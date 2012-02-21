@@ -3,7 +3,6 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link rel="stylesheet" type="text/css" href="static/css/main.css" />
-    <link rel="stylesheet" type="text/css" href="static/css/garden-app.css" />
     <link rel="stylesheet" type="text/css" href="kanso-topbar/topbar.css" />
     <link rel="shortcut icon" href="static/img/dashboard-icon.png" />
     <title>{{#if title}}{{title}}{{else}}Dashboard{{/if}}</title>
@@ -18,7 +17,7 @@
           <a href="{{baseURL}}/#/apps">Apps</a>
         </li>
         <li class="install active"><a href="{{baseURL}}/install">Install</a></li>
-        <li class="settings admin-only" style="display: none;" ><a href="#/settings">Settings</a></li>
+        <li class="settings admin-only" style="display: none;" ><a href="{{baseURL}}/#/settings">Settings</a></li>
       </ul>
     </div>
 
@@ -55,8 +54,11 @@
     		<p><a href="https://github.com/kanso/dashboard">Garden Dashboard</a>. Version <span class="version"></span></p>
     	</div>
     </footer>
-
-    <script type="text/javascript" src="static/js/lib/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="modules.js"></script>
+    <script type="text/javascript">
+      // so the jquery plugins below work
+        window.$ = window.jQuery = require('jquery');
+    </script>
     <script type="text/javascript" src="static/js/lib/jquery.couch.js"></script>
     <script type="text/javascript" src="static/js/lib/director-1.0.8.min.js"></script>
     <script type="text/javascript" src="static/js/lib/bootstrap-tooltip.js"></script>
@@ -65,8 +67,6 @@
     <script type="text/javascript" src="static/js/lib/bootstrap-dropdown.js"></script>
     <script type="text/javascript" src="static/js/lib/moment.min.js"></script>
     <script type="text/javascript" src="static/js/lib/System.js"></script>
-    <script type="text/javascript" src="modules.js"></script>
-    <script type="text/javascript" src="static/js/jquery.garden-app.js"></script>
     <script type="text/javascript" src="static/js/common.js"></script>
     <script type="text/javascript" src="static/js/install.js"></script>
   </body>
