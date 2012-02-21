@@ -85,18 +85,15 @@ function updateStatus(msg, percent, complete) {
 
 
 $(function() {
-    $('#garden-navigation').tooltip({placement: 'right'});
     $('.help').tooltip({placement: 'bottom'});
 
+    require('kanso-topbar').init();
 
     $('.modal .cancel').live('click', function() {
         $(this).parent().parent().modal('hide');
     });
-    $('.logout').live('click', function() {
-        session.logout(function(err){
-            if (err) return alert('There was a problem logging out');
-            adjustUIforUser({});
-        });
+    session.on('change', function(err){
+        adjustUIforUser({});
     });
 
     // version info
@@ -107,7 +104,4 @@ $(function() {
         $('footer span.version').text(data.config.version + ':' + git_rev_small + modified);
 
     })
-
-
-
 });

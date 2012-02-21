@@ -34,7 +34,7 @@
         "users" : null,
         "jsonp": null,
         "semver" : null,
-        "garden-app-support" : null,
-        "git-info" : null
+        "git-info" : null,
+        "kanso-topbar": null
     }
 }
