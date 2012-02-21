@@ -52,7 +52,11 @@
     		<p><a href="https://github.com/kanso/dashboard">Garden Dashboard</a>. Version <span class="version"></span></p>
     	</div>
     </footer>
-    <script type="text/javascript" src="static/js/lib/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="modules.js"></script>
+    <script type="text/javascript">
+      // so the jquery plugins below work
+      window.$ = window.jQuery = require('jquery');
+    </script>
     <script type="text/javascript" src="static/js/lib/jquery-ui-1.8.5.custom.min.js"></script>
     <script type="text/javascript" src="static/js/lib/jquery.couch.js"></script>
     <script type="text/javascript" src="static/js/lib/amplify.min.js"></script>
@@ -66,7 +70,6 @@
     <script type="text/javascript" src="static/js/lib/bootstrap-dropdown.js"></script>
     <script type="text/javascript" src="static/js/lib/moment.min.js"></script>
     <script type="text/javascript" src="static/js/lib/System.js"></script>
-    <script type="text/javascript" src="modules.js"></script>
     <script type="text/javascript" src="static/js/jquery.garden-app.js"></script>
     <script type="text/javascript" src="static/js/common.js"></script>
     <script type="text/javascript" src="static/js/ui.js"></script>
