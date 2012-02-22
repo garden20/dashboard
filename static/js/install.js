@@ -216,7 +216,7 @@ $(function() {
     function setSecurityToAdmins(app_data) {
         addDBReaderRole(db_name, '_admin', function(err) {
 
-            addRewriteRules(app_data, function(err) {
+            addVhostRule(app_data, function(err) {
                 updateStatus('Install Complete', '100%', true);
                 var link = garden_urls.get_launch_url(app_data);
 
@@ -229,6 +229,10 @@ $(function() {
 
         });
     }
+
+
+
+
 
 
     function addRewriteRules (app_data, callback) {

@@ -1,3 +1,5 @@
+var session = require('session');
+
 var dashboard_db_name = 'dashboard';
 jQuery.couch.urlPrefix = '_couch';
 
@@ -11,7 +13,14 @@ function dbRoot(location) {
     return location.protocol + '//' + location.host + '/';
 }
 
+function appRewrite(db) {
+    return location.host + '/' + db ;
+}
 
+function appFullUrl(db, ddoc_name, open_path) {
+    return '/' + db + '/_design/' + ddoc_name + open_path;
+
+}
 
 function thisDashboardUrl(location) {
     var installPath = '/';
@@ -82,7 +91,35 @@ function updateStatus(msg, percent, complete) {
     }
 }
 
+function addVhostRule(app_data, callback) {
+    var safe_name = garden_urls.user_app_name_to_safe_url(app_data.dashboard_title);
+    console.log(app_data);
+    var rewrite_url = appFullUrl(app_data.installed.db, app_data.doc_id, app_data.open_path);
+    console.log(rewrite_url);
+    $.couch.config({
+        success : function(result) {
+            callback(null, result);
+        }
+    }, 'vhosts', appRewrite(safe_name), rewrite_url );
+}
 
+function renameVhostRule(app_data, old_name, callback) {
+    var safe_name = garden_urls.user_app_name_to_safe_url(old_name);
+    var add = function() {
+        addVhostRule(app_data, function(err, result) {
+            callback(err, result);
+        })
+    };
+    // remove any old one
+    $.couch.config({
+        success : function() {
+            add();
+        },
+        error : function() {
+            add();
+        }
+    }, 'vhosts', appRewrite(safe_name), null );
+}
 
 $(function() {
     $('.help').tooltip({placement: 'bottom'});

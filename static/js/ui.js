@@ -86,10 +86,7 @@ function checkUpdates(apps, callback){
 }
 
 
-
-function showApps() {
-    show('apps');
-
+function displayApps() {
     getApps(function(data) {
         if (!data.apps || data.apps.length === 0) {
             $('.message').html(handlebars.templates['no_apps_message.html']({}, {}));
@@ -171,7 +168,7 @@ function showApps() {
             if (longclickinfo.showMsg)
                 clearTimeout(longclickinfo.showMsg);
         }
-        
+
         $('ul.app a').click(function() {
             return false;
         });
@@ -213,7 +210,7 @@ function showApps() {
             $(this).find('img').removeClass('thumbnail-mouse-down');
         });
 
-        // End of crazy 
+        // End of crazy
 
         $('ul.app').sortable({
             update: function() {
@@ -230,6 +227,23 @@ function showApps() {
 
 
     });
+}
+
+
+function showApps() {
+    show('apps');
+    displayApps();
+
+    setTimeout(function(){
+        // this resets any apps the user may lose access to on a session change
+        session.on('change', function(err, info){
+            $('.message').hide();
+            displayApps();
+        });
+    }, 1000); // wait some time for the page to finishe before binding to the session
+
+
+
 }
 
 
@@ -283,13 +297,10 @@ function viewApp(id) {
                $.couch.db(dashboard_db_name).saveDoc(doc, {
                    success: function(response) {
                         doc._rev = response.rev;
+                       renameVhostRule(doc, prev_name, function(err, result) {
 
-                        // update the rewrites
-                        var safe_name = garden_urls.user_app_name_to_safe_url(doc.dashboard_title);
+                       });
 
-                        $.post('./_db/_design/dashboard/_update/modifyAppRewrites/_design/dashboard?db=' + doc.installed.db + '&ddoc=' + doc.doc_id + '&new_name=' + safe_name + '&prev_name=' + prev_name, function(result) {
-                            //callback(null, result);
-                        })
                    }
                })
            })
