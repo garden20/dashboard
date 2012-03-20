@@ -18,9 +18,26 @@ $(function(){
 
     var $topbar = $('#kanso-topbar');
     if ($topbar.length === 0) {
-        console.log('prepend topbar');
         $topbar = $('<div id="kanso-topbar"></div>');
         $('body').prepend($topbar);
     }
-    $topbar.load('/dashboard/_design/dashboard/_rewrite/_topbar');
+    var path = window.location.pathname;
+    $topbar.load('/dashboard/_design/dashboard/_rewrite/_topbar', function() {
+        // highlight the best thing
+
+        var dash = $topbar.find('a.home-icon').attr('href');
+        if (dash == path)  $topbar.find('a.home-icon').addClass('active');
+
+        var login = $topbar.find('#kanso-topbar-session a').attr('href');
+        if (login == path)  $topbar.find('#kanso-topbar-session').addClass('active');
+
+
+        $('#kanso-topbar ul.nav li').each(function(i) {
+            var href = $(this).find('a').attr('href');
+            if (path.indexOf(href) == 0) return $(this).addClass('active');
+        })
+
+
+    });
+
 });

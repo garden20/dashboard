@@ -9,9 +9,9 @@
     </ul>
     <div id="kanso-topbar-session">
     {{#if username}}
-        <a href=""><img src="{{avatar}}" alt="{{username}}">{{username}}</a>
+        <a class="username" href=""><img src="{{avatar}}" alt="{{username}}">{{username}}</a>
     {{else}}
-        <a href="{{login_url}}">Login</a>
+        <a class="login" href="{{login_url}}">Login</a>
     {{/if}}
     </div>
 </div>

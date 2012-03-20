@@ -195,7 +195,7 @@
     margin: 0;
 }
 
-#kanso-topbar #kanso-topbar-session ul li a {
+#kanso-topbar #kanso-topbar-session  a.login {
     display: block;
     border-top: 2px solid #1d1d1d;
     background-color: #1d1d1d;
@@ -204,7 +204,28 @@
     color: #bfbfbf;
 }
 
-#kanso-topbar #kanso-topbar-session ul li a:hover {
+#kanso-topbar #kanso-topbar-session  a.login:hover {
+    background-color: #2b2b2b;
+    color: white;
+    text-decoration: none;
+}
+
+#kanso-topbar #kanso-topbar-session.active  a.login {
+    background-color: #2b2b2b;
+    color: white;
+    text-decoration: none;
+}
+
+#kanso-topbar #kanso-topbar-session  a.username {
+    display: block;
+
+    background-color: #1d1d1d;
+    padding: 0px 10px 0px 10px;
+    border-left: 1px solid #404040;
+    color: #bfbfbf;
+}
+
+#kanso-topbar #kanso-topbar-session  a.username:hover {
     background-color: #2b2b2b;
     color: white;
     text-decoration: none;
@@ -375,8 +396,15 @@
     display: inline-block;
     width: 13px;
     height: 25px;
-    border-right: 1px solid #404040;
+    /*border-right: 1px solid #404040; */
     float: left;
+}
+
+#kanso-topbar .home-icon.active {
+    background-image: url(img/dashboard.png);
+    border-top: 2px solid #bd0000;
+    background-position: 10px 3px;
+    height: 23px;
 }
 
 #kanso-topbar .home-icon:hover {
