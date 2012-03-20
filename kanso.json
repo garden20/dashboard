@@ -1,8 +1,8 @@
 {
     "name": "dashboard",
-    "version": "0.0.3",
+    "version": "0.1.0",
     "description": "Kanso app to manage your installed couchapps from a garden..",
-    "attachments": ["static", "index.html"],
+    "attachments": ["static"],
     "modules": "lib",
     "load": "lib/app",
     "less": {
@@ -10,7 +10,6 @@
         "compile": ["static/css/main.less"],
         "remove_from_attachments": true
     },
-    "duality": { "base_template": "base.html" },
     "handlebars": {
         "all_partials": true,
         "templates": "templates"
@@ -33,6 +32,7 @@
         "jsonp": null,
         "semver" : null,
         "git-info" : null,
-        "kanso-topbar": null
+        "dashboard-core" : null,
+        "gravatar" : null
     }
 }

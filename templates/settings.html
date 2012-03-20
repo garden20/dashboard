@@ -13,10 +13,11 @@
 
         <div class="tabbable">
           <ul class="nav tabs">
-             <li class="active"><a href="#0" data-toggle="tab">Updates</a></li>
-            <li><a href="#1" data-toggle="tab">Applications</a></li>
-            <li><a href="#2" data-toggle="tab">Admins</a></li>
-            <li><a href="#3" data-toggle="tab">Roles</a></li>
+            <li class="active"><a href="#0" data-toggle="tab">Apps</a></li>
+            <li><a href="#1" data-toggle="tab">Front Page</a></li>
+            <li><a href="#2" data-toggle="tab">Nav Bar</a></li>
+            <li><a href="#3" data-toggle="tab">Admins</a></li>
+            <li><a href="#4" data-toggle="tab">Roles</a></li>
           </ul>
 
 
@@ -35,18 +36,24 @@
                                 <td>dashboard</td>
                                 <td class="installed-version"><img src="static/img/ajax-loader.gif" alt="loading..." /></td>
                                 <td class="available-version"><img src="static/img/ajax-loader.gif" alt="loading..." /></td>
-                                <td><div class="update-action" style="display: none;"><button class="btn primary small update-run" data-loading-text="Updating..." data-complete-text="Finished!">Update</button></div> </td>
+                                <td>
+                                    <a href="#" class="btn small">Settings</a>
+                                    <div class="update-action" style="display: none;"><button class="btn primary small update-run" data-loading-text="Updating..." data-complete-text="Finished!">Update</button></div> 
+
+                                </td>
                             </tr>
                       </tbody>
                   </table>
               </div>
             <div class="tab-pane" id="1">
 
-                <ul class="app-list-condensed">
-                    
-                </ul>
+
+                <textarea rows=3"" cols="80">{{settings.markdown}}</textarea>
             </div>
             <div class="tab-pane" id="2">
+                Top Bar Options:
+            </div>
+            <div class="tab-pane" id="3">
                 <div class="row multiUser">
                     <div class=" span5">
                         <button href="#add-admin-dialog" data-toggle="modal" class="btn small add-button">Add Admin</button>
@@ -66,7 +73,7 @@
                     </div>
                 </div>
             </div>
-            <div class="tab-pane" id="3">
+            <div class="tab-pane" id="4">
                 <div class="row multiUser">
                     <div class=" span5">
                         <button href="#add-role-dialog" data-toggle="modal" class="btn small add-button">Add Role</button>

@@ -1,4 +1,5 @@
 var session = require('session');
+var utils = require('lib/utils');
 
 var dashboard_db_name = 'dashboard';
 jQuery.couch.urlPrefix = '_couch';
@@ -43,7 +44,7 @@ function addDashboardUrl(data) {
 
 
 function adjustUIforUser(info, callback) {
-        var isAdmin = userType.isAdmin(info);
+        var isAdmin = utils.isAdmin(info);
         if (!isAdmin) {
             $('.admin-only').hide();
         } else {
@@ -124,7 +125,6 @@ function renameVhostRule(app_data, old_name, callback) {
 $(function() {
     $('.help').tooltip({placement: 'bottom'});
 
-    require('kanso-topbar').init();
 
     $('.modal .cancel').live('click', function() {
         $(this).parent().parent().modal('hide');
@@ -133,12 +133,5 @@ $(function() {
         adjustUIforUser({});
     });
 
-    // version info
-    $.getJSON("./_info",  function(data) {
-        var git_rev_small = data.git.commit.substring(0,7);
-        var modified = "";
-        if (data.git.uncommitted && data.git.uncommitted.length > 0) modified = "*";
-        $('footer span.version').text(data.config.version + ':' + git_rev_small + modified);
 
-    })
 });

@@ -1,0 +1,17 @@
+<a href="{{dashboard_url}}" class="home-icon"  title="Home" ></a>
+    <ul class="nav">
+{{#each apps}}        
+        <li><a href="/{{db}}">{{title}}</a></li>
+{{/each}}
+{{#if isAdmin}}
+        <li><a href="{{settings_url}}">Settings</a></li>
+{{/if}}
+    </ul>
+
+    {{#if username}}
+        <a href=""><img src="{{avatar}}" alt="{{username}}">{{username}}</a>
+    {{else}}
+        <a href="{{login_url}}">Login</a>
+    {{/if}}
+
+</div>

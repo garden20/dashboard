@@ -3,71 +3,43 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link rel="stylesheet" type="text/css" href="static/css/main.css" />
-    <link rel="stylesheet" type="text/css" href="kanso-topbar/topbar.css" />
+    <link rel="stylesheet" type="text/css" href="/dashboard/_design/dashboard/_rewrite/static/css/topbar.css" />
     <link rel="shortcut icon" href="static/img/dashboard-icon.png" />
-    <title>{{#if title}}{{title}}{{else}}Dashboard{{/if}}</title>
+    <title>{{Title}}</title>
   </head>
   <body>
 
+    <div id="kanso-topbar"></div>
 
-    <div id="kanso-topbar">
-      <div class="appname">&nbsp;</div>
-      <ul class="nav">
-        <li class="apps">
-          <a href="{{baseURL}}/#/apps">Apps</a>
-        </li>
-        <li class="install active"><a href="{{baseURL}}/install">Install</a></li>
-        <li class="settings admin-only" style="display: none;" ><a href="{{baseURL}}/#/settings">Settings</a></li>
-      </ul>
-    </div>
+    <div class="container" role="main">
 
-    <div class="container">
-
-
-        <div class="row">
-            <div class="main span9">
-                <div id="content" class="main">
-                        {{{content}}}
-                </div>
-            </div>
-            <div class="span3">
-
-                <div class="row title">
-                    <h3>Looking for apps?</h3>
-                    Find fresh apps to install from your local <b>Garden Market</b>!
-                </div>
-                <ul class="gardens">
-
-                </ul>
-            </div>
-
-
-        </div>
-
-
-
+        {{{content}}}
 
 
     </div>
-    <footer>
-    	<div class="container">
-    		<p><a href="https://github.com/kanso/dashboard">Garden Dashboard</a>. Version <span class="version"></span></p>
-    	</div>
-    </footer>
+
     <script type="text/javascript" src="modules.js"></script>
     <script type="text/javascript">
       // so the jquery plugins below work
-        window.$ = window.jQuery = require('jquery');
+      window.$ = window.jQuery = require('jquery');
     </script>
+    <script type="text/javascript" src="static/js/lib/jquery-ui-1.8.5.custom.min.js"></script>
+    <script type="text/javascript" src="/dashboard/_design/dashboard/_rewrite/static/js/topbar.js"></script>
     <script type="text/javascript" src="static/js/lib/jquery.couch.js"></script>
+    <script type="text/javascript" src="static/js/lib/amplify.min.js"></script>
     <script type="text/javascript" src="static/js/lib/director-1.0.8.min.js"></script>
     <script type="text/javascript" src="static/js/lib/bootstrap-tooltip.js"></script>
     <script type="text/javascript" src="static/js/lib/bootstrap-popover.js"></script>
     <script type="text/javascript" src="static/js/lib/bootstrap-alert.js"></script>
+    <script type="text/javascript" src="static/js/lib/bootstrap-modal.js"></script>
+    <script type="text/javascript" src="static/js/lib/bootstrap-tab.js"></script>
+    <script type="text/javascript" src="static/js/lib/bootstrap-button.js"></script>
     <script type="text/javascript" src="static/js/lib/bootstrap-dropdown.js"></script>
     <script type="text/javascript" src="static/js/lib/moment.min.js"></script>
     <script type="text/javascript" src="static/js/lib/System.js"></script>
     <script type="text/javascript" src="static/js/common.js"></script>
-    <script type="text/javascript" src="static/js/install.js"></script>
+    {{#each scripts}}
+    <script type="text/javascript" src="static/js/{{this}}"></script>
+    {{/each}}
   </body>
 </html>

@@ -1,10 +1,10 @@
 var _ = require('underscore')._;
 var handlebars = require('handlebars');
-var garden_urls = require('lib/garden_urls');
-var userType = require('lib/userType');
+var utils = require('lib/utils');
 var session = require('session');
 var users = require("users");
 var semver = require("semver");
+var dashboard_core = require('lib/dashboard_core');
 
 
 var show = function(what, context) {
@@ -17,41 +17,10 @@ var show = function(what, context) {
 
 
 
-function getApps(callback) {
-
-    $.couch.db(dashboard_db_name).view('dashboard/by_active_install', {
-        include_docs : true,
-        success: function(response) {
-            var data = {};
-            data.apps = _.map(response.rows, function(row) {
-
-                            // we should verify these by checking the db and design docs exist.
-
-                            var app_data = row.doc;
-                            return {
-                                id   : app_data._id,
-                                img  : garden_urls.bestIcon128(app_data),
-                                name : app_data.dashboard_title,
-                                db   : app_data.installed.db,
-                                start_url : garden_urls.get_launch_url(app_data, window.location.pathname)
-                            }
-                        });
-                        callback(data);
-        }
-    })
-}
 
 
-function getAppsByMarket(callback) {
-    $.couch.db(dashboard_db_name).view('dashboard/app_version_by_market', {
-        success: function(response) {
-            var data = _.groupBy(response.rows, function(row) {
-                return row.key;
-            })
-            callback(data);
-        }
-    });
-}
+
+
 
 
 function checkUpdates(apps, callback){
@@ -86,162 +55,10 @@ function checkUpdates(apps, callback){
 }
 
 
-function displayApps() {
-    getApps(function(data) {
-        if (!data.apps || data.apps.length === 0) {
-            $('.message').html(handlebars.templates['no_apps_message.html']({}, {}));
-            return;
-        }
-
-        // get any stored ordering
-        var order = amplify.store('dashboardOrder');
-
-        if (order) {
-            var max = 1000;
-            var current_past_end = data.apps.length + 1;
-            data.apps = _.sortBy(data.apps, function(app) {
-                var dash_order = current_past_end++;
-                if (order[app.id] && order[app.id] >= 0) dash_order = order[app.id];
-                dash_order =  dash_order;
-
-                return dash_order;
-            });
-        }
 
 
 
-        $('.app').html(handlebars.templates['app_list.html'](data, {}));
-
-        // count the thumbnails that get loaded. After all done, and no apps showing, display
-        // a message to login
-        var appAccessCheck = function() {
-            if (loadedApps == 0) {
-                $('.message').html(handlebars.templates['no_apps_access_message.html']({}, {}));
-            }
-        }
-        var loadedApps = 0;
-        var deniedApps = 0;
-        var renderMessage = _.after(data.apps.length, appAccessCheck);
-        $('.thumbnail img')
-            .error(function() {
-                // this is to handle apps that we dont have permissions to
-                deniedApps++;
-                $(this).closest('li').remove();
-                renderMessage();
-            })
-            .load(function() {
-                loadedApps++;
-                renderMessage();
-            });
-
-
-
-        //  begin crazy stuff to get a short click (with animation) and a long click to settings
-        $('ul.app .thumbnail').click(function(event){
-
-            try {
-                var id = $(this).data('id');
-                var now = new Date().getTime();
-                if (longclickinfo.id === id && (now - longclickinfo.start) > 900 ) return;
-
-                var name = $(this).data('name');
-                var link = $(this).parent().attr('href');
-
-
-                window.location = link;
-
-
-            } catch (e) {
-                console.log(e);
-            }
-            return false;
-
-
-        });
-
-        var longclickinfo = {
-
-        }
-        function cancelLongClick() {
-            longclickinfo.id = null;
-            longclickinfo.start = null;
-            if (longclickinfo.showMsg)
-                clearTimeout(longclickinfo.showMsg);
-        }
-
-        $('ul.app a').click(function() {
-            return false;
-        });
-        var thumbnail = $('ul.app .thumbnail')
-        thumbnail.tooltip({
-            trigger: 'manual',
-            title: 'Enter Settings...'
-        });
-
-        thumbnail.bind('mousedown touchstart', function(event) {
-            var me = $(this);
-            me.find('img').addClass('thumbnail-mouse-down');
-            longclickinfo.id = $(this).data('id');
-            longclickinfo.start = new Date().getTime();
-            longclickinfo.showMsg = setTimeout(function(){
-                me.tooltip('show');
-            }, 900)
-        });
-        thumbnail.bind('mousemove touchmove', function(){
-            cancelLongClick();
-            $(this).tooltip('hide')
-              .find('img').removeClass('thumbnail-mouse-down');
-        });
-        thumbnail.bind('mouseup touchend', function(event){
-            var id = $(this).data('id');
-            var now = new Date().getTime();
-            if (longclickinfo.id === id && (now - longclickinfo.start) > 900 ) {
-                try {
-                    event.stopPropagation();
-                   $(this).tooltip('hide');
-                   router.setRoute('/settings/info/' + id);
-
-                } catch(e) {
-                }
-            } else {
-                $(this).tooltip('hide');
-                cancelLongClick();
-            }
-            $(this).find('img').removeClass('thumbnail-mouse-down');
-        });
-
-        // End of crazy
-
-        $('ul.app').sortable({
-            update: function() {
-                var order = {};
-                var count = 1;
-                $('.thumbnail').each(function() {
-                    var id = $(this).data('id');
-                    order[id] = count++;
-                });
-                amplify.store('dashboardOrder', order);
-            }
-        });
-        $('ul.app').disableSelection();
-
-
-    });
-}
-
-
-function showApps() {
-    show('apps');
-    displayApps();
-
-    setTimeout(function(){
-        // this resets any apps the user may lose access to on a session change
-        session.on('change', function(err, info){
-            $('.message').hide();
-            displayApps();
-        });
-    }, 1000); // wait some time for the page to finishe before binding to the session
-
+function showHome() {
 
 
 }
@@ -484,7 +301,7 @@ function getUsers(callback) {
 function showSettings() {
 
     session.info(function(err, info) {
-        isAdmin = userType.isAdmin(info);
+        isAdmin = utils.isAdmin(info);
         show('settings', {isAdmin : isAdmin});
 
         if (!isAdmin) return;
@@ -654,7 +471,7 @@ function afterRender(callback) {
 
 
 var routes = {
-  '/apps'   : showApps,
+  '/'   : showHome,
   '/settings/info/:db' : viewApp,
   '/dashboard/install' : installApp,
   '/sync'   : showSync,
@@ -672,7 +489,7 @@ router.configure({
        afterRender();
    }
 });
-router.init('/apps');
+
 
 
 
@@ -683,18 +500,6 @@ $(function() {
 
 
 
-
-    //query feeds
-    var data = [];
-    data.feeds = [
-        {
-            app : 'http://placehold.it/20x20',
-            message : 'You added Get Milk',
-            date: '2012-01-13T09:24:17Z'
-        }
-
-    ]
-    $('.feed').append(handlebars.templates['feed_details.html'](data, {}));
 
 
 
@@ -805,73 +610,7 @@ $(function() {
         })
     });
 
-    /** vary lame copy and past job from install.js. Need to merge **/
 
-    function copyDoc(db, app_data, callback) {
-        var design_doc_id = '_design/' + app_data.doc_id;
-        db.headDoc(design_doc_id,{}, {
-            success : function(data, status, jqXHR) {
-                if (!jqXHR) callback('Update failed.');
-                var rev = jqXHR.getResponseHeader('ETag').replace(/"/gi, '');
-                design_doc_id += "?rev=" + rev;
-                db.copyDoc(
-                  app_data.doc_id,
-                  {
-                       success: function() {
-                           deleteDoc(db, app_data, callback);
-                       }
-
-                  },
-                  {
-                       headers : {Destination : design_doc_id }
-                   }
-               );
-            },
-            error: function() {
-                callback('Update failed.');
-            }
-        })
-    }
-
-    function deleteDoc(db, app_data, callback) {
-        db.headDoc(app_data.doc_id, {}, {
-            success : function(data, status, jqXHR) {
-                var rev = jqXHR.getResponseHeader('ETag').replace(/"/gi, '');
-
-                var purge_url = jQuery.couch.urlPrefix + '/' + app_data.installed.db + '/_purge';
-                var data = {};
-                data[app_data.doc_id] = [rev];
-                $.ajax({
-                  url : purge_url,
-                  data : JSON.stringify(data),
-                  dataType : 'json',
-                  contentType: 'application/json',
-                  type: 'POST',
-                  success : function(data) {
-                      saveAppDetails(db, app_data, callback)
-                  }
-                 });
-            }
-        });
-    }
-
-    function saveAppDetails(db, app_data, callback) {
-        var app_json_url = garden_urls.app_details_json(app_data.src);
-        $.ajax({
-            url : app_json_url + "?callback=?",
-            dataType : 'json',
-            jsonp : true,
-            success : function(data) {
-                app_data.kanso = data.kanso;
-                app_data.updated  =  new Date().getTime();
-                $.couch.db(dashboard_db_name).saveDoc(app_data, {
-                    success : function() {
-                         callback();
-                    }
-                });
-            }
-        });
-    }
 
 
     $('.timeago').each(function() {
