@@ -13,17 +13,25 @@
 
         <div class="tabbable">
           <ul class="nav tabs">
-            <li class="active"><a href="#0" data-toggle="tab">Apps</a></li>
-            <li><a href="#1" data-toggle="tab">Front Page</a></li>
-            <li><a href="#2" data-toggle="tab">Navagation</a></li>
-            <li><a href="#3" data-toggle="tab">Admins</a></li>
-            <li><a href="#4" data-toggle="tab">Roles</a></li>
+            <li class="active"><a href="#apps" data-toggle="tab">Apps</a></li>
+            <li><a href="#frontpage" data-toggle="tab">Front Page</a></li>
+            <li><a href="#navigation" data-toggle="tab">Navigation</a></li>
+            <li><a href="#admins" data-toggle="tab">Admins</a></li>
+            <li><a href="#roles" data-toggle="tab">Roles</a></li>
           </ul>
 
 
 
           <div class="tab-content">
-              <div class="tab-pane active" id="0">
+              <div class="tab-pane active" id="apps">
+                  
+                  
+
+
+                  <div class="right">
+                      <a href="install" class="btn success large">Install New App</a>
+                  </div>
+                  <h2>Installed Apps</h2>
                   <table class="table">
                       <thead>
                         <tr>
@@ -45,7 +53,7 @@
                       </tbody>
                   </table>
               </div>
-            <div class="tab-pane front-page" id="1">
+            <div class="tab-pane front-page" id="frontpage">
                 
 
 
@@ -70,10 +78,10 @@
                     <button class="btn primary large">Save</button>
 
             </div>
-            <div class="tab-pane" id="2">
+            <div class="tab-pane" id="navigation">
                 Top Bar Options:
             </div>
-            <div class="tab-pane" id="3">
+            <div class="tab-pane" id="admins">
                 <div class="row multiUser">
                     <div class=" span5">
                         <button href="#add-admin-dialog" data-toggle="modal" class="btn small add-button">Add Admin</button>
@@ -93,7 +101,7 @@
                     </div>
                 </div>
             </div>
-            <div class="tab-pane" id="4">
+            <div class="tab-pane" id="roles">
                 <div class="row multiUser">
                     <div class=" span5">
                         <button href="#add-role-dialog" data-toggle="modal" class="btn small add-button">Add Role</button>

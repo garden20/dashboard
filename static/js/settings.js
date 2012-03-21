@@ -65,4 +65,41 @@ $(function(){
 
     });
 
+
+    //var url = document.location.toString();
+    //if (url.match('#')) {
+    //    $('.nav.tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
+    //}
+
+    // Change hash for page-reload
+    $('.nav.tabs a').on('shown', function (e) {
+        var tab = e.target.hash.split('#')[1];
+        router.setRoute('/' + tab);
+//        window.location.hash = '/' + tab;
+    })
+    function showTab(id) {
+        $('#' + id).tab('show');
+    }
+    function showTab(e) {
+        var url = document.location.toString();
+        $('.nav.tabs a[href=#'+url.split('#/')[1]+']').tab('show') ;
+    }
+    var routes = {
+      '/apps'   : showTab,
+      '/apps/:db' : function(app) {
+
+      },
+      '/frontpage'  : showTab,
+      '/navigation' : showTab,
+      '/admins'     : showTab,
+      '/roles'      : showTab
+    };
+
+
+    var router = Router(routes);
+    router.init('/apps');
 })
+
+
+
+
