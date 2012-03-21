@@ -43,6 +43,9 @@ $(function(){
 
     })
     $('.front-page .primary').on('click', function() {
+        var btn = $(this);
+        btn.button('loading');
+
         var isMarkdown =  $('.front-page .btn-group .btn.active').data('type') === 'markdown';
         var showActivityFeed = $('.front-page input.showActivityFeed').attr('checked') === 'checked';
         var text;
@@ -51,11 +54,20 @@ $(function(){
         } else {
             text = escape($('.front-page .html textarea').val());
         }
-        console.log(isMarkdown, showActivityFeed, text);
+        var started = new Date().getTime();
         $.ajax({
             url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/frontpage/settings?isMarkdown=' + isMarkdown + '&showActivityFeed=' + showActivityFeed + '&text=' + text,
             type: 'PUT',
             success : function(result) {
+                if (result == 'update complete') {
+                    var now = new Date().getTime();
+                    var minUItime = 1000 - (now - started);
+                    if (minUItime > 0);
+                    setTimeout(function() {
+                        btn.button('reset');
+                    }, minUItime);
+                }
+                else alert('update failed');
 
             },
             error : function() {

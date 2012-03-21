@@ -31,7 +31,7 @@
                   <div class="right">
                       <a href="install" class="btn success large">Install New App</a>
                   </div>
-                  <h2>Installed Apps</h2>
+                  <h3>Installed Apps</h3>
                   <table class="table">
                       <thead>
                         <tr>
@@ -54,28 +54,49 @@
                   </table>
               </div>
             <div class="tab-pane front-page" id="frontpage">
-                
 
 
-                    <div class="btn-group" data-toggle="buttons-radio">
-                       <button class="btn  {{#if settings.frontpage.use_markdown}}active{{/if}}" data-type="markdown">Markdown</button>
-                       <button class="btn  {{#if settings.frontpage.use_html}}active{{/if}}"     data-type="html">Html</button>
-                    </div>
-                    <input class="showActivityFeed" type="checkbox" {{#if settings.frontpage.show_activity_feed}}checked="checked"{{/if}}> Show Activity Feed
-                    <div class="type markdown" {{#unless settings.frontpage.use_markdown}}style="display:none"{{/unless}}>
 
-                        <textarea rows="" cols="80">{{settings.frontpage.markdown}}</textarea>
-                    </div>
-                    <div class="type html" {{#unless settings.frontpage.use_html}}style="display:none"{{/unless}}>
-                        <ul>
-                            <li>Bootstrap classes are available to you. See <a href="http://twitter.github.com/bootstrap/">Documentation</a></li>
-                            <li>To add the activity feed, add \{{activityFeef}}. </li>
-                        </ul>
-                        <textarea rows="" cols="80">{{settings.frontpage.html}}</textarea>
-                    </div>
-                
+                        <div class="btn-group" data-toggle="buttons-radio">
+                           <button class="btn  {{#if settings.frontpage.use_markdown}}active{{/if}}" data-type="markdown">Markdown</button>
+                           <button class="btn  {{#if settings.frontpage.use_html}}active{{/if}}"     data-type="html">Html</button>
+                        </div>
+                        <input class="showActivityFeed" type="checkbox" {{#if settings.frontpage.show_activity_feed}}checked="checked"{{/if}}> Show Activity Feed
+                        <div class="type markdown" {{#unless settings.frontpage.use_markdown}}style="display:none"{{/unless}}>
+                            <div class="row">
+                                <div class="span8">
+                                    <textarea rows="" cols="80">{{settings.frontpage.markdown}}</textarea>
+                                </div>
+                                <div class="span4">
+                                      <div class="module newuser sidebar-help" id="how-to-format" style="display: block; ">
+                                          <h4>How to Format</h4>
+                                          <p><span class="dingus">►</span> put returns between paragraphs</p>
+                                          <p><span class="dingus">►</span> for linebreak add 2 spaces at end</p>
+                                          <p><span class="dingus">►</span> <i>_italic_</i> or <b>**bold**</b></p>
+                                          <p><span class="dingus">►</span> quote by placing &gt; at start of line</p>
+                                          <p><span class="dingus">►</span> to make links</p>
+                                          <p>&lt;http://foo.com&gt;<br>[foo](http://foo.com)<br>&lt;a href="http://foo.com"&gt;foo&lt;/a&gt;</p>
+                                          <p><span class="dingus">►</span> <a href="http://meta.stackoverflow.com/questions/1777/what-html-tags-are-allowed" target="_blank">basic HTML</a> also allowed</p>
+                                          <p class="ar">
+                                          <a href="/editing-help" target="_edithelp">formatting help »</a><br>
+                                          <a href="/questions/how-to-ask">asking help »</a>
+                                          </p>
+                                      </div>
+                                </div>
+                             </div>
+                        </div>
+                        <div class="type html" {{#unless settings.frontpage.use_html}}style="display:none"{{/unless}}>
+                            <ul>
+                                <li>Bootstrap classes are available to you. See <a href="http://twitter.github.com/bootstrap/">Documentation</a></li>
+                                <li>To add the activity feed, add \{{activityFeef}}. </li>
+                            </ul>
+                            <textarea rows="" cols="80">{{settings.frontpage.html}}</textarea>
+                        </div>
 
-                    <button class="btn primary large">Save</button>
+
+                        <button class="btn primary large" data-loading-text="Saving..">Save</button>
+
+
 
             </div>
             <div class="tab-pane" id="navigation">
