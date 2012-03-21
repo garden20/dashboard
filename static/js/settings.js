@@ -36,4 +36,33 @@ $(function(){
         });
 
 
+    $('.front-page .btn-group .btn').on('click', function() {
+        var type = $(this).data('type');
+        $('.front-page .type').hide();
+        $('.front-page .' + type).show();
+
+    })
+    $('.front-page .primary').on('click', function() {
+        var isMarkdown =  $('.front-page .btn-group .btn.active').data('type') === 'markdown';
+        var showActivityFeed = $('.front-page input.showActivityFeed').attr('checked') === 'checked';
+        var text;
+        if (isMarkdown) {
+            text = escape($('.front-page .markdown textarea').val());
+        } else {
+            text = escape($('.front-page .html textarea').val());
+        }
+        console.log(isMarkdown, showActivityFeed, text);
+        $.ajax({
+            url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/frontpage/settings?isMarkdown=' + isMarkdown + '&showActivityFeed=' + showActivityFeed + '&text=' + text,
+            type: 'PUT',
+            success : function(result) {
+
+            },
+            error : function() {
+
+            }
+        });
+
+    });
+
 })

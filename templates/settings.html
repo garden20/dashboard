@@ -15,7 +15,7 @@
           <ul class="nav tabs">
             <li class="active"><a href="#0" data-toggle="tab">Apps</a></li>
             <li><a href="#1" data-toggle="tab">Front Page</a></li>
-            <li><a href="#2" data-toggle="tab">Nav Bar</a></li>
+            <li><a href="#2" data-toggle="tab">Navagation</a></li>
             <li><a href="#3" data-toggle="tab">Admins</a></li>
             <li><a href="#4" data-toggle="tab">Roles</a></li>
           </ul>
@@ -45,10 +45,30 @@
                       </tbody>
                   </table>
               </div>
-            <div class="tab-pane" id="1">
+            <div class="tab-pane front-page" id="1">
+                
 
 
-                <textarea rows=3"" cols="80">{{settings.markdown}}</textarea>
+                    <div class="btn-group" data-toggle="buttons-radio">
+                       <button class="btn  {{#if settings.frontpage.use_markdown}}active{{/if}}" data-type="markdown">Markdown</button>
+                       <button class="btn  {{#if settings.frontpage.use_html}}active{{/if}}"     data-type="html">Html</button>
+                    </div>
+                    <input class="showActivityFeed" type="checkbox" {{#if settings.frontpage.show_activity_feed}}checked="checked"{{/if}}> Show Activity Feed
+                    <div class="type markdown" {{#unless settings.frontpage.use_markdown}}style="display:none"{{/unless}}>
+
+                        <textarea rows="" cols="80">{{settings.frontpage.markdown}}</textarea>
+                    </div>
+                    <div class="type html" {{#unless settings.frontpage.use_html}}style="display:none"{{/unless}}>
+                        <ul>
+                            <li>Bootstrap classes are available to you. See <a href="http://twitter.github.com/bootstrap/">Documentation</a></li>
+                            <li>To add the activity feed, add \{{activityFeef}}. </li>
+                        </ul>
+                        <textarea rows="" cols="80">{{settings.frontpage.html}}</textarea>
+                    </div>
+                
+
+                    <button class="btn primary large">Save</button>
+
             </div>
             <div class="tab-pane" id="2">
                 Top Bar Options:

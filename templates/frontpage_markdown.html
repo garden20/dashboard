@@ -1,7 +1,8 @@
 <div class="row">
-    <div class="main frontpage-message span8">
-        {{{message}}}
+    <div class="main frontpage-message {{#if show_activity_feed}}span8{{/if}}">
+        {{{markdown_content}}}
     </div>
+    {{#if show_activity_feed}}
     <div class="span4">
         <div class="activity-feed-list">
             <i class="list" ></i> <b class="help" title="Feeds from all your applications.">Activity Feed</b>
@@ -12,7 +13,7 @@
 
 
     </div>
-
+    {{/if}}
 
 </div>
 
