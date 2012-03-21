@@ -1,15 +1,32 @@
-<a href="{{dashboard_url}}" class="home-icon"  title="Home" ></a>
-    <ul class="nav">
-{{#each apps}}        
-        <li><a href="/{{db}}">{{title}}</a></li>
-{{/each}}
+{{#unless settings.top_nav_bar.show_brand}}
+<a href="{{dashboard_url}}" class="home home-icon"  title="Home" ></a>
+{{/unless}}
+
+<ul class="nav">
+
+{{#if settings.top_nav_bar.show_brand}}
+    <li class="home"><a class="home" href="{{dashboard_url}}">Home</a></li>
+{{/if}}
+{{#unless hide_apps}}
+    {{#each apps}}
+            <li><a href="/{{db}}">{{title}}</a></li>
+    {{/each}}
+{{/unless}}
 {{#if isAdmin}}
         <li><a href="{{settings_url}}">Settings</a></li>
 {{/if}}
-    </ul>
-    <div id="kanso-topbar-session">
+</ul>
+<div id="kanso-topbar-session">
     {{#if username}}
-        <a class="username" href=""><img src="{{avatar}}" alt="{{username}}">{{username}}</a>
+        <a class="username" href="">
+
+            {{#if settings.top_nav_bar.show_gravatar}}
+                <img src="{{avatar}}" alt="{{username}}">
+            {{/if}}
+            {{#if settings.top_nav_bar.show_username}}
+                {{username}}
+            {{/if}}
+        </a>
     {{else}}
         <a class="login" href="{{login_url}}">Login</a>
     {{/if}}

@@ -100,7 +100,124 @@
 
             </div>
             <div class="tab-pane" id="navigation">
-                Top Bar Options:
+                <div class="row">
+                    <div class="offset1 span8">
+                        <form class="form-horizontal">
+                            <fieldset>
+
+                                <legend>Host Options</legend>
+
+                                <!-- Short URLS -->
+                                <div class="control-group">
+                                    <label class="control-label" for="short_urls">Short URLs</label>
+                                    <div class="controls">
+                                      <label class="checkbox">
+                                          <input type="checkbox" id="short_urls" name="short_urls" {{#if settings.host_options.short_urls}}checked="checked"{{/if}}> Use Short Urls
+                                      </label>
+                                    </div>
+                                </div>
+                                <div class="control-group indent short_urls {{#unless settings.host_options.short_urls}}hidden{{/unless}}" >
+                                    <div class="controls">
+                                      <input type="text" class="span6" id="hostnames" name="hostnames" value="{{settings.host_options.hostnames}}">
+                                      <p class="help-block">A comma seperated list of hostnames to bind to, eg: http://localhost:5984,http://app.com</p>
+                                    </div>
+                                </div>
+                                <div class="control-group indent short_urls {{#unless settings.host_options.short_urls}}hidden{{/unless}}">
+                                    <div class="controls">
+                                        <label class="checkbox">
+                                              <input type="checkbox" name="short_app_urls" {{#if settings.host_options.short_app_urls}}checked="checked"{{/if}}>Short App URLs
+                                        </label>
+                                        <label class="checkbox">
+                                            <input type="checkbox" name="rootDashboard" {{#if settings.host_options.rootDashboard}}checked="checked"{{/if}}>Dashboard On Root
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- End Short URLS -->
+
+                                <!-- Frontpage -->
+                                <div class="control-group">
+                                    <label class="control-label" for="redirect_frontpage_on_anon">FrontPage</label>
+                                    <div class="controls">
+                                      <label class="checkbox">
+                                          <input type="checkbox" name="redirect_frontpage_on_anon" {{#if settings.host_options.redirect_frontpage_on_anon}}checked="checked"{{/if}}> Redirect to login page if not logged in.
+                                      </label>
+                                    </div>
+                                </div>
+
+
+
+                                <legend>Top Nav Bar</legend>
+
+                                <div class="control-group">
+                                    <label class="control-label" for="bg_color">Background Color</label>
+                                    <div class="controls">
+                                        <input type="text" class="span2" name="bg_color" value="{{settings.top_nav_bar.bg_color}}">
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label" for="link_color">Inactive Link Color</label>
+                                    <div class="controls">
+                                        <input type="text" class="span2" name="link_color" value="{{settings.top_nav_bar.link_color}}">
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label" for="active_link_color">Active Link Color</label>
+                                    <div class="controls">
+                                        <input type="text" class="span2" name="active_link_color" value="{{settings.top_nav_bar.active_link_color}}">
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label" for="active_bar_color">Active Bar Color</label>
+                                    <div class="controls">
+                                        <input type="text" class="span2" name="active_bar_color" value="{{settings.top_nav_bar.active_bar_color}}">
+                                    </div>
+                                </div>
+
+                                <div class="control-group">
+                                    <label class="control-label" for="show_brand">Brand</label>
+                                    <div class="controls">
+                                        <label class="checkbox">
+                                          <input type="checkbox" id="show_brand" name="show_brand" {{#if settings.top_nav_bar.show_brand}}checked="checked"{{/if}}> Show Brand
+                                      </label>
+                                    </div>
+                                </div>
+                                <div class="control-group indent show_brand {{#unless settings.top_nav_bar.show_brand}}hidden{{/unless}}">
+                                    <label class="control-label" for="brand_img">Image</label>
+                                    <div class="controls">
+                                      <input type="text" class="span6" id="brand_img" name="brand_img">
+                                    </div>
+                                </div>
+                                <div class="control-group indent show_brand {{#unless settings.top_nav_bar.show_brand}}hidden{{/unless}}">
+                                    <label class="control-label" for="brand_link">Link</label>
+                                    <div class="controls">
+                                      <input type="text" class="span6" id="brand_link" name="brand_link"  value="{{settings.top_nav_bar.brand_link}}">
+                                    </div>
+                                </div>
+
+
+                                <div class="control-group">
+                                    <label class="control-label" for="show_gravatar">User</label>
+                                    <div class="controls">
+                                        <label class="checkbox">
+                                          <input type="checkbox" name="show_username"  {{#if settings.top_nav_bar.show_username}}checked="checked"{{/if}}> Show Username
+                                      </label>
+                                      <label class="checkbox">
+                                          <input type="checkbox" name="show_gravatar"  {{#if settings.top_nav_bar.show_gravatar}}checked="checked"{{/if}}> Show Gravatar Icon
+                                      </label>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-actions">
+                                   <a href="#" class="btn primary">Save changes</a>
+                                   <button type="reset" class="btn">Cancel</button>
+                                 </div>
+
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
             </div>
             <div class="tab-pane" id="admins">
                 <div class="row multiUser">

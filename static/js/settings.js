@@ -77,6 +77,40 @@ $(function(){
 
     });
 
+    $('#short_urls').on('click', function() {
+        if ($(this).attr('checked')==='checked') $('.short_urls').show(300);
+        else $('.short_urls').hide(300);
+    });
+    $('#show_brand').on('click', function() {
+            if ($(this).attr('checked')==='checked') $('.show_brand').show(300);
+            else $('.show_brand').hide(300);
+    });
+    $('#navigation .primary').click(function() {
+        var btn = $(this);
+        btn.button('loading');
+        var started = new Date().getTime();
+        var params = $('#navigation form').formParams();
+        $.ajax({
+            url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/navigation/settings?' + $.param(params),
+            type: 'PUT',
+            success : function(result) {
+                if (result == 'update complete') {
+                    var now = new Date().getTime();
+                    var minUItime = 1000 - (now - started);
+                    if (minUItime > 0);
+                    setTimeout(function() {
+                        btn.button('reset');
+                    }, minUItime);
+                }
+                else alert('update failed');
+
+            },
+            error : function() {
+
+            }
+        });
+        return false;
+    })
 
     //var url = document.location.toString();
     //if (url.match('#')) {

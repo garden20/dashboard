@@ -25,8 +25,8 @@ $(function(){
     $topbar.load('/dashboard/_design/dashboard/_rewrite/_topbar', function() {
         // highlight the best thing
 
-        var dash = $topbar.find('a.home-icon').attr('href');
-        if (dash == path)  $topbar.find('a.home-icon').addClass('active');
+        var dash = $topbar.find('a.home').attr('href');
+        if (dash == path)  $topbar.find('a.home').addClass('active');
 
         var login = $topbar.find('#kanso-topbar-session a').attr('href');
         if (login == path)  $topbar.find('#kanso-topbar-session').addClass('active');
@@ -34,7 +34,13 @@ $(function(){
 
         $('#kanso-topbar ul.nav li').each(function(i) {
             var href = $(this).find('a').attr('href');
-            if (path.indexOf(href) == 0) return $(this).addClass('active');
+            if ($(this).hasClass('home')) {
+                if (href == path)return $(this).addClass('active');
+            } else {
+                if (path.indexOf(href) == 0) return $(this).addClass('active');
+            }
+
+
         })
 
 
