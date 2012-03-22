@@ -38,11 +38,18 @@ $(function(){
 
 
         $('#kanso-topbar ul.nav li').each(function(i) {
-            var href = $(this).find('a').attr('href');
+            var link = $(this).find('a');
+            var href = link.attr('href');
             if ($(this).hasClass('home')) {
-                if (href == path)return $(this).addClass('active');
+                if (href == path){
+                    $(this).addClass('active');
+                    link.addClass('active')
+                }
             } else {
-                if (path.indexOf(href) == 0) return $(this).addClass('active');
+                if (path.indexOf(href) == 0) {
+                    $(this).addClass('active');
+                    link.addClass('active');
+                }
             }
 
 
