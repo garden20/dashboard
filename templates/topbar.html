@@ -1,6 +1,15 @@
-{{#unless settings.top_nav_bar.show_brand}}
-<a href="{{dashboard_url}}" class="home home-icon"  title="Home" ></a>
-{{/unless}}
+{{#if settings.top_nav_bar.show_brand}}
+
+    {{#if settings.top_nav_bar.brand_link}}
+        <a href="{{settings.top_nav_bar.brand_link}}">
+            <img class="home home-icon-custom" src="{{dashboard_url}}/_db/settings/{{settings.top_nav_bar.icon_name}}" />
+        </a>
+    {{else}}
+        <img class="home home-icon-custom" src="{{dashboard_url}}/_db/settings/{{settings.top_nav_bar.icon_name}}" />
+    {{/if}}
+{{else}}
+    <a href="{{dashboard_url}}" class="home home-icon"  title="Home" ></a>
+{{/if}}
 
 <ul class="nav">
 

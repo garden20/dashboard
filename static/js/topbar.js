@@ -13,7 +13,12 @@ if ($ === undefined) {
 }
 
 $(function(){
-    $('head').append('<link rel="stylesheet" type="text/css" href="/dashboard/_design/dashboard/_rewrite/_topbar.css" />')
+    // append the css if its not there
+    var check = $('link[href="/dashboard/_design/dashboard/_rewrite/_topbar.css"]');
+    if (check.length == 0 )  {
+        $('head').append('<link rel="stylesheet" type="text/css" href="/dashboard/_design/dashboard/_rewrite/_topbar.css" />');
+    }
+
 
 
     var $topbar = $('#kanso-topbar');

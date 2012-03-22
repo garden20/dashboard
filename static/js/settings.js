@@ -85,22 +85,66 @@ $(function(){
             if ($(this).attr('checked')==='checked') $('.show_brand').show(300);
             else $('.show_brand').hide(300);
     });
+
+
+
+    $('#brand_img').on('change', function() {
+        var icon_name = $('#brand_img').val().split('\\').pop();
+        if (icon_name) {
+            $('#image-upload-form').ajaxSubmit({
+                url:  "_db/settings",
+                success: function(resp) {
+                    var json_resp = JSON.parse(resp);
+                    $('#attachmentRevision').val(json_resp.rev);
+                    $('#brand_img_display').attr('src', '_db/settings/' + icon_name);
+                }
+            });
+
+        }
+    });
+
+
+    function resetButtonAfter(btn, started) {
+       var now = new Date().getTime();
+       var minUItime = 1000 - (now - started);
+       if (minUItime > 0);
+       setTimeout(function() {
+           btn.button('reset');
+       }, minUItime);
+    }
+
+
+
+
+
     $('#navigation .primary').click(function() {
         var btn = $(this);
         btn.button('loading');
         var started = new Date().getTime();
-        var params = $('#navigation form').formParams();
+        var params = $('#navigation form.a').formParams();
+        _.extend(params, $('#navigation form.c').formParams());
+
+        var icon_name = $('#brand_img').val().split('\\').pop();
+        if (icon_name) {
+            params.icon_name = icon_name;
+            var height = $('#brand_img_display').height();
+            if (height > 25) return alert('your icon is greater than 25px.');
+            params.icon_height = height;
+
+
+        }
+
+
         $.ajax({
             url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/navigation/settings?' + $.param(params),
             type: 'PUT',
-            success : function(result) {
+            success : function(result, textStatus, xmlHttpRequest) {
                 if (result == 'update complete') {
-                    var now = new Date().getTime();
-                    var minUItime = 1000 - (now - started);
-                    if (minUItime > 0);
-                    setTimeout(function() {
-                        btn.button('reset');
-                    }, minUItime);
+
+
+                    resetButtonAfter(btn, started);
+                    window.location.reload();
+
                 }
                 else alert('update failed');
 

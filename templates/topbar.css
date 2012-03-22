@@ -411,3 +411,24 @@
     background-image: url(img/dashboard.png);
     background-color: #2B2B2B;
 }
+
+#kanso-topbar .home-icon-custom {
+{{#if custom_icon_top_padding}}
+    padding-top: {{custom_icon_top_padding}}px; /* a */
+{{else}}
+    padding-top: 3px;
+{{/if}}
+    padding-bottom: 3px;
+    padding-left: 10px;
+    padding-right: 10px;
+    display: inline-block;
+    /*border-right: 1px solid #404040; */
+    float: left;
+}
+
+
+/*  Move the icon a bit on a hover */
+#kanso-topbar .home-icon-custom:hover {
+    padding-left: 9px;
+    margin-right: 1px; /* keep the rest of the header in place */
+}

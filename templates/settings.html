@@ -102,7 +102,7 @@
             <div class="tab-pane" id="navigation">
                 <div class="row">
                     <div class="offset1 span8">
-                        <form class="form-horizontal">
+                        <form class="form-horizontal a">
                             <fieldset>
 
                                 <legend>Host Options</legend>
@@ -182,12 +182,26 @@
                                       </label>
                                     </div>
                                 </div>
-                                <div class="control-group indent show_brand {{#unless settings.top_nav_bar.show_brand}}hidden{{/unless}}">
-                                    <label class="control-label" for="brand_img">Image</label>
-                                    <div class="controls">
-                                      <input type="text" class="span6" id="brand_img" name="brand_img">
+
+                            </fieldset>
+                        </form>
+                        <!-- form in a form to support post image -->
+                        <form class="form-horizontal b" method="post" id="image-upload-form">
+                            <fieldset>
+                                    <div class="control-group indent show_brand {{#unless settings.top_nav_bar.show_brand}}hidden{{/unless}}">
+                                        <label class="control-label" for="brand_img">Image</label>
+                                        <div class="controls">
+                                            <input type="hidden" name="_rev" id="attachmentRevision" value="{{settings._rev}}"/>
+                                            <input type="file" class="span6" id="brand_img" name="_attachments">
+
+                                            <img id="brand_img_display" src="_db/settings/{{settings.top_nav_bar.icon_name}}" {{#unless settings.top_nav_bar.icon_name}}class="hidden"{{/unless}} />
+
+                                        </div>
                                     </div>
-                                </div>
+                            </fieldset>
+                        </form>
+                        <form class="form-horizontal c">
+                            <fieldset>
                                 <div class="control-group indent show_brand {{#unless settings.top_nav_bar.show_brand}}hidden{{/unless}}">
                                     <label class="control-label" for="brand_link">Link</label>
                                     <div class="controls">
