@@ -1,4 +1,10 @@
-[![Build Status](https://secure.travis-ci.org/ryanramage/garden-dashboard.png)](http://travis-ci.org/ryanramage/garden-dashboard)
+[![Build Status](https://secure.travis-ci.org/kanso/dashboard.png)](http://travis-ci.org/kanso/dashboard)
+
+# Dashboard
+
+The dashboard couchapp gives you a way to make a site out of a bunch of couchapps.
+
+
 
 ## The Garden Project
 
@@ -6,4 +12,5 @@ An open garden, opposite of a [Walled Garden](http://en.wikipedia.org/wiki/Walle
 The name also pays tribute to the [Garden](https://couchapp.org/page/garden) project by J Chris Anderson.
 
 Learn more on the [wiki](https://github.com/kanso/garden/wiki).
+
 
