@@ -9,8 +9,6 @@ before_script:
   - curl -X PUT localhost:5984/myapp_test
   - npm install kanso -g
   - npm install nodeunit -g
-  - "sudo bash test/install_phantom.sh > /dev/null"
-
 
 
 script: "kanso install; kanso push http://localhost:5984/myapp_test"
