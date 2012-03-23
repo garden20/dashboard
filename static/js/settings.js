@@ -131,6 +131,8 @@ $(function(){
             if (height > 25) return alert('your icon is greater than 25px.');
             params.icon_height = height;
 
+            var width = $('#brand_img_display').width();
+            params.icon_width = width;
 
         }
 

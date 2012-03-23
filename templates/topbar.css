@@ -413,6 +413,10 @@
 }
 
 #kanso-topbar .home-icon-custom {
+
+{{#if top_nav_bar.icon_width}}
+    width: {{top_nav_bar.icon_width}}px;
+{{/if}}
 {{#if custom_icon_top_padding}}
     padding-top: {{custom_icon_top_padding}}px; /* a */
 {{else}}
