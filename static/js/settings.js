@@ -9,31 +9,55 @@ var semver = require("semver");
 $(function(){
 
 
-        dashboard_core.getInstalledApps(function(err, data) {
-             $('.app-list-condensed').html(handlebars.templates['settings-apps.html'](data, {}));
-        });
+    dashboard_core.getInstalledApps(function(err, data) {
+         $('.app-list-condensed').html(handlebars.templates['settings-apps.html'](data, {}));
+    });
 
-        // dashboard version info
-        $.getJSON("./_info",  function(data) {
-            var ourVersion = data.config.version;
+    // dashboard version info
+    $.getJSON("./_info",  function(data) {
+        var ourVersion = data.config.version;
 
-            $('.update-board tr.dashboard td.installed-version').html(ourVersion);
+        $('.update-board tr.dashboard td.installed-version').html(ourVersion);
 
-            $.ajax({
-                url :  "http://garden20.iriscouch.com/garden20/_design/dashboard/_show/configInfo/_design/dashboard?callback=?",
-                dataType : 'json',
-                jsonp : true,
-                success : function(remote_data) {
-                    var currentVersion = remote_data.config.version;
-                    $('.update-board tr.dashboard td.available-version').html(currentVersion);
-                    if (semver.lt(ourVersion, currentVersion )) {
-                        $('.update-board tr.dashboard div.update-action').show();
-                    }
-                },
-                error : function() {
+        $.ajax({
+            url :  "http://garden20.iriscouch.com/garden20/_design/dashboard/_show/configInfo/_design/dashboard?callback=?",
+            dataType : 'json',
+            jsonp : true,
+            success : function(remote_data) {
+                var currentVersion = remote_data.config.version;
+                $('.update-board tr.dashboard td.available-version').html(currentVersion);
+                if (semver.lt(ourVersion, currentVersion )) {
+                    $('.update-board tr.dashboard div.update-action').show();
                 }
-            });
+            },
+            error : function() {
+            }
         });
+    });
+
+
+    dashboard_core.getInstalledAppsByMarket(function(err, apps) {
+        _.each(apps, function(apps, location ) {
+            var data = {
+                location: location,
+                apps : apps
+            };
+            $('.update-board').append(handlebars.templates['settings-app-updates.html'](data, {}));
+            dashboard_core.checkUpdates(data, function(err, appVersions) {
+                _.each(appVersions.apps, function(app) {
+                    if (app.value.availableVersion) {
+                        $('.update-board tr.'+ app.id +' td.available-version').html(app.value.availableVersion);
+                       if (app.value.needsUpdate) {
+                           $('.update-board tr.'+ app.id +' div.update-action').show();
+                       }
+                    } else {
+                        $('.update-board tr.'+ app.id +' td.available-version').html("Can't determine");
+                    }
+
+                })
+            });
+        })
+    });
 
 
     $('.front-page .btn-group .btn').on('click', function() {
