@@ -50,6 +50,7 @@ $(function(){
                     $(this).addClass('active');
                     link.addClass('active');
                 }
+                addNotLoggedInHack(link);
             }
 
 
@@ -57,5 +58,19 @@ $(function(){
 
 
     });
+
+    /**
+     * TODO - Implement this function. Should do a head check to the db. before allowing the link
+     * to pass.
+     * This double checks the user can login to the link.
+     * THis is to prevent the dreaded json error.
+     * @param link
+     */
+    function addNotLoggedInHack(link) {
+        $(link).on('click', function(){
+           return true;
+        });
+    }
+
 
 });

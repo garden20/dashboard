@@ -8,57 +8,138 @@ var semver = require("semver");
 
 $(function(){
 
+    function viewApp(id) {
+        $.couch.db(dashboard_db_name).openDoc(id, {
+            success: function(doc){
+                doc.installed_text = moment(new Date(doc.installed.date)).calendar();
+                doc.icon_src = dashboard_core.bestIcon96(doc);
 
-    dashboard_core.getInstalledApps(function(err, data) {
-         $('.app-list-condensed').html(handlebars.templates['settings-apps.html'](data, {}));
-    });
+               $('#apps').html(handlebars.templates['app_details.html'](doc, {}));
 
-    // dashboard version info
-    $.getJSON("./_info",  function(data) {
-        var ourVersion = data.config.version;
+               $('.form-actions .btn').tooltip({placement: 'bottom'});
 
-        $('.update-board tr.dashboard td.installed-version').html(ourVersion);
+               var showDBSize = function() {
+                   $.couch.db(doc.installed.db).info({
+                      success: function(data) {
+                          var nice_size = dashboard_core.formatSize(data.disk_size);
+                         $('#db-size').text(nice_size);
+                      }
+                  })
+               };
 
-        $.ajax({
-            url :  "http://garden20.iriscouch.com/garden20/_design/dashboard/_show/configInfo/_design/dashboard?callback=?",
-            dataType : 'json',
-            jsonp : true,
-            success : function(remote_data) {
-                var currentVersion = remote_data.config.version;
-                $('.update-board tr.dashboard td.available-version').html(currentVersion);
-                if (semver.lt(ourVersion, currentVersion )) {
-                    $('.update-board tr.dashboard div.update-action').show();
-                }
-            },
-            error : function() {
+               showDBSize();
+
+               $('.edit-title').blur(function() {
+
+               })
+
+
+
+
+               $('#delete-final').click(function() {
+                   $(this).parent().parent().modal('hide');
+
+                   $.couch.db(doc.installed.db).drop({
+                       success: function() {
+                           $.couch.db(dashboard_db_name).removeDoc(doc,  {
+                               success : function() {
+                                   // go to the dashboard.
+                                  router.setRoute('/settings');
+                               }
+                           });
+                       }
+                   })
+               });
+
+
+               function updateStatus(msg, percent, complete) {
+                   $('.activity-info .bar').css('width', percent);
+                   if (complete) {
+                       $('.activity-info .progress').removeClass('active');
+                   }
+               }
+
+
+               $('#compact-final').click(function(){
+                   $('.activity-info').show();
+                   updateStatus('Compacting', '50%', true);
+                   $.couch.db(doc.installed.db).compact({
+                      success : function(){
+                          updateStatus('Done Compact', '100%', true);
+                          setTimeout(function() {
+                              $('.activity-info').hide();
+                              showDBSize();
+
+                          }, 3000);
+
+                      }
+                   });
+               });
+
+
+               $('#clone-app-start').click(function(){
+                   $('#newAppName').val(doc.dashboard_title);
+               });
+
+
             }
         });
-    });
+    }
 
+    function showApps() {
+        if ($('#apps table').length > 0) return; // weird bug we are getting called twice. prevent re-render.
+        $('#apps').html(handlebars.templates['apps.html']({}));
 
-    dashboard_core.getInstalledAppsByMarket(function(err, apps) {
-        _.each(apps, function(apps, location ) {
-            var data = {
-                location: location,
-                apps : apps
-            };
-            $('.update-board').append(handlebars.templates['settings-app-updates.html'](data, {}));
-            dashboard_core.checkUpdates(data, function(err, appVersions) {
-                _.each(appVersions.apps, function(app) {
-                    if (app.value.availableVersion) {
-                        $('.update-board tr.'+ app.id +' td.available-version').html(app.value.availableVersion);
-                       if (app.value.needsUpdate) {
-                           $('.update-board tr.'+ app.id +' div.update-action').show();
-                       }
-                    } else {
-                        $('.update-board tr.'+ app.id +' td.available-version').html("Can't determine");
+        dashboard_core.getInstalledApps(function(err, data) {
+             $('.app-list-condensed').html(handlebars.templates['settings-apps.html'](data, {}));
+        });
+
+        // dashboard version info
+        $.getJSON("./_info",  function(data) {
+            var ourVersion = data.config.version;
+
+            $('.update-board tr.dashboard td.installed-version').html(ourVersion);
+
+            $.ajax({
+                url :  "http://garden20.iriscouch.com/garden20/_design/dashboard/_show/configInfo/_design/dashboard?callback=?",
+                dataType : 'json',
+                jsonp : true,
+                success : function(remote_data) {
+                    var currentVersion = remote_data.config.version;
+                    $('.update-board tr.dashboard td.available-version').html(currentVersion);
+                    if (semver.lt(ourVersion, currentVersion )) {
+                        $('.update-board tr.dashboard div.update-action').show();
                     }
-
-                })
+                },
+                error : function() {
+                }
             });
-        })
-    });
+        });
 
+
+        dashboard_core.getInstalledAppsByMarket(function(err, apps) {
+            _.each(apps, function(apps, location ) {
+                var data = {
+                    location: location,
+                    apps : apps
+                };
+                $('.update-board').append(handlebars.templates['settings-app-updates.html'](data, {}));
+                dashboard_core.checkUpdates(data, function(err, appVersions) {
+                    _.each(appVersions.apps, function(app) {
+                        if (app.value.availableVersion) {
+                            $('.update-board tr.'+ app.id +' td.available-version').html(app.value.availableVersion);
+                           if (app.value.needsUpdate) {
+                               $('.update-board tr.'+ app.id +' div.update-action').show();
+                           }
+                        } else {
+                            $('.update-board tr.'+ app.id +' td.available-version').html("Can't determine");
+                        }
+
+                    })
+                });
+            })
+        });
+    }
 
     $('.front-page .btn-group .btn').on('click', function() {
         var type = $(this).data('type');
@@ -196,14 +277,17 @@ $(function(){
     function showTab(id) {
         $('#' + id).tab('show');
     }
-    function showTab(e) {
+    function showTab() {
         var url = document.location.toString();
         $('.nav.tabs a[href=#'+url.split('#/')[1]+']').tab('show') ;
     }
     var routes = {
-      '/apps'   : showTab,
-      '/apps/:db' : function(app) {
 
+      '/apps/:db' : function(app_id) {
+          viewApp(app_id);
+      },
+      '/apps'   : function(){
+          showApps();
       },
       '/frontpage'  : showTab,
       '/navigation' : showTab,

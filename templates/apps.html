@@ -1,14 +1,24 @@
-<div class="row title">
+<div class="right">
+    <a href="install" class="btn success large">Install New App</a>
 </div>
+<h3>Installed Apps</h3>
+<table class="table">
+   <thead>
+     <tr>
+         <th>Name</th><th>App</th><th>Installed Version</th><th>Available Version</th><th></th>
+     </tr>
+   </thead>
+   <tbody class="update-board">
+         <tr class="dashboard">
+             <td>Dashboard</td>
+             <td>dashboard</td>
+             <td class="installed-version"><img src="static/img/ajax-loader.gif" alt="loading..." /></td>
+             <td class="available-version"><img src="static/img/ajax-loader.gif" alt="loading..." /></td>
+             <td>
 
+                 <div class="update-action" style="display: none;"><button class="btn primary small update-run" data-loading-text="Updating..." data-complete-text="Finished!">Update</button></div>
 
-
-<div class="row">
-
-    <div class="message"></div>
-
-    <ul class="app thumbnails">
-
-    </ul>
-</div>
-
+             </td>
+         </tr>
+   </tbody>
+</table>
