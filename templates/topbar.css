@@ -390,7 +390,7 @@
 
 #kanso-topbar .home-icon {
     padding: 0 10px;
-    background-image: url(img/dashboard_grey.png);
+    background-image: url(_img/dashboard_grey.png);
     background-position: 10px 5px;
     background-repeat: no-repeat;
     display: inline-block;
@@ -401,14 +401,14 @@
 }
 
 #kanso-topbar .home-icon.active {
-    background-image: url(img/dashboard.png);
+    background-image: url(_img/dashboard.png);
     border-top: 2px solid #bd0000;
     background-position: 10px 3px;
     height: 23px;
 }
 
 #kanso-topbar .home-icon:hover {
-    background-image: url(img/dashboard.png);
+    background-image: url(_img/dashboard.png);
     background-color: #2B2B2B;
 }
 

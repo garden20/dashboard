@@ -14,7 +14,6 @@ $(function() {
 
     function showMarkets() {
         dashboard_core.getMarkets(function(err, data) {
-            console.log(data);
             $('ul.gardens').html(handlebars.templates['garden_details.html'](data, {}));
         })
 

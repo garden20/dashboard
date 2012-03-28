@@ -31,6 +31,12 @@ $(function(){
 
                $('.edit-title').blur(function() {
 
+                   doc.dashboard_title = $(this).text();
+                   $.couch.db(dashboard_db_name).saveDoc(doc, {
+                      success: function(results) {
+
+                      }
+                   });
                })
 
 
@@ -44,7 +50,7 @@ $(function(){
                            $.couch.db(dashboard_db_name).removeDoc(doc,  {
                                success : function() {
                                    // go to the dashboard.
-                                  router.setRoute('/settings');
+                                  router.setRoute('/apps');
                                }
                            });
                        }
