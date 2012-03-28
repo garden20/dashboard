@@ -26,18 +26,20 @@
 {{/if}}
 </ul>
 <div id="kanso-topbar-session">
-    {{#if username}}
-        <a class="username" href="">
+    {{#unless isAdminParty}}
+        {{#if username}}
+            <a class="username" href="">
 
-            {{#if settings.top_nav_bar.show_gravatar}}
-                <img src="{{avatar}}" alt="{{username}}">
-            {{/if}}
-            {{#if settings.top_nav_bar.show_username}}
-                {{username}}
-            {{/if}}
-        </a>
-    {{else}}
-        <a class="login" href="{{login_url}}">Login</a>
-    {{/if}}
+                {{#if settings.top_nav_bar.show_gravatar}}
+                    <img src="{{avatar}}" alt="{{username}}">
+                {{/if}}
+                {{#if settings.top_nav_bar.show_username}}
+                    {{username}}
+                {{/if}}
+            </a>
+        {{else}}
+            <a class="login" href="{{login_url}}">Login</a>
+        {{/if}}
+    {{/unless}}
     </div>
 </div>
