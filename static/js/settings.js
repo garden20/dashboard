@@ -254,9 +254,18 @@ $(function(){
             success : function(result, textStatus, xmlHttpRequest) {
                 if (result == 'update complete') {
 
+                    var userBrowserid = 'false';
+                    if (params.login_type == 'browserid') {
+                        userBrowserid = 'true';
+                    }
+                    $.couch.config({
+                        success : function(result) {
+                            resetButtonAfter(btn, started);
+                            window.location.reload();
+                        }
+                    }, 'browserid', 'enabled', userBrowserid );
 
-                    resetButtonAfter(btn, started);
-                    window.location.reload();
+
 
                 }
                 else alert('update failed');

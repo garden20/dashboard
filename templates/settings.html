@@ -119,6 +119,20 @@
                                     </div>
                                 </div>
 
+                                <!-- Login Type -->
+                                <div class="control-group">
+                                    <label class="control-label" for="login_type">Login Method</label>
+                                    <div class="controls">
+                                        <label class="radio">
+                                            <input type="radio" name="login_type" value="local" {{#if settings.host_options.login_type_local}}checked="checked"{{/if}}>
+                                            Local Login.
+                                        </label>
+                                      <label class="radio">
+                                          <input type="radio" name="login_type" value="browserid" {{#if settings.host_options.login_type_browserid}}checked="checked"{{/if}}>
+                                          BrowserID
+                                      </label>
+                                    </div>
+                                </div>
 
 
                                 <legend>Top Nav Bar</legend>
