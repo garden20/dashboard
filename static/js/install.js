@@ -14,6 +14,12 @@ $(function() {
 
     function showMarkets() {
         dashboard_core.getMarkets(function(err, data) {
+            var dash_url = window.location.protocol + '//' + window.location.host + '/' + $('.container').data('dashboardurl');
+            data = _.map(data, function(market){
+                market.url = market.url + '?dashboard=' + dash_url;
+                return market;
+            });
+
             $('ul.gardens').html(handlebars.templates['garden_details.html'](data, {}));
         })
 

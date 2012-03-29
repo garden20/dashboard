@@ -1,37 +1,53 @@
 
 
 <div class="row title">
-    <h1>Install Application</h1>
+  <div class="main span8">
+      <h1>Install Application</h1>
+      <div id="content" class="main">
+          <div class="row install-row">
+
+              {{#if is_auth}}
+
+
+
+                  {{#if app_url}}
+                      <div class="alert alert-info">
+                          <p><strong>Heads up!</strong> You are about to <strong>install</strong> an application. Make sure you trust the information below.</p>
+                      </div>
+                      <div class="loading" data-appurl="{{app_url}}">
+                          Loading installation information...Please wait
+                      </div>
+
+                  {{else}}
+
+                        <form class="well search-form">
+                           <input type="text" class="span6" placeholder="Got an application url?" name="app_url">
+                          <button type="submit" class="btn next">Next &raquo;</button>
+                        </form>
+
+                  {{/if}}
+              {{else}}
+                  <div class="alert alert-info">
+                      <p>You need to login as an admin to install an application</p>
+                      <a href="{{login_link}}" class="btn">Login</a>
+                  </div>
+              {{/if}}
+
+          </div>
+      </div>
+  </div>
+  <div class="span3">
+
+      <div class="row title">
+          <h3>Looking for apps?</h3>
+          Find fresh apps to install from your local <b>Garden Market</b>!
+      </div>
+      <ul class="gardens">
+
+      </ul>
+  </div>
+
 </div>
 
 
-<div class="row install-row">
 
-    {{#if is_auth}}
-
-
-
-        {{#if app_url}}
-            <div class="alert alert-info">
-                <p><strong>Heads up!</strong> You are about to <strong>install</strong> an application. Make sure you trust the information below.</p>
-            </div>
-            <div class="loading" data-appurl="{{app_url}}">
-                Loading installation information...Please wait
-            </div>
-
-        {{else}}
-
-              <form class="well search-form">
-                 <input type="text" class="span6" placeholder="Got an application url?" name="app_url">
-                <button type="submit" class="btn next">Next &raquo;</button>
-              </form>
-
-        {{/if}}
-    {{else}}
-        <div class="alert alert-info">
-            <p>You need to login as an admin to install an application</p>
-            <a href="{{login_link}}" class="btn">Login</a>
-        </div>
-    {{/if}}
- 
-</div>
