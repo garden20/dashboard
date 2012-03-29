@@ -8,9 +8,9 @@
 /*
  *  Ensure the page has jquery
  */
-//if ($ === undefined) {
-//    $ = require('jquery');
-//}
+if ($ === undefined) {
+    $ = require('jquery');
+}
 
 $(function(){
 
@@ -21,9 +21,9 @@ $(function(){
     }
 
     var loadTopbar = function() {
-        var $topbar = $('#kanso-topbar');
+        var $topbar = $('#dashboard-topbar');
         if ($topbar.length === 0) {
-            $topbar = $('<div id="kanso-topbar"></div>');
+            $topbar = $('<div id="dashboard-topbar"></div>');
             $('body').prepend($topbar);
         }
         var path = window.location.pathname;
@@ -33,11 +33,11 @@ $(function(){
             var dash = $topbar.find('a.home').attr('href');
             if (dash == path)  $topbar.find('a.home').addClass('active');
 
-            var login = $topbar.find('#kanso-topbar-session a').attr('href');
-            if (login == path)  $topbar.find('#kanso-topbar-session').addClass('active');
+            var login = $topbar.find('#dashboard-topbar-session a').attr('href');
+            if (login == path)  $topbar.find('#dashboard-topbar-session').addClass('active');
 
 
-            $('#kanso-topbar ul.nav li').each(function(i) {
+            $('#dashboard-topbar ul.nav li').each(function(i) {
                 var link = $(this).find('a');
                 var href = link.attr('href');
                 if ($(this).hasClass('home')) {
@@ -70,7 +70,7 @@ $(function(){
      * @param link
      */
     function addNotLoggedInHack(link) {
-        $(link).on('click', function(){
+        $(link).bind('click', function(){
            $(this).removeClass('hover');
            return true;
         });
