@@ -167,6 +167,21 @@ $(function(){
 
     });
 
+    $('.update-board tr.dashboard .update-run').live('click',function(){
+       var btn = $(this);
+       btn.button('loading');
+       $.couch.replicate('http://garden20.iriscouch.com/garden20', dashboard_core.dashboard_db_name, {
+          success : function() {
+              btn
+                  .button('complete')
+                  .addClass('disabled')
+                  .attr('disabled', 'disabled');
+
+          }
+       }, {doc_ids : [ '_design/dashboard'  ] });
+    });
+
+
     $('.front-page .btn-group .btn').on('click', function() {
         var type = $(this).data('type');
         $('.front-page .type').hide();
