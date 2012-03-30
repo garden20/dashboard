@@ -54,10 +54,20 @@ $(function(){
                 }
 
 
-            })
+            });
 
+            $('#dashboard-topbar .username').click(function() {
+                $('#dashboard-profile').toggle();
+                $(document).one('click', function() {
+                    $('#dashboard-profile').hide();
+                });
+                return false;
+            });
+
+            $('#dashboard-topbar .logout').click(logout);
 
         });
+
     }
 
     setTimeout(loadTopbar, 10);
@@ -74,6 +84,21 @@ $(function(){
            $(this).removeClass('hover');
            return true;
         });
+    }
+
+    function logout() {
+        $.ajax({ url : '/dashboard/_design/dashboard/_rewrite/_couch/_session'
+         , type: 'DELETE'
+         , dataType: 'json'
+         , success: function(){
+                window.location.reload();
+
+            }
+         , error  : function() {
+                alert('erro loging out.');
+            }
+         });
+        return false;
     }
 
 

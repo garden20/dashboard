@@ -43,3 +43,15 @@
     {{/unless}}
     </div>
 </div>
+{{#if username}}
+<div id="dashboard-profile">
+    <img src="{{avatar_large}}"/>
+    <div class="info">
+        <h4>{{username}}</h4>
+        <ul>
+            <li><a href="">Profile</a></li>
+            <li><a class="logout" href="">Logout</a></li>
+        </ul>
+    </div>
+</div>
+{{/if}}

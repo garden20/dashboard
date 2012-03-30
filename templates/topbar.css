@@ -438,3 +438,29 @@
     padding-left: 9px;
     margin-right: 1px; /* keep the rest of the header in place */
 }
+
+#dashboard-profile {
+    position: absolute;
+    top: 25px;
+    right: 0px;
+    display: none;
+    z-index: 999;
+    padding: 10px 20px;
+    border-left: 1px solid #404040;
+    border-right: 1px solid #404040;
+    border-bottom: 1px solid #404040;
+    background-color: white;
+    margin-right: 10px;
+    -moz-box-shadow: -1px 1px 1px rgba(0,0,0,.2);
+    -webkit-box-shadow: 0 2px 4px rgba(0,0,0,.2);
+    box-shadow: 0 2px 4px rgba(0,0,0,.2);
+}
+
+#dashboard-profile img {
+    float : left;
+}
+
+#dashboard-profile .info {
+    float: right;
+    margin-left: 15px;
+}
