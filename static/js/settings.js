@@ -147,6 +147,26 @@ $(function(){
         });
     }
 
+    $('.update-board  button.update-run-app').live('click',function(){
+        console.log('clikcccasdsadsa');
+        var btn = $(this);
+        btn.button('loading');
+        var id = btn.data('id');
+        dashboard_core.updateApp(id, function(err, app_data) {
+            if (err) {
+                return alert(err);
+            } else {
+                btn
+                 .button('complete')
+                 .addClass('disabled')
+                 .attr('disabled', 'disabled');
+                $('.' + id + ' .installed-version').html(app_data.kanso.config.version);
+            }
+        });
+
+
+    });
+
     $('.front-page .btn-group .btn').on('click', function() {
         var type = $(this).data('type');
         $('.front-page .type').hide();
