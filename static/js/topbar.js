@@ -66,6 +66,13 @@ $(function(){
 
             $('#dashboard-topbar .logout').click(logout);
 
+            try {
+                var userCtx = JSON.parse(decodeURI( $('#dashboard-topbar-session').data('userctx') ));
+                var session = require('session');
+                session.emit('change', userCtx);
+            } catch(ignore){}
+
+
         });
 
     }

@@ -25,7 +25,7 @@
         <li><a href="{{settings_url}}">Settings</a></li>
 {{/if}}
 </ul>
-<div id="dashboard-topbar-session">
+<div id="dashboard-topbar-session" data-userCtx="{{usrCtxString}}">
     {{#unless isAdminParty}}
         {{#if username}}
             <a class="username" href="">
