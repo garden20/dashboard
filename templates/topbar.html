@@ -18,14 +18,14 @@
 {{/if}}
 {{#unless hide_apps}}
     {{#each apps}}
-            <li><a href="{{link}}">{{title}}</a></li>
+            <li><a href="{{link}}"  {{#if db}}data-db="{{db}}"{{/if}} >{{title}}</a></li>
     {{/each}}
 {{/unless}}
 {{#if isAdmin}}
         <li><a href="{{settings_url}}">Settings</a></li>
 {{/if}}
 </ul>
-<div id="dashboard-topbar-session" data-userCtx="{{usrCtxString}}">
+<div id="dashboard-topbar-session" data-userCtx="{{usrCtxString}}" data-login="{{login_url}}">
     {{#unless isAdminParty}}
         {{#if username}}
             <a class="username" href="">
