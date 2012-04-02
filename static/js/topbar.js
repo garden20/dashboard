@@ -66,6 +66,10 @@ $(function(){
 
             $('#dashboard-topbar .logout').click(logout);
 
+            var base = $('#dashboard-topbar .login').attr('href');
+            base += "?redirect=" + encodeURIComponent(window.location);
+            $('#dashboard-topbar .login').attr('href', base);
+
             try {
                 var userCtx = JSON.parse(decodeURI( $('#dashboard-topbar-session').data('userctx') ));
                 var session = require('session');
