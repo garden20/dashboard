@@ -281,7 +281,7 @@ function getAdmins(callback) {
 function getRoles(callback) {
     $.couch.db(dashboard_db_name).view('dashboard/by_roles', {
        success: function(response) {
-           callback(response.rows);
+           callback(null, response.rows);
        }
     });
 }
@@ -294,7 +294,6 @@ function getUsers(callback) {
         else  callback(list);
     });
 }
-
 
 
 

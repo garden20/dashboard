@@ -16,6 +16,7 @@
             <li class="active"><a href="#apps" data-toggle="tab">Apps</a></li>
             <li><a href="#frontpage" data-toggle="tab">Front Page</a></li>
             <li><a href="#navigation" data-toggle="tab">Navigation</a></li>
+            <li><a href="#links" data-toggle="tab">Links</a></li>
             <li><a href="#admins" data-toggle="tab">Admins</a></li>
             <li><a href="#roles" data-toggle="tab">Roles</a></li>
           </ul>
@@ -228,6 +229,38 @@
                         </form>
                     </div>
                 </div>
+            </div>
+            <div class="tab-pane" id="links">
+                <h2>Manage other links on the navbar</h2>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>URL</th>
+                      <th class="action">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody class="link-table">
+
+                  </tbody>
+                </table>
+
+
+                <div>
+                    <a href="#" class="btn success add-link">Add Link</a>
+                </div>
+
+                <form id="add-link" class="form well" style="display: none;">
+                    <label>Name</label>
+                    <input type="text" name="dashboard_title" />
+                    <label>Url</label>
+                    <input type="text" name="url" />
+                    <div class="form-actions">
+                       <a id="add-link-final" href="#" class="btn primary">Save changes</a>
+                       <button id="add-link-cancel" type="reset" class="btn">Cancel</button>
+                     </div>
+                </form>
+
             </div>
             <div class="tab-pane" id="admins">
                 <div class="row multiUser">

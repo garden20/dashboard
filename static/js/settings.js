@@ -313,6 +313,65 @@ $(function(){
         return false;
     })
 
+    function getLinks(callback) {
+        console.log('get linkls');
+        $.couch.db(dashboard_db_name).view('dashboard/links_only', {
+            success: function(response) {
+                callback(null, response.rows);
+            }
+         });
+    }
+    getLinks(function(err, links) {
+        $('.link-table').append(handlebars.templates['settings-links.html']({links: links}));
+        $('.remove-link').on('click', function() {
+            console.log('dedeede');
+            var id = $(this).data('id');
+            var row = $(this).closest('tr');
+
+            $.couch.db(dashboard_db_name).openDoc(id, {
+                success: function(doc) {
+                    $.couch.db(dashboard_db_name).removeDoc(doc, {
+                        success: function() {
+                            row.remove();
+                        }
+                    });
+                }
+            });
+
+            return false;
+
+        });
+    });
+
+    $('a.add-link').on('click', function() {
+        $(this).hide();
+        $('#add-link').show(600);
+        return false;
+    });
+    $('#add-link-final').on('click', function() {
+        var link = $('#add-link').formParams();
+        link.type = 'link';
+
+        $.couch.db(dashboard_db_name).saveDoc(link, {
+            success: function(response) {
+                var mock = {
+                    id : link._id,
+                    key : link.dashboard_title,
+                    value : link.url
+
+                }
+                $('.link-table').append(handlebars.templates['settings-links.html']({links: [mock]}));
+                $('#add-link').hide();
+                $('a.add-link').show();
+            }
+        });
+
+        return false;
+    });
+    $('#add-link-cancel').on('click', function() {
+        $('#add-link').hide();
+        $('a.add-link').show();
+    });
     //var url = document.location.toString();
     //if (url.match('#')) {
     //    $('.nav.tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
@@ -342,7 +401,8 @@ $(function(){
       '/frontpage'  : showTab,
       '/navigation' : showTab,
       '/admins'     : showTab,
-      '/roles'      : showTab
+      '/roles'      : showTab,
+      '/links'      : showTab
     };
 
 
