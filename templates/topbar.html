@@ -23,6 +23,9 @@
 {{/unless}}
 {{#if isAdmin}}
         <li><a href="{{settings_url}}">Settings</a></li>
+        {{#if settings.top_nav_bar.admin_show_futon}}
+            <li><a href="/_utils/">Futon</a></li>
+        {{/if}}
 {{/if}}
 </ul>
 <div id="dashboard-topbar-session" data-userCtx="{{usrCtxString}}" data-login="{{login_url}}">
