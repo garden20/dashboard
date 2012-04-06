@@ -101,7 +101,7 @@
     height: 25px;
     width: 100%;
     background-color: {{top_nav_bar.bg_color}};
-    position: relative;
+    position: {{position}};
 }
 
 #dashboard-topbar .dashboard-topbar-home-icon {
@@ -138,7 +138,7 @@
     height: 25px;
     overflow: hidden;
     list-style-type: none;
-    float: left;
+
 }
 
 #dashboard-topbar>ul>li {
