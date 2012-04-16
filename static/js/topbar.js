@@ -78,7 +78,7 @@ $(function(){
             if (login == path)  $topbar.find('#dashboard-topbar-session').addClass('active');
 
 
-            $('#dashboard-topbar ul.nav li').each(function(i) {
+            $('#dashboard-topbar ul.kanso-nav li').each(function(i) {
                 var link = $(this).find('a');
                 var href = link.attr('href');
                 if ($(this).hasClass('home')) {
