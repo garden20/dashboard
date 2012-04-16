@@ -5,6 +5,7 @@ var session = require('session');
 var users = require("users");
 var dashboard_core = require('lib/dashboard_core');
 var dashboard_links = require('lib/dashboard_links');
+var dashboard_settings = require('lib/settings');
 var db = require('db').use('_db');
 
 $(function() {
@@ -105,9 +106,10 @@ $(function() {
             dashboard_core.install_app(remote_app_details, db_name, updateStatus, function(err, app_install_doc) {
                 if (err) return errorInstalling(err);
                 updateStatus('Install Complete', '100%', true);
-                console.log(app_install_doc);
-                db.getDoc('settings', function(err, settings) {
-                    if (err) return console.log("cant get settings");
+
+                db.getDoc('settings', function(err, settingsDoc) {
+                    if (err) settingsDoc = {};
+                    var settings = _.defaults(settingsDoc, dashboard_settings.defaultSettings);
                     var link = dashboard_links.appUrl(settings, app_install_doc);
                     $('.success').attr('href', link).show();
                 })
