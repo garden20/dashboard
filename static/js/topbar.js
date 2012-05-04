@@ -97,6 +97,23 @@ $(function(){
 
             });
 
+            $('#dashboard-topbar .more-apps').click(function(){
+                var me = $(this);
+                var menu = $('#dashboard-more-apps');
+
+                var left = me.position().left;
+                menu.css('left', left + 'px').toggle(0, function(){
+                    if (menu.is(':visible')) me.addClass('dashboard-menu-highlight');
+                    else me.removeClass('dashboard-menu-highlight');
+                });
+                $(document).one('click', function() {
+                    me.removeClass('dashboard-menu-highlight');
+                    $('#dashboard-more-apps').hide();
+                });
+                return false;
+            });
+
+
             $('#dashboard-topbar .username').click(function() {
                 $('#dashboard-profile').toggle();
                 $(document).one('click', function() {

@@ -17,9 +17,12 @@
     <li class="home"><a class="home" href="{{dashboard_url}}">Home</a></li>
 {{/if}}
 {{#unless hide_apps}}
-    {{#each apps}}
-            <li><a href="{{link}}"  {{#if db}}data-db="{{db}}"{{/if}} >{{title}}</a></li>
+    {{#each apps.apps}}
+        <li><a href="{{link}}"  {{#if db}}data-db="{{db}}"{{/if}} >{{title}}</a></li>
     {{/each}}
+    {{#if apps.more_apps}}
+        <li><a href="#" class="more-apps">More <span class="ddown">&#9660;</span></a></li>
+    {{/if}}
 {{/unless}}
 {{#if isAdmin}}
         <li><a href="{{settings_url}}">Settings</a></li>
@@ -56,5 +59,14 @@
             <li><a class="logout" href="">Logout</a></li>
         </ul>
     </div>
+</div>
+{{/if}}
+{{#if apps.more_apps}}
+<div id="dashboard-more-apps">
+    <ul>
+    {{#each apps.more_apps}}
+        <li><a href="{{link}}"  {{#if db}}data-db="{{db}}"{{/if}} >{{title}}</a></li>
+    {{/each}}
+    </li>
 </div>
 {{/if}}

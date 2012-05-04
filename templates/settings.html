@@ -14,9 +14,12 @@
         <div class="tabbable">
           <ul class="nav tabs">
             <li class="active"><a href="#apps" data-toggle="tab">Apps</a></li>
-            <li><a href="#frontpage" data-toggle="tab">Front Page</a></li>
-            <li><a href="#navigation" data-toggle="tab">Navigation</a></li>
             <li><a href="#links" data-toggle="tab">Links</a></li>
+            <li><a href="#ordering" data-toggle="tab">Ordering</a></li>
+            <li><a href="#navigation" data-toggle="tab">Navigation</a></li>
+            <li><a href="#frontpage" data-toggle="tab">Front Page</a></li>
+
+
             <li><a href="#admins" data-toggle="tab">Admins</a></li>
             <li><a href="#roles" data-toggle="tab">Roles</a></li>
           </ul>
@@ -260,6 +263,31 @@
                        <button id="add-link-cancel" type="reset" class="btn">Cancel</button>
                      </div>
                 </form>
+
+            </div>
+            <div class="tab-pane" id="ordering">
+                <h2>Manage navbar ordering</h2>
+                <p>
+                    Drag the items below into the order you want them to appear on the nav bar. Hide lesser used items in the
+                    'More' menu dropdown.
+                </p>
+
+
+                <h4>Visible Items</h4>
+                <ul id="sortable1" class="connectedSortable">
+
+                </ul>
+
+                <h4>'More' dropdown menu</h4>
+                <ul id="sortable2" class="connectedSortable">
+
+                </ul>
+
+                <div class="form-actions">
+                    <button id="save-ordering-final" href="#" class="btn primary" disabled="disabled">Save changes</button>
+                    <a href="settings#/ordering" class="btn">Cancel</a>
+                </div>
+
 
             </div>
             <div class="tab-pane" id="admins">

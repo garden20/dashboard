@@ -147,8 +147,50 @@ $(function(){
         });
     }
 
+    function showOrdering() {
+        $('#save-ordering-final')
+            .attr('disabled', 'disabled')
+            .on('click', function(){
+                $(this).attr('disabled', 'disabled');
+
+                var showing = [];
+                var onDropdownMenu = [];
+                $('#sortable1 li').each(function(i, entry) {
+                   showing.push($(entry).data('id'));
+                });
+                $('#sortable2 li').each(function(i, entry) {
+                    onDropdownMenu.push($(entry).data('id'));
+                });
+
+                console.log(showing, onDropdownMenu);
+                dashboard_core.updateNavOrdering(showing, onDropdownMenu, function(err) {
+                    if (err) return humane.error(err);
+                    humane.info('Save complete');
+                });
+            });
+        $( "#sortable1, #sortable2" ).empty().sortable({
+            connectWith: ".connectedSortable",
+            stop: function(event, ui) {
+                $('#save-ordering-final').removeAttr('disabled');
+            }
+        }).disableSelection();
+
+        dashboard_core.getTopbarEntries(function(err, rows) {
+            _.each(rows, function(row) {
+                if (row.key[0] === 0) return; // settings doc
+                 if(row.doc.onDropdownMenu) {
+                     $('#sortable2').append('<li class="ui-state-default" data-id="'+ row.id + '">' + row.key[2] + '</li>');
+                 } else {
+                     $('#sortable1').append('<li class="ui-state-default" data-id="'+ row.id + '">' + row.key[2] + '</li>');
+                 }
+            });
+        });
+
+
+    }
+
+
     $('.update-board  button.update-run-app').live('click',function(){
-        console.log('clikcccasdsadsa');
         var btn = $(this);
         btn.button('loading');
         var id = btn.data('id');
@@ -402,7 +444,11 @@ $(function(){
       '/navigation' : showTab,
       '/admins'     : showTab,
       '/roles'      : showTab,
-      '/links'      : showTab
+      '/links'      : showTab,
+      '/ordering'   : function() {
+          showTab();
+          showOrdering();
+      }
     };
 
 
