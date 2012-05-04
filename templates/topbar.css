@@ -153,6 +153,7 @@
     padding: 1px 10px 2px 10px;
     color: {{top_nav_bar.link_color}};
     font-weight: bold;
+    text-transform: capitalize;
 }
 
 #dashboard-topbar>ul>li>a:hover {
