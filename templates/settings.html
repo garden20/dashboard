@@ -21,7 +21,8 @@
 
 
             <li><a href="#admins" data-toggle="tab">Admins</a></li>
-            <li><a href="#roles" data-toggle="tab">Roles</a></li>
+            <li><a href="#groups" data-toggle="tab">Groups</a></li>
+            <li><a href="#users" data-toggle="tab">Users</a></li>
           </ul>
 
 
@@ -234,7 +235,12 @@
                 </div>
             </div>
             <div class="tab-pane" id="links">
-                <h2>Manage other links on the navbar</h2>
+                <p>Manage other links on the navbar</p>
+
+                <div>
+                    <a href="#" class="btn success add-link">Add Link</a>
+                </div>
+
                 <table class="table">
                   <thead>
                     <tr>
@@ -249,9 +255,7 @@
                 </table>
 
 
-                <div>
-                    <a href="#" class="btn success add-link">Add Link</a>
-                </div>
+
 
                 <form id="add-link" class="form well" style="display: none;">
                     <label>Name</label>
@@ -293,8 +297,8 @@
             <div class="tab-pane" id="admins">
                 <div class="row multiUser">
                     <div class=" span5">
-                        <button href="#add-admin-dialog" data-toggle="modal" class="btn small add-button">Add Admin</button>
-                        <h6>Admins</h6>
+                        <button href="#add-admin-dialog" data-toggle="modal" class="btn small success">Add Admin</button>
+
                         <table class="table">
                           <thead>
                             <tr>
@@ -310,15 +314,20 @@
                     </div>
                 </div>
             </div>
-            <div class="tab-pane" id="roles">
+            <div class="tab-pane" id="groups">
                 <div class="row multiUser">
                     <div class=" span5">
-                        <button href="#add-role-dialog" data-toggle="modal" class="btn small add-button">Add Role</button>
-                        <h6>User Roles</h6>
+
+
+                        <p>Groups are things like 'Accounting', or 'Sales Team' and provide an easy way to manage application access.</p>
+
+
+                        <button href="#add-role-dialog" data-toggle="modal" class="btn small success">Add Group</button>
+
                         <table class="table">
                           <thead>
                             <tr>
-                              <th>Role</th>
+                              <th>Group</th>
                               <th class="action">Actions</th>
                             </tr>
                           </thead>
@@ -364,12 +373,12 @@
 
 <div id="add-role-dialog" class="modal fade" style="display: none;">
     <div class="modal-header">
-        <h3>Add Role</h3>
+        <h3>Add Group</h3>
     </div>
     <div class="modal-body">
-        <p>Roles are a way to group permissions for users.</p>
+        <p>Please provide a name like 'Accounting', or 'Sales Team'.</p>
         <form>
-            <label>Role Name</label>
+            <label>Group Name</label>
             <input type="text" id="role-name" />
         </form>
 

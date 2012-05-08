@@ -551,7 +551,7 @@ $(function(){
           showTab();
           showAdmins();
       },
-      '/roles'      : function(){
+      '/groups'      : function(){
           showTab();
           showRoles();
       },
