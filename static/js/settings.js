@@ -385,6 +385,111 @@ $(function(){
         });
     });
 
+    function getAdmins(callback) {
+        $.couch.config({
+            success : function(data) {
+                  var keys = [];
+                  for(var i in data) if (data.hasOwnProperty(i)){
+                    keys.push(i);
+                  }
+
+                if (callback) callback(keys);
+
+            },
+            error : function() {
+                console.log('not an admin');
+            }
+        }, 'admins')
+
+    }
+
+    function showAdmins() {
+        getAdmins(function(admins) {
+            var data = {
+                admins : admins
+            };
+            $('.admin-list').html(handlebars.templates['admins.html'](data, {}));
+        });
+
+
+    }
+
+    function getRoles(callback) {
+
+        $.couch.db(dashboard_db_name).view('dashboard/get_roles', {
+            include_docs: true,
+           success: function(response) {
+               callback(response.rows);
+           }
+        });
+    }
+
+    function showRoles() {
+        getRoles(function(roles) {
+            var data = {
+                roles : roles
+            }
+            $('.role-list').html(handlebars.templates['roles.html'](data, {}));
+        });
+    }
+    $('.admin-delete').live('click', function(){
+       var me = $(this);
+       var name = $(this).data('name');
+
+       users.delete(name, function(err) {
+           if (err) return alert('could not delete.' + err);
+           me.closest('tr').remove();
+       });
+
+    });
+
+    $('#add-admin-final').live('click', function(){
+        var username = $('#admin-name').val();
+        var password = $('#admin-password').val();
+        $('#add-admin-dialog').modal('hide');
+        users.create(username, password,{roles : ['_admin']}, function(err) {
+            if(err) return alert('Cant create admin');
+            // admin created
+            var data = {
+                admins : [username]
+            };
+            $('.admin-list').append(handlebars.templates['admins.html'](data, {}));
+            $('#admin-name').val('');
+            $('#admin-password').val('');
+
+        })
+    });
+
+
+    $('#add-role-final').live('click', function() {
+        var role = {
+            type : 'role',
+            name : $('#role-name').val()
+        };
+        $('#add-role-dialog').modal('hide');
+
+        $.couch.db(dashboard_db_name).saveDoc(role, function(){
+            role.key = role.name; // to keep the template rigt
+            showRoles();
+            $('#role-name').val('');
+        })
+
+    });
+
+
+    $('.role-delete').live('click', function() {
+       var me = $(this);
+       var toDelete = {
+           _id : $(this).data('id'),
+           _rev : $(this).data('rev')
+       };
+       $.couch.db(dashboard_db_name).removeDoc(toDelete, {
+           success: function() {
+               me.closest('tr').remove();
+           }
+       })
+    });
+
     $('a.add-link').on('click', function() {
         $(this).hide();
         $('#add-link').show(600);
@@ -442,8 +547,14 @@ $(function(){
       },
       '/frontpage'  : showTab,
       '/navigation' : showTab,
-      '/admins'     : showTab,
-      '/roles'      : showTab,
+      '/admins'     : function(){
+          showTab();
+          showAdmins();
+      },
+      '/roles'      : function(){
+          showTab();
+          showRoles();
+      },
       '/links'      : showTab,
       '/ordering'   : function() {
           showTab();
