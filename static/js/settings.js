@@ -9,6 +9,7 @@ var semver = require("semver");
 $(function(){
 
     function viewApp(id) {
+        console.log('view app');
         $.couch.db(dashboard_db_name).openDoc(id, {
             success: function(doc){
                 doc.installed_text = moment(new Date(doc.installed.date)).calendar();
@@ -88,12 +89,95 @@ $(function(){
                });
 
 
+
+
+               dashboard_core.getDBSecurity(doc.installed.db, function(err, security){
+                   if (err) return console.log(err);
+
+                   if (!security.members || !security.members.roles || security.members.roles.length == 0 ) {
+                       security.access_type_public = true;
+                   } else {
+                       var actual = { roles: security.members.roles };
+                       var admin  = { roles: ['_admin'] };
+                       if (_.isEqual(actual, admin)) {
+                           security.access_type_admins = true;
+                       } else {
+                           security.access_type_groups = true;
+                       }
+                   }
+                   security.members.roles = _.without(security.members.roles, "_admin");
+                   $('.app_access').html(handlebars.templates['app_access.html'](security, {}));
+                   if (security.access_type_groups) {
+                       renderAppGroupTable(doc.installed.db);
+                   }
+                   configureRadioSelection(doc.installed.db);
+
+               });
+
+
+
             }
         });
     }
 
+    function renderAppGroupTable(db) {
+        $('.group-table').show();
+        configureRolesSelection();
+        $('#add-groups-to-app-final').on('click', function(){
+            saveAccessType(db, 'groups', $('#group_access').val(), function(err, new_security) {
+                //humane.info('access changed');
+                //new_security.access_type_groups = true;
+                //new_security.members.roles = _.without(new_security.members.roles, "_admin");
+                //$('.app_access').html(handlebars.templates['app_access.html'](new_security, {}));
+                //configureRolesSelection();
+                //configureRadioSelection(doc.installed.db);
+                window.location.reload();
+            });
+            return false;
+        });
+    }
+
+    function configureRolesSelection() {
+        getRoles(function(roles) {
+           _.each(roles, function(row) {
+               var option = $('<option>'+ row.key +'</option>');
+               $('#group_access').append(option);
+           });
+           $('#group_access').chosen({no_results_text: "No results matched"});
+        });
+    }
+
+    function configureRadioSelection(db) {
+        $('.access_radio').on('click', function(){
+             var access_type = $(this).val();
+
+             if (access_type == 'admins' || access_type == 'public') {
+                  $('.group-table').hide();
+                  $('.group-table tbody tr').remove();
+                  return saveAccessType(db, access_type, null, function(err){
+                      humane.info('access changed');
+                  });
+             }
+             else renderAppGroupTable(db);
+        });
+    }
+
+    function saveAccessType(db, type, groups, callback) {
+        if (type == 'admins'){
+            return dashboard_core.onlyAdminDBReaderRole(db, callback);
+        }
+        if (type == 'public') {
+            return dashboard_core.removeAllDBReaderRoles(db, callback);
+        }
+        if (type == 'groups') {
+            return dashboard_core.addDBReaderRole(db, groups, callback);
+        }
+    }
+
+
+
     function showApps() {
-        if ($('#apps table').length > 0) return; // weird bug we are getting called twice. prevent re-render.
+        if ($('#apps table.apps').length > 0) return; // weird bug we are getting called twice. prevent re-render.
         $('#apps').html(handlebars.templates['apps.html']({}));
 
         dashboard_core.getInstalledApps(function(err, data) {
@@ -363,27 +447,30 @@ $(function(){
             }
          });
     }
-    getLinks(function(err, links) {
-        $('.link-table').append(handlebars.templates['settings-links.html']({links: links}));
-        $('.remove-link').on('click', function() {
-            console.log('dedeede');
-            var id = $(this).data('id');
-            var row = $(this).closest('tr');
 
-            $.couch.db(dashboard_db_name).openDoc(id, {
-                success: function(doc) {
-                    $.couch.db(dashboard_db_name).removeDoc(doc, {
-                        success: function() {
-                            row.remove();
-                        }
-                    });
-                }
+    function showLinks() {
+        getLinks(function(err, links) {
+            $('.link-table').append(handlebars.templates['settings-links.html']({links: links}));
+            $('.remove-link').on('click', function() {
+                console.log('dedeede');
+                var id = $(this).data('id');
+                var row = $(this).closest('tr');
+
+                $.couch.db(dashboard_db_name).openDoc(id, {
+                    success: function(doc) {
+                        $.couch.db(dashboard_db_name).removeDoc(doc, {
+                            success: function() {
+                                row.remove();
+                            }
+                        });
+                    }
+                });
+
+                return false;
+
             });
-
-            return false;
-
         });
-    });
+    }
 
     function getAdmins(callback) {
         $.couch.config({
@@ -555,7 +642,10 @@ $(function(){
           showTab();
           showRoles();
       },
-      '/links'      : showTab,
+      '/links'      : function(){
+          showTab();
+          showLinks();
+      },
       '/ordering'   : function() {
           showTab();
           showOrdering();

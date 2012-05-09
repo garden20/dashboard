@@ -1,0 +1,59 @@
+<h4>Application Access</h4>
+<form class="form-horizontal">
+<fieldset>
+  <div class="control-group">
+    <label class="control-label"></label>
+    <div class="controls">
+      <label class="radio">
+        <input type="radio" id="optionsRadios1" class="access_radio" name="access" value="admins"  {{#if access_type_admins}}checked="checked"{{/if}}>
+        Admins only
+      </label>
+      <label class="radio">
+            <input type="radio" id="optionsRadios2" class="access_radio" name="access" value="public" {{#if access_type_public}}checked="checked"{{/if}}>
+            Public
+      </label>
+      <label class="radio">
+        <input type="radio" id="optionsRadios3" class="access_radio" name="access" value="groups" {{#if access_type_groups}}checked="checked"{{/if}}>
+        Specified Groups
+      </label>
+    </div>
+  </div>
+
+
+  <div class="control-group group-table" {{#unless access_type_groups}}style="display: none;"{{/unless}}>
+      <label></label>
+      <div class="controls">
+          <table class="table condensed">
+              <thead>
+                <tr>
+                    <th>Group</th>
+                    <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                    {{#each members.roles}}
+                    <tr>
+                        <td>{{.}}</td>
+                        <td><button class="btn remove_role_from_app" data-role="{{.}}">Remove</button> </td>
+                    </tr>
+                    {{/each}}
+              </tbody>
+          </table>
+          <div class="group-access-add-row">
+              <select name="group_access" id="group_access" multiple data-placeholder="Enter a group name">
+
+
+             </select>
+             <button id="add-groups-to-app-final" class="btn">Add Groups</button>
+          </div>
+
+      </div>
+  </div>
+
+
+  <div class="form-actions" style="display: none;">
+    <button type="submit" class="btn primary">Save changes</button>
+    <button type="reset" class="btn">Cancel</button>
+  </div>
+</fieldset>
+</form>
