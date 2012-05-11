@@ -3,9 +3,9 @@
   <td>{{just_name}}</td>
   <td>
       {{#each groups}}
-        {{.}},
+        <span class="tag-link">{{.}}</span>
       {{/each}}
   </td>
-  <td class="action"><a href="#/settings" class="user-delete" data-name="{{this}}">Delete</a></td>
+  <td class="action"><a href="#/settings" class="user-delete" data-id="{{id}}">Delete</a></td>
 </tr>
 {{/each}}

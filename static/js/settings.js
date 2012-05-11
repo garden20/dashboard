@@ -685,7 +685,21 @@ $(function(){
         return 'mailto:' + email + '?subject=' + subject + '&body=' + encodeURIComponent(text);
     }
 
+    $('.user-delete').live('click', function(){
+        var me = $(this);
+        var _id = $(this).data('id');
+        if (_id.indexOf('org.couchdb.user:') == 0) {
+            _id = _id.substring(17);
+        }
 
+
+        users.delete(_id, function(err){
+            if (err) return humane.error(err);
+            me.closest('tr').remove();
+            humane.info('user deleted');
+        });
+        return false;
+    });
 
 
     $('#add-role-final').live('click', function() {
