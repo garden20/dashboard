@@ -175,7 +175,13 @@ $(function(){
          , type: 'DELETE'
          , dataType: 'json'
          , success: function(){
-                window.location.reload();
+                var isOkToReload = checkLogoutDestination();
+                if (isOkToReload) {
+                    window.location.reload();
+                } else {
+                    window.location = $('#dashboard-topbar-session').data('login');
+                }
+
 
             }
          , error  : function() {
@@ -185,7 +191,21 @@ $(function(){
         return false;
     }
 
+    function checkLogoutDestination() {
+        var pass;
+        $.ajax({ url : window.location
+             , type: 'HEAD'
+             , async: false
+             , success: function(data){
+                    pass = true;
+             }
+             , error  : function() {
+                 pass = false;
+             }
 
+         });
+        return pass;
+    }
 
 
 });
