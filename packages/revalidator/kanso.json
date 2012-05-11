@@ -1,0 +1,19 @@
+{
+    "name": "revalidator",
+    "version": "0.0.1-kanso.1",
+    "categories": ["validation"],
+    "description": "A simple object validation tool. Indicates if an object conforms to a provided schema",
+    "maintainers": [
+        {
+            "name": "Flatiron",
+            "url": "https://github.com/flatiron/revalidator"
+        }
+    ],
+    "url": "https://github.com/flatiron/revalidator",
+    "modules": [
+        "revalidator.js"
+    ],
+    "dependencies": {
+        "modules": null
+    }
+}

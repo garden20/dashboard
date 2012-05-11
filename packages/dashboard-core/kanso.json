@@ -1,0 +1,21 @@
+{
+    "name": "dashboard-core",
+    "version": "0.0.1",
+    "description": "core functions for managing a dashboard",
+    "modules": "lib",
+    "dependencies": {
+        "modules": null,
+        "properties": null,
+        "underscore": null,
+        "sanitize": null,
+        "datelib": "0.0.1",
+        "base64": null,
+        "async": null,
+        "session" : null,
+        "users" : null,
+        "jsonp": null,
+        "semver" : null,
+        "git-info" : null,
+        "jquery-couch" : null
+    }
+}

@@ -1,0 +1,11 @@
+{{#if name}}{{name}},{{else}}{{email}},{{/if}}
+
+This email has been sent to you because an account {{#if host}}on {{host}} {{/if}}has been created for you.
+
+You can login at:
+{{login}}
+{{#if password}}
+and your temporary password is
+
+{{password}}
+{{/if}}

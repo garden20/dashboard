@@ -1,0 +1,19 @@
+{
+    "name": "jquery-couch",
+    "version": "2012.3.13-kanso.3",
+    "categories": ["utils"],
+    "maintainers": [
+        {
+            "name": "Ryan Ramage",
+            "url": "https://github.com/ryanramage"
+        }
+    ],
+    "url": "https://github.com/ryanramage/kanso-jquery-couch",
+    "modules": "jquery.couch.js",
+    "modules_attachment": false,
+    "dependencies": {
+        "modules": ">=0.0.8",
+	"jquery": ">=2.0.0"
+    },
+    "description": "The jquery.couch.js file that is used by futon."
+}

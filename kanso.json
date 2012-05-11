@@ -33,6 +33,7 @@
         "semver" : null,
         "git-info" : null,
         "dashboard-core" : null,
+        "revalidator" : null,
         "gravatar" : null
     }
 }

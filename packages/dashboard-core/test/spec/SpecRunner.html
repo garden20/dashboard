@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>Nodeunit Test Runner</title>
+  <link rel="stylesheet" href="nodeunit.css" type="text/css" />
+
+  <script type="text/javascript" src="../modules.js"></script>
+  <script src="rewrites.js"></script>
+  <script src="core_test.js"></script>
+
+</head>
+<body>
+<body>
+  <h1 id="nodeunit-header">Example Test Suite</h1>
+  <script>
+    var nodeunit = require('nodeunit');
+    var $ = require('jquery');
+    var db = require('db').current();
+    $.couch = require('jquery.couch');
+
+    nodeunit.run({
+      'Rewrites': rewrites,
+      'Core' : core_test
+    });
+  </script>
+</body>
+
+
+</body>
+</html>

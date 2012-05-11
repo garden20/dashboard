@@ -1,10 +1,14 @@
 var dashboard_core = require('lib/dashboard_core');
+var dashboard_links = require('lib/dashboard_links');
 var _ = require('underscore')._;
 var handlebars = require('handlebars');
 var utils = require('lib/utils');
 var session = require('session');
 var users = require("users");
 var semver = require("semver");
+var revalidator = require("revalidator");
+var password = require('lib/password');
+
 
 $(function(){
 
@@ -106,6 +110,16 @@ $(function(){
                        }
                    }
                    security.members.roles = _.without(security.members.roles, "_admin");
+                   var cleaned_roles = [];
+                   _.each(security.members.roles, function(role) {
+                       if (role.indexOf('group.') === 0 ) {
+                           cleaned_roles.push(role.substring(6));
+                       }
+                   });
+                   security.members.roles = cleaned_roles;
+
+
+
                    $('.app_access').html(handlebars.templates['app_access.html'](security, {}));
                    if (security.access_type_groups) {
                        renderAppGroupTable(doc.installed.db);
@@ -122,9 +136,13 @@ $(function(){
 
     function renderAppGroupTable(db) {
         $('.group-table').show();
-        configureRolesSelection();
+        configureRolesSelection('#group_access');
         $('#add-groups-to-app-final').on('click', function(){
-            saveAccessType(db, 'groups', $('#group_access').val(), function(err, new_security) {
+
+            var groups = $('#group_access').val();
+            groups = _.map(groups, function(group){ return 'group.' + group });
+
+            saveAccessType(db, 'groups', groups, function(err, new_security) {
                 //humane.info('access changed');
                 //new_security.access_type_groups = true;
                 //new_security.members.roles = _.without(new_security.members.roles, "_admin");
@@ -137,13 +155,23 @@ $(function(){
         });
     }
 
-    function configureRolesSelection() {
+    function configureRolesSelection(select) {
+
+        if ($(select).hasClass('chzn-done')) return;
+
+
         getRoles(function(roles) {
-           _.each(roles, function(row) {
-               var option = $('<option>'+ row.key +'</option>');
-               $('#group_access').append(option);
-           });
-           $('#group_access').chosen({no_results_text: "No results matched"});
+           if (!roles || roles.length == 0) {
+               $(select).hide();
+           }  else {
+               $(select).empty();
+               _.each(roles, function(row) {
+                   var option = $('<option>'+ row.key +'</option>');
+                   $(select).append(option);
+               });
+               $(select).show().chosen({no_results_text: "No results matched"});
+
+           }
         });
     }
 
@@ -519,6 +547,56 @@ $(function(){
             $('.role-list').html(handlebars.templates['roles.html'](data, {}));
         });
     }
+
+
+    function getUsers(callback) {
+        $.couch.db('_users').allDocs({
+            include_docs: true,
+            startkey : 'org.couchdb.user:',
+            endkey : 'org.couchdb.user_',
+            success: function(response) {
+               callback(null, response.rows);
+            }
+        });
+    }
+
+
+    function showUsers() {
+
+        $('#add-user-dialog').on('shown', function(){
+           // populate the roles
+            configureRolesSelection('#new-user-roles');
+            $('.password').val('');
+        });
+
+
+        getAdmins(function(admins) {
+           var admins = _.map(admins, function(admin) { return 'org.couchdb.user:' + admin })
+           getUsers(function(err, users) {
+               var users_pure = [];
+               _.each(users, function(user) {
+                    if (_.contains(admins, user.id)) return;
+                   user.just_name = user.id.substring(17);
+                    user.groups = [];
+                   _.each(user.doc.roles, function(role) {
+                        if (role.indexOf('group.') === 0 ) {
+                            user.groups.push(role.substring(6));
+                        }
+                   });
+                   users_pure.push(user);
+               });
+               $('.users-list').html(handlebars.templates['users.html'](users_pure, {}));
+
+
+
+
+
+           });
+        });
+    }
+
+
+
     $('.admin-delete').live('click', function(){
        var me = $(this);
        var name = $(this).data('name');
@@ -546,6 +624,68 @@ $(function(){
 
         })
     });
+
+    $('.generate-password').live('click', function(){
+        var pass = password();
+        $('.password').val(pass).trigger('change');
+        return false;
+    });
+
+
+    function addUser(){
+        var roles = $('#new-user-roles').val();
+        roles = _.map(roles, function(role){ return 'group.' + role })
+        var password = $('#user-password').val();
+        if (password == null || password == '') roles.push('browserid');
+
+        var properties = {
+            roles : roles,
+            fullname : $('#user-name').val()
+        }
+
+        users.create($('#user-email').val(), password, properties, function(err) {
+            if (err) return console.log(err);
+            $('#add-user-dialog').modal('hide');
+            // so much cheating
+            window.location.reload(); // fixme
+        });
+    }
+
+
+    $('#add-user-final').live('click', function(){
+        addUser();
+    });
+
+    $('#add-user-final-email').live('click', function(){
+        addUser();
+    });
+
+    $('#user-email, #user-password, #user-name').live('change', function(){
+        var mailto = generateAccountInfoMailto($('#user-email').val(), $('#user-password').val(), $('#user-name').val());
+        $('#add-user-final-email').attr('href', mailto);
+    });
+
+    function generateAccountInfoMailto(email, password, name) {
+        var data = {
+            email : email,
+            password: password,
+            name : name
+        }
+
+
+        data.host = dashboard_links.hostRoot(window.location);
+        data.login = data.host + $('#dashboard-topbar-session').data('login');
+
+        var text =  handlebars.templates['accountEmail.txt'](data, {});
+
+        //mailto:someone@example.com?subject=This%20is%20the%20subject&body=This%20is%20the%20body
+        var subject = encodeURIComponent("New Account Created");
+
+
+        return 'mailto:' + email + '?subject=' + subject + '&body=' + encodeURIComponent(text);
+    }
+
+
 
 
     $('#add-role-final').live('click', function() {
@@ -649,6 +789,10 @@ $(function(){
       '/ordering'   : function() {
           showTab();
           showOrdering();
+      },
+      '/users'   : function() {
+            showTab();
+            showUsers();
       }
     };
 

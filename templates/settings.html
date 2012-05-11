@@ -339,7 +339,27 @@
                     </div>
                 </div>
             </div>
+            <div class="tab-pane" id="users">
+               <div class="row ">
+                   <div class=" span5">
+                       <button href="#add-user-dialog" data-toggle="modal" class="btn small success">Add User</button>
 
+                       <table class="table">
+                         <thead>
+                           <tr>
+                             <th>Username</th>
+                             <th>Groups</th>
+                             <th class="action">Actions</th>
+                           </tr>
+                         </thead>
+                         <tbody class="users-list">
+
+                         </tbody>
+                       </table>
+
+                   </div>
+               </div>
+           </div>
 
 
 
@@ -359,17 +379,52 @@
             <label>Name</label>
             <input type="text" id="admin-name" />
             <label>Password</label>
-            <input type="password" id="admin-password">
+            <input type="password" id="admin-password" />
         </form>
-
-
-
     </div>
     <div class="modal-footer">
         <button id="add-admin-final" class="btn primary">Add</button>
         <button class="btn cancel">Cancel</button>
     </div>
 </div>
+
+<div id="add-user-dialog" class="modal fade" style="display: none;">
+    <div class="modal-header">
+        <h3>Create a new user</h3>
+    </div>
+    <div class="modal-body">
+        <form>
+            <label>User email address</label>
+            <input type="text" id="user-email" />
+
+            {{#if settings.host_options.login_type_local}}
+             <label>Password</label>
+             <input type="password" id="user-password" class="password" />
+             <button class="btn small generate-password">Generate Password</button>
+            {{/if}}
+
+            <label>Name</label>
+            <input type="text" id="user-name" />
+
+
+            <label>Groups</label>
+            <select id="new-user-roles" multiple  data-placeholder="Enter a group name">
+
+            </select>
+
+
+        </form>
+    </div>
+    <div class="modal-footer">
+
+        <a href="mailto:someone@example.com?subject=This%20is%20the%20subject&body=This%20is%20the%20body" target="_blank" id="add-user-final-email" class="btn primary">Add, send email</a>
+        <button id="add-user-final" class="btn">Add, don't email</button>
+
+        <button class="btn cancel">Cancel</button>
+    </div>
+</div>
+
+
 
 <div id="add-role-dialog" class="modal fade" style="display: none;">
     <div class="modal-header">

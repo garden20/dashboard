@@ -1,0 +1,11 @@
+{{#each .}}
+<tr>
+  <td>{{just_name}}</td>
+  <td>
+      {{#each groups}}
+        {{.}},
+      {{/each}}
+  </td>
+  <td class="action"><a href="#/settings" class="user-delete" data-name="{{this}}">Delete</a></td>
+</tr>
+{{/each}}
