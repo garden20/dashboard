@@ -586,7 +586,7 @@ $(function(){
                    users_pure.push(user);
                });
                $('.users-list').html(handlebars.templates['users.html'](users_pure, {}));
-
+               $('.help').tooltip({placement: 'bottom'});
 
 
 
