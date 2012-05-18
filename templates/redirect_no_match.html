@@ -1,3 +1,25 @@
-Nothing matched where you want to go.
-<br/>
-{{path}}
+<div class="row">
+  <div class="main span8">
+    <div class="alert alert-info">
+        <b>Oh no!</b> There is nothing configured to handle the link to <b>{{path}}</b>
+    </div>
+{{#if isUser}}
+
+        <h2>Add a redirect rule <small>Please help us fix this</small></h2>
+        <form class="form well">
+
+            <label>From</label>
+            <input type="text" value="{{path}}" class="span7" id="route"/>
+            <label>To</label>
+            <input type="text" placeholder="Enter url where it should go " class="span7" id="to"/>
+            <label></label>
+            <button class="btn primary fixit">Submit</button>
+        </form>
+
+        <h2>Or</h2>
+{{/if}}
+      Not sure what to do? <a href="#" class="defer">Notify someone to fix.</a>
+
+
+  </div>
+</div>
