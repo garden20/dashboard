@@ -1,11 +1,15 @@
 
-<h3>App Details</h3>
+<div class="app-details">
+    <h3>App Details</h3>
 
-name : {{kanso.config.name}}<br/>
-description: {{kanso.config.description}}<br/>
-version: {{kanso.config.version}}<br/>
-src: <a href="{{src}}">{{src}}</a>
-
+    Name : {{kanso.config.name}}<br/>
+    Description: {{kanso.config.description}}<br/>
+    Version: {{kanso.config.version}}<br/>
+    From: <a href="{{src}}">{{src}}</a>
+</div>
+<div class="alert span4 offset2 install-message" >
+    <p><strong>Heads up!</strong> You are about to <strong>install</strong> this app. Make sure you trust the app, and  details on this page.</p>
+</div>
 
 <fieldset class="form-actions">
     <button class="btn primary large">Install</button>
