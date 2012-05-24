@@ -431,6 +431,7 @@
     display: inline-block;
     /*border-right: 1px solid #404040; */
     float: left;
+    max-height: 21px;
 }
 
 
