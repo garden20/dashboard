@@ -39,6 +39,7 @@
                         <div class="btn-group" data-toggle="buttons-radio">
                            <button class="btn  {{#if settings.frontpage.use_markdown}}active{{/if}}" data-type="markdown">Markdown</button>
                            <button class="btn  {{#if settings.frontpage.use_html}}active{{/if}}"     data-type="html">Html</button>
+                           <button class="btn  {{#if settings.frontpage.use_link}}active{{/if}}"     data-type="link">Link</button>
                         </div>
                         <input class="showActivityFeed" type="checkbox" {{#if settings.frontpage.show_activity_feed}}checked="checked"{{/if}}> Show Activity Feed
                         <div class="type markdown" {{#unless settings.frontpage.use_markdown}}style="display:none"{{/unless}}>
@@ -71,7 +72,9 @@
                             </ul>
                             <textarea rows="" cols="80">{{settings.frontpage.html}}</textarea>
                         </div>
-
+                        <div class="type link" {{#unless settings.frontpage.use_link}}style="display:none"{{/unless}}>
+                            <input type="text" id="frontpage_link_url" name="frontpage_link_url" placeholder="Enter URL..." value="{{settings.frontpage.link_url}}" />
+                        </div>
 
                         <button class="btn primary large" data-loading-text="Saving..">Save</button>
 

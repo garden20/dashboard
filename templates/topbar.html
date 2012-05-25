@@ -8,13 +8,13 @@
         <img class="home home-icon-custom" src="{{dashboard_url}}_db/settings/{{settings.top_nav_bar.icon_name}}" />
     {{/if}}
 {{else}}
-    <a href="{{dashboard_url}}" class="home home-icon"  title="Home" ></a>
+    <a href="{{home_url}}" class="home home-icon"  title="Home" ></a>
 {{/if}}
 
 <ul class="kanso-nav">
 
 {{#if settings.top_nav_bar.show_brand}}
-    <li class="home"><a class="home" href="{{dashboard_url}}">Home</a></li>
+    <li class="home"><a class="home" href="{{home_url}}">Home</a></li>
 {{/if}}
 {{#unless hide_apps}}
     {{#each apps.apps}}

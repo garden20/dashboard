@@ -346,17 +346,19 @@ $(function(){
         var btn = $(this);
         btn.button('loading');
 
-        var isMarkdown =  $('.front-page .btn-group .btn.active').data('type') === 'markdown';
+        var frontpage_type =  $('.front-page .btn-group .btn.active').data('type');
         var showActivityFeed = $('.front-page input.showActivityFeed').attr('checked') === 'checked';
         var text;
-        if (isMarkdown) {
+        if (frontpage_type === 'markdown') {
             text = escape($('.front-page .markdown textarea').val());
-        } else {
+        } else if (frontpage_type === 'html') {
             text = escape($('.front-page .html textarea').val());
+        } else {
+            text = escape($('#frontpage_link_url').val());
         }
         var started = new Date().getTime();
         $.ajax({
-            url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/frontpage/settings?isMarkdown=' + isMarkdown + '&showActivityFeed=' + showActivityFeed + '&text=' + text,
+            url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/frontpage/settings?type=' + frontpage_type + '&showActivityFeed=' + showActivityFeed + '&text=' + text,
             type: 'PUT',
             success : function(result) {
                 if (result == 'update complete') {
