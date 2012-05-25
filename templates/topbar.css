@@ -434,12 +434,15 @@
     max-height: 21px;
 }
 
-
+{{#if top_nav_bar.show_brand}}
+{{#if top_nav_bar.brand_link}}
 /*  Move the icon a bit on a hover */
 #dashboard-topbar .home-icon-custom:hover {
     padding-left: 9px;
     margin-right: 1px; /* keep the rest of the header in place */
 }
+{{/if}}
+{{/if}}
 
 #dashboard-profile {
     position: absolute;
