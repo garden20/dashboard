@@ -14,11 +14,11 @@
 <ul class="kanso-nav">
 
 {{#if settings.top_nav_bar.show_brand}}
-    <li class="home"><a class="home" href="{{home_url}}">Home</a></li>
+    <li class="home"><a class="home" href="{{home_url}}" rel="external">Home</a></li>
 {{/if}}
 {{#unless hide_apps}}
     {{#each apps.apps}}
-        <li><a href="{{link}}"  {{#if db}}data-db="{{db}}"{{/if}} >{{title}}</a></li>
+        <li><a href="{{link}}"  {{#if db}}data-db="{{db}}"{{/if}} {{#if external}}rel="external"{{/if}}>{{title}}</a></li>
     {{/each}}
     {{#if apps.more_apps}}
         <li><a href="#" class="more-apps">More <span class="ddown">&#9660;</span></a></li>
@@ -65,7 +65,7 @@
 <div id="dashboard-more-apps">
     <ul>
     {{#each apps.more_apps}}
-        <li><a href="{{link}}"  {{#if db}}data-db="{{db}}"{{/if}} >{{title}}</a></li>
+        <li><a href="{{link}}"  {{#if db}}data-db="{{db}}"{{/if}}  {{#if external}}rel="external"{{/if}}>{{title}}</a></li>
     {{/each}}
     </li>
 </div>
