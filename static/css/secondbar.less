@@ -1,0 +1,38 @@
+#secondbar {
+    background: url(../img/secondbar_bg.png);
+    border-bottom: 1px solid #ccc;
+    padding: 13px 0 5px 0;
+    color: #404040;
+    margin-bottom: @baseline;
+}
+
+/* Hack due to inconsistant bootstrap versions */
+#secondbar .span2 {
+    width: 100px !important;
+}
+
+#secondbar .app_title {
+    text-transform: capitalize;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+#secondbar .updated {
+    border-left: 1px solid #CCC;
+    padding-left: 1em;
+    margin-left: 0.5em;
+}
+
+#secondbar h1 a,
+#secondbar h1 a:hover {
+    color: @grayDark;
+    text-decoration: none;
+}
+
+/* Don't display dots on mobile devices */
+@media only screen and (max-device-width: 480px) {
+    #secondbar {
+        background: #fafafa;
+    }
+}
+

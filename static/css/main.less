@@ -1,6 +1,16 @@
 @import "packages/bootstrap/bootstrap/lib/bootstrap.less";
+@import "secondbar.less";
+@import "wizard_trail.less";
+
 /* Now use bootstrap and less! */
 
+
+@black:             #000;
+@grayDark:          lighten(@black, 25%);
+
+// Baseline grid
+@basefont:          13px;
+@baseline:          18px;
 
 @brand-accent-1: #EEECBB;
 @brand-accent-2: #B5C976;
@@ -301,4 +311,13 @@ a.install-app {
     -moz-border-radius: 15px;
     -webkit-border-radius: 15px;
     border-radius: 15px;
+}
+
+.app-details {
+    margin-bottom: 20px;
+    margin-left: 40px;
+}
+
+.install-row .form-actions {
+    margin-top: 20px;
 }

@@ -7,6 +7,7 @@ var dashboard_core = require('lib/dashboard_core');
 var dashboard_links = require('lib/dashboard_links');
 var dashboard_settings = require('lib/settings');
 var db = require('db').use('_db');
+var datelib = require('datelib');
 
 $(function() {
 
@@ -15,7 +16,7 @@ $(function() {
 
     function showMarkets() {
         dashboard_core.getMarkets(function(err, data) {
-            var dash_url = window.location.protocol + '//' + window.location.host + '/' + $('.container').data('dashboardurl');
+            var dash_url = window.location.protocol + '//' + window.location.host + '/' + $('.container[role="main"]').data('dashboardurl');
             data = _.map(data, function(market){
                 market.url = market.url + '?dashboard=' + dash_url;
                 return market;
@@ -73,9 +74,18 @@ $(function() {
 
     var remote_app_details;
     if (appurl) {
+
+        $('.step-description').text(window.location.protocol + '//' + window.location.host + '/' + $('.container[role="main"]').data('dashboardurl'));
+
         dashboard_core.getGardenAppDetails(appurl, function(err, results) {
             console.log(err, results);
             if (err) return errorLoadingInfo();
+
+            $('#secondbar').show();
+            $('.app_icon').attr('src', results.icon_url);
+            $('.app_title').text(results.kanso.config.name);
+            $('.uploaded_by').text(results.user).attr('href', results.user_url)
+            $('.updated .readable').text(datelib.prettify(results.kanso.push_time));
             remote_app_details = results;
             $('.loading').html(handlebars.templates['install_app_info.html'](remote_app_details, {}));
         })

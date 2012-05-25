@@ -2,24 +2,30 @@
 
 <div class="row title">
   <div class="main span8">
-      <h1>Install Application</h1>
+
       <div id="content" class="main">
           <div class="row install-row">
-
               {{#if is_auth}}
-
-
-
                   {{#if app_url}}
-                      <div class="alert alert-info">
-                          <p><strong>Heads up!</strong> You are about to <strong>install</strong> an application. Make sure you trust the information below.</p>
+                      <div class="wizard_trail first">
+                          <h2>Installation Location</h2>
+                          <div class="step-info">
+                              <div class="icon-holder">
+                                  <img src="../static/img/{{installation_location_icon}}" alt="" />
+                                  <div class="type">{{installation_location_type}}</div>
+                              </div>
+                              <div class="step-description">
+                                  {{installation_location_description}}
+                              </div>
+                          </div>
                       </div>
+
                       <div class="loading" data-appurl="{{app_url}}">
                           Loading installation information...Please wait
                       </div>
 
                   {{else}}
-
+                        <h1>Install Application</h1>
                         <form class="well search-form">
                            <input type="text" class="span6" placeholder="Got an application url?" name="app_url">
                           <button type="submit" class="btn next">Next &raquo;</button>
@@ -27,6 +33,7 @@
 
                   {{/if}}
               {{else}}
+                 <h1>Install Application</h1>
                   <div class="alert alert-info">
                       <p>You need to login as an admin to install an application</p>
                       <a href="{{login_link}}" class="btn">Login</a>
@@ -36,6 +43,7 @@
           </div>
       </div>
   </div>
+  {{#unless app_url}}
   <div class="span3">
 
       <div class="row title">
@@ -46,6 +54,7 @@
 
       </ul>
   </div>
+  {{/unless}}
 
 </div>
 

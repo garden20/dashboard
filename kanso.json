@@ -1,6 +1,6 @@
 {
     "name": "dashboard",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "description": "Kanso app to manage your installed couchapps from a garden..",
     "attachments": ["static"],
     "modules": "lib",
@@ -34,6 +34,7 @@
         "git-info" : null,
         "dashboard-core" : null,
         "revalidator" : null,
-        "gravatar" : null
+        "gravatar" : null,
+        "datelib": "0.0.1"
     }
 }
