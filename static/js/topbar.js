@@ -68,7 +68,7 @@ $(function(){
             $('body').prepend($topbar);
         }
         var path = window.location.pathname;
-        $topbar.load('/dashboard/_design/dashboard/_rewrite/_topbar?d=' + new Date().getTime(), function() {
+        $topbar.load('/dashboard/_design/dashboard/_rewrite/_topbar', function() {
             // highlight the best thing
 
             var dash = $topbar.find('a.home').attr('href');

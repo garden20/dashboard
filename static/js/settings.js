@@ -56,6 +56,8 @@ $(function(){
                                success : function() {
                                    // go to the dashboard.
                                   router.setRoute('/apps');
+                                  // reload page to reload the topbar
+                                  window.location.reload();
                                }
                            });
                        }
@@ -482,7 +484,6 @@ $(function(){
         getLinks(function(err, links) {
             $('.link-table').append(handlebars.templates['settings-links.html']({links: links}));
             $('.remove-link').on('click', function() {
-                console.log('dedeede');
                 var id = $(this).data('id');
                 var row = $(this).closest('tr');
 
@@ -491,6 +492,7 @@ $(function(){
                         $.couch.db(dashboard_db_name).removeDoc(doc, {
                             success: function() {
                                 row.remove();
+                                window.location.reload();
                             }
                         });
                     }
@@ -744,15 +746,7 @@ $(function(){
 
         $.couch.db(dashboard_db_name).saveDoc(link, {
             success: function(response) {
-                var mock = {
-                    id : link._id,
-                    key : link.dashboard_title,
-                    value : link.url
-
-                }
-                $('.link-table').append(handlebars.templates['settings-links.html']({links: [mock]}));
-                $('#add-link').hide();
-                $('a.add-link').show();
+                window.location.reload();
             }
         });
 
