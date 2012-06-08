@@ -55,7 +55,9 @@
     <div class="info">
         <h4>{{username}}</h4>
         <ul>
-            <li><a href="">Profile</a></li>
+            {{#if profile_url}}
+            <li><a href="{{profile_url}}">Profile</a></li>
+            {{/if}}
             <li><a class="logout" href="">Logout</a></li>
         </ul>
     </div>

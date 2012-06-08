@@ -125,7 +125,7 @@ $(function(){
             $('#dashboard-topbar .logout').click(logout);
 
             var base = $('#dashboard-topbar .login').attr('href');
-            base += "?redirect=" + encodeURIComponent(window.location);
+            base += "/" + encodeURIComponent(window.location);
             $('#dashboard-topbar .login').attr('href', base);
 
             try {
