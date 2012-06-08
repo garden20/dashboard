@@ -19,7 +19,7 @@
             <li><a href="#navigation" data-toggle="tab">Navigation</a></li>
             <li><a href="#frontpage" data-toggle="tab">Front Page</a></li>
 
-
+            <li><a href="#sessions" data-toggle="tab">Sessions</a></li>
             <li><a href="#admins" data-toggle="tab">Admins</a></li>
             <li><a href="#groups" data-toggle="tab">Groups</a></li>
             <li><a href="#users" data-toggle="tab">Users</a></li>
@@ -117,30 +117,7 @@
 
                                 <!-- End Short URLS -->
 
-                                <!-- Frontpage -->
-                                <div class="control-group">
-                                    <label class="control-label" for="redirect_frontpage_on_anon">FrontPage</label>
-                                    <div class="controls">
-                                      <label class="checkbox">
-                                          <input type="checkbox" name="redirect_frontpage_on_anon" {{#if settings.host_options.redirect_frontpage_on_anon}}checked="checked"{{/if}}> Redirect to login page if not logged in.
-                                      </label>
-                                    </div>
-                                </div>
 
-                                <!-- Login Type -->
-                                <div class="control-group">
-                                    <label class="control-label" for="login_type">Login Method</label>
-                                    <div class="controls">
-                                        <label class="radio">
-                                            <input type="radio" name="login_type" value="local" {{#if settings.host_options.login_type_local}}checked="checked"{{/if}}>
-                                            Local Login.
-                                        </label>
-                                      <label class="radio">
-                                          <input type="radio" name="login_type" value="browserid" {{#if settings.host_options.login_type_browserid}}checked="checked"{{/if}}>
-                                          BrowserID
-                                      </label>
-                                    </div>
-                                </div>
 
 
                                 <legend>Top Nav Bar</legend>
@@ -296,6 +273,87 @@
                 </div>
 
 
+            </div>
+            <div class="tab-pane" id="sessions">
+                <div class="row">
+                    <div class="offset1 span8">
+                        <form class="form-horizontal">
+                            <fieldset>
+                                <legend>Session Options</legend>
+                                <!-- Frontpage -->
+                                <div class="control-group">
+                                    <label class="control-label" for="redirect_frontpage_on_anon">FrontPage</label>
+                                    <div class="controls">
+                                      <label class="checkbox">
+                                          <input type="checkbox" name="redirect_frontpage_on_anon" {{#if settings.host_options.redirect_frontpage_on_anon}}checked="checked"{{/if}}> Redirect to login page if not logged in.
+                                      </label>
+                                    </div>
+                                </div>
+
+
+                                <div class="control-group">
+                                   <label class="control-label" for="session_type">Session Handler</label>
+                                   <div class="controls">
+                                     <label class="radio">
+                                           <input id="session_type_internal" type="radio" name="session_type" value="internal" {{#if settings.sessions.type_internal}}checked="checked"{{/if}}>
+                                           Default (built-in)
+                                     </label>
+                                     <label class="radio">
+                                         <input id="session_type_other"  type="radio" name="session_type" value="other" {{#if settings.sessions.type_other}}checked="checked"{{/if}}>
+                                         Other
+                                     </label>
+                                   </div>
+                               </div>
+
+
+                                <!-- Login Type -->
+                                <div class="control-group internal_session_method" {{#unless settings.sessions.type_internal}}style="display: none;"{{/unless}}>
+                                    <label class="control-label" for="login_type">Login Method</label>
+                                    <div class="controls">
+                                      <label class="radio">
+                                            <input type="radio" name="login_type" value="local" {{#if settings.host_options.login_type_local}}checked="checked"{{/if}}>
+                                            Local Login.
+                                      </label>
+                                      <label class="radio">
+                                          <input type="radio" name="login_type" value="browserid" {{#if settings.host_options.login_type_browserid}}checked="checked"{{/if}}>
+                                          BrowserID
+                                      </label>
+                                    </div>
+                                </div>
+                                <div class="other_session_method" {{#unless settings.sessions.type_other}}style="display: none;"{{/unless}}>
+                                    <div class="control-group " >
+                                        <label class="control-label" for="login_url">Login Url</label>
+                                        <div class="controls">
+                                            <input type="text" class="span6"  name="login_url"  value="{{settings.sessions.other.login_url}}">
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label" for="login_url_next">Login Url with redirect</label>
+                                        <div class="controls">
+                                            <input type="text" class="span6"  name="login_url_next"  value="{{settings.sessions.other.login_url_next}}">
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label" for="signup_url">Signup Url</label>
+                                        <div class="controls">
+                                            <input type="text" class="span6"  name="signup_url"  value="{{settings.sessions.other.signup_url}}">
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label" for="profile_url">Profile Url</label>
+                                        <div class="controls">
+                                            <input type="text" class="span6"  name="profile_url"  value="{{settings.sessions.other.profile_url}}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                   <a href="#" class="btn primary">Save changes</a>
+                                   <button type="reset" class="btn">Cancel</button>
+                                 </div>
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
             </div>
             <div class="tab-pane" id="admins">
                 <div class="row multiUser">

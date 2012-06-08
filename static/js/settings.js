@@ -504,6 +504,22 @@ $(function(){
         });
     }
 
+    function showSessions() {
+
+
+        $('input[name=session_type]').on('click', function(){
+            var selected = $('input[name=session_type]:checked').val();
+            if (selected == 'internal') {
+                $('.internal_session_method').show(300);
+                $('.other_session_method').hide(300);
+            } else {
+
+                $('.internal_session_method').hide(300);
+                $('.other_session_method').show(300);
+            }
+        });
+    }
+
     function getAdmins(callback) {
         $.couch.config({
             success : function(data) {
@@ -784,6 +800,10 @@ $(function(){
       },
       '/frontpage'  : showTab,
       '/navigation' : showTab,
+      '/sessions'   : function() {
+          showTab();
+          showSessions();
+      },
       '/admins'     : function(){
           showTab();
           showAdmins();
