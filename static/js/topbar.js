@@ -125,8 +125,14 @@ $(function(){
             $('#dashboard-topbar .logout').click(logout);
 
             var base = $('#dashboard-topbar .login').attr('href');
-            base += "/" + encodeURIComponent(window.location);
-            $('#dashboard-topbar .login').attr('href', base);
+            var full_login = base + "?redirect=" + encodeURIComponent(window.location);
+
+            var sessionType = $('#dashboard-topbar-session').data('sessiontype')
+            if (sessionType == 'other') {
+                full_login = base +  "/" + encodeURIComponent(window.location);
+            }
+
+            $('#dashboard-topbar .login').attr('href', full_login);
 
             try {
                 var userCtx = JSON.parse(decodeURI( $('#dashboard-topbar-session').data('userctx') ));
