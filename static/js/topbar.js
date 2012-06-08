@@ -124,12 +124,12 @@ $(function(){
 
             $('#dashboard-topbar .logout').click(logout);
 
-            var base = $('#dashboard-topbar .login').attr('href');
-            var full_login = base + "?redirect=" + encodeURIComponent(window.location);
+            var login_base = $('#dashboard-topbar .login').attr('href');
+            var full_login = login_base + "?redirect=" + encodeURIComponent(window.location);
 
             var sessionType = $('#dashboard-topbar-session').data('sessiontype')
             if (sessionType == 'other') {
-                full_login = base +  "/" + encodeURIComponent(window.location);
+                full_login = login_base +  "/" + encodeURIComponent(window.location);
             }
 
             $('#dashboard-topbar .login').attr('href', full_login);
@@ -140,6 +140,11 @@ $(function(){
                 session.emit('change', userCtx);
             } catch(ignore){}
 
+            // if we are on the login, set the class to active
+            var fullPath = path + window.location.hash;
+            if (fullPath.indexOf(login_base) == 0) {
+                $('#dashboard-topbar-session').addClass('active');
+            }
 
         });
 
