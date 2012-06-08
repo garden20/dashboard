@@ -507,8 +507,8 @@ $(function(){
     function showSessions() {
 
 
-        $('input[name=session_type]').on('click', function(){
-            var selected = $('input[name=session_type]:checked').val();
+        $('input[name=type]').on('click', function(){
+            var selected = $('input[name=type]:checked').val();
             if (selected == 'internal') {
                 $('.internal_session_method').show(300);
                 $('.other_session_method').hide(300);
@@ -518,6 +518,27 @@ $(function(){
                 $('.other_session_method').show(300);
             }
         });
+
+        $('#sessions .primary').click(function(){
+            var btn = $(this);
+            btn.button('saving');
+            var params = $('#sessions form').formParams();
+            $.ajax({
+                url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/sessions/settings?' + $.param(params),
+                type: 'PUT',
+                success : function(result, textStatus, xmlHttpRequest) {
+                    if (result == 'update complete') {
+                        window.location.reload();
+                    }
+                    else alert('update failed');
+
+                },
+                error : function() {
+                    alert('update failed');
+                }
+            });
+        });
+
     }
 
     function getAdmins(callback) {
