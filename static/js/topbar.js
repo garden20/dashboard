@@ -144,6 +144,8 @@ $(function(){
             var fullPath = path + window.location.hash;
             if (fullPath.indexOf(login_base) == 0) {
                 $('#dashboard-topbar-session').addClass('active');
+                // add active to any ul
+                $('#dashboard-topbar-session').find('ul li:first').addClass('active');
             }
 
         });
