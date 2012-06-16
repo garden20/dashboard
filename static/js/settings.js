@@ -8,6 +8,7 @@ var users = require("users");
 var semver = require("semver");
 var revalidator = require("revalidator");
 var password = require('lib/password');
+var flattr = require('flattr');
 
 
 $(function(){
@@ -18,9 +19,13 @@ $(function(){
             success: function(doc){
                 doc.installed_text = moment(new Date(doc.installed.date)).calendar();
                 doc.icon_src = dashboard_core.bestIcon96(doc);
+                if (flattr.hasFlattr(doc)) {
+                    var flattrDetails = flattr.getFlattrDetailsFromInstallDoc(doc);
+                    doc.flattrLink = flattr.generateFlatterLinkHtml(flattrDetails);
+                }
 
                $('#apps').html(handlebars.templates['app_details.html'](doc, {}));
-
+               $('.flattr_link').tooltip({placement: 'bottom'});
                $('.form-actions .btn').tooltip({placement: 'bottom'});
 
                var showDBSize = function() {

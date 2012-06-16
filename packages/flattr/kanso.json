@@ -1,0 +1,10 @@
+{
+    "name": "flattr",
+    "version": "0.0.1",
+    "categories": ["utils", "payment"],
+    "description": "Support for generating flattr buttons for an app",
+    "modules": "flattr.js",
+    "dependencies": {
+        "modules": null
+    }
+}
