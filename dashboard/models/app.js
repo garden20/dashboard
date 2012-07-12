@@ -15,4 +15,8 @@ function (exports, require, $, _) {
         type: 'app'
     });
 
+    // increment this value to force update of
+    // all existing app documents to a new format
+    exports.App.format_version = 1;
+
 });

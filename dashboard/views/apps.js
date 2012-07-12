@@ -18,12 +18,15 @@ function (exports, require, $, _) {
         className: 'app-list',
         template: require('hbt!../../tmpl/apps'),
         initialize: function (apps) {
+            console.log(['AppsView init', apps]);
             this.apps = apps;
             //this.apps.on('add', this.addOne, this);
             // ...
         },
         render: function () {
-            $(this.el).html(this.template({apps: this.apps}));
+            $(this.el).html(this.template({
+                apps: this.apps.toJSON()
+            }));
             return this;
         }
     });

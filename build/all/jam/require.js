@@ -16874,6 +16874,10 @@ function (exports, require, $, _) {
         type: 'app'
     });
 
+    // increment this value to force update of
+    // all existing app documents to a new format
+    exports.App.format_version = 1;
+
 });
 
 define('handlebars', [], function () {
@@ -18786,12 +18790,15 @@ function (exports, require, $, _) {
         className: 'app-list',
         template: require('hbt!../../tmpl/apps'),
         initialize: function (apps) {
+            console.log(['AppsView init', apps]);
             this.apps = apps;
             //this.apps.on('add', this.addOne, this);
             // ...
         },
         render: function () {
-            $(this.el).html(this.template({apps: this.apps}));
+            $(this.el).html(this.template({
+                apps: this.apps.toJSON()
+            }));
             return this;
         }
     });
@@ -19777,12 +19784,13 @@ function (exports, require, $, _) {
                 async.forEachSeries(data.rows || [], function (r, cb) {
                     var ddoc_url = ['', db, r.id].join('/');
 
-                    if (!that.exists(ddoc_url, r.value.rev)) {
+                    if (!that.exists(ddoc_url, r.value.rev, App.format_version)) {
                         // does not exist at this revision, update
                         that.updateDoc(ddoc_url, cb);
                     }
                     else {
                         console.log(['skip app', ddoc_url]);
+                        cb();
                     }
                 },
                 callback);
@@ -19798,7 +19806,7 @@ function (exports, require, $, _) {
                         'Failed to app from doc: ' + ddoc_url + '\n' + err
                     );
                 }
-                var app_url = '/_utils/document.html?' + ddoc_url;
+                var app_url;
                 if (ddoc._attachments) {
                     if (ddoc._attachments['index.html']) {
                         app_url = ddoc_url + '/index.html';
@@ -19810,16 +19818,29 @@ function (exports, require, $, _) {
                 if (ddoc.rewrites && ddoc.rewrites.length) {
                     app_url = ddoc_url + '/_rewrite/';
                 }
+
                 var doc = {
                     _id: ddoc_url,
-                    _rev: ddoc._rev,
+                    ddoc_rev: ddoc._rev,
+                    type: 'app',
                     url: app_url,
-                    name: ddoc._id.split('/')[1]
+                    name: ddoc._id.split('/')[1],
+                    format_version: App.format_version // increment this if you change these
+                                         // properties and want to for update
+                                         // of existing app docs
                 };
+                if (!app_url) {
+                    // show document in futon
+                    doc.url = '/_utils/document.html?' +
+                        ddoc_url.replace(/^\//, '');
+                    doc.unknown_root = true;
+                }
+
                 var app = that.get(ddoc_url);
                 if (app) {
                     console.log(['update app', doc._id, doc]);
                     app.set(doc);
+                    app.save();
                 }
                 else {
                     console.log(['create app', doc._id, doc]);
@@ -19830,15 +19851,21 @@ function (exports, require, $, _) {
                 callback();
             });
         },
-        exists: function (id, /*optional*/rev) {
-            return this.any(function (m) {
-                if (m._id === id) {
-                    if (rev && m._rev === rev) {
+        exists: function (id, /*optional*/rev, /*optional*/format_version) {
+            var m = this.get(id);
+            if (m) {
+                if (rev) {
+                    if (m.get('ddoc_rev') === rev) {
+                        if (format_version !== undefined) {
+                            return m.attributes.format_version === format_version;
+                        }
                         return true;
                     }
+                    return false;
                 }
-                return false;
-            });
+                return true
+            }
+            return false;
         }
     });
 
@@ -19864,11 +19891,18 @@ function (exports, require, $, _) {
     exports.init = function () {
         // refresh app list
         window.app_list = new AppList();
-        window.app_list.update();
+        window.app_list.fetch({
+            error: function (err) {
+                console.error(err);
+            },
+            success: function () {
+                window.app_list.update();
 
-        // setup URL router
-        new routes.WorkspaceRouter();
-        Backbone.history.start({pushstate: false});
+                // setup URL router
+                new routes.WorkspaceRouter();
+                Backbone.history.start({pushstate: false});
+            }
+        });
     };
 
 });

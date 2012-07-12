@@ -18,11 +18,18 @@ function (exports, require, $, _) {
     exports.init = function () {
         // refresh app list
         window.app_list = new AppList();
-        window.app_list.update();
+        window.app_list.fetch({
+            error: function (err) {
+                console.error(err);
+            },
+            success: function () {
+                window.app_list.update();
 
-        // setup URL router
-        new routes.WorkspaceRouter();
-        Backbone.history.start({pushstate: false});
+                // setup URL router
+                new routes.WorkspaceRouter();
+                Backbone.history.start({pushstate: false});
+            }
+        });
     };
 
 });
