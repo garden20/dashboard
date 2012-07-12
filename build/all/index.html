@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html manifest="dashboard.appcache">
+  <head>
+    <meta charset="utf-8">
+
+    <script type="text/javascript">
+      // add trailing slash
+      var loc = '' + window.location;
+      if (loc.substr(loc.length - 1) !== '/') {
+        window.location = loc + '/';
+      }
+    </script>
+
+    <title>Dashboard</title>
+
+    <link rel="stylesheet" type="text/css" href="css/dashboard.css" />
+
+  </head>
+  <body>
+
+    <div class="navbar">
+      <div class="container-fluid">
+        <div class="navbar-inner">
+          <ul class="nav">
+            <li class="active"><a href="#">Dashboard</a></li>
+            <li><a href="#">Settings</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div id="content"></div>
+
+    <script src="jam/require.js"></script>
+    <script type="text/javascript">
+      require(['dashboard/app'], function (app) {
+        app.init();
+      });
+    </script>
+
+  </body>
+</html>

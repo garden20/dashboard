@@ -1,0 +1,20 @@
+{
+    "name": "dashboard",
+    "description": "CouchApp dashboard and installation / upgrade tools",
+    "version": "0.0.1",
+    "attachments": [
+        "dashboard.appcache",
+        "index.html",
+        "jam",
+        "css"
+    ],
+    "modules": [
+        "ddoc.js"
+    ],
+    "load": "ddoc",
+    "dependencies": {
+        "attachments": null,
+        "modules": null,
+        "properties": null
+    }
+}
