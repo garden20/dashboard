@@ -17,6 +17,6 @@ function (exports, require, $, _) {
 
     // increment this value to force update of
     // all existing app documents to a new format
-    exports.App.format_version = 1;
+    exports.App.format_version = 8;
 
 });

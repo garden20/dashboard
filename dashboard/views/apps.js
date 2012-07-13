@@ -14,11 +14,10 @@ function (exports, require, $, _) {
 
 
     exports.AppsView = Backbone.View.extend({
-        tagname: 'ul',
+        tagName: 'ul',
         className: 'app-list',
         template: require('hbt!../../tmpl/apps'),
         initialize: function (apps) {
-            console.log(['AppsView init', apps]);
             this.apps = apps;
             //this.apps.on('add', this.addOne, this);
             // ...

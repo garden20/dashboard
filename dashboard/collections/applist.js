@@ -31,7 +31,12 @@ function (exports, require, $, _) {
             view: {
                 map: function (doc) {
                     if (doc.type === 'app') {
-                        emit([doc.title], null);
+                        if (doc.title) {
+                            emit([doc.title], null);
+                        }
+                        else {
+                            emit([doc.db + ' / ' + doc.name], null);
+                        }
                     }
                 }
             }
@@ -110,16 +115,27 @@ function (exports, require, $, _) {
                     ddoc_rev: ddoc._rev,
                     type: 'app',
                     url: app_url,
+                    db: ddoc_url.split('/')[1],
                     name: ddoc._id.split('/')[1],
-                    format_version: App.format_version // increment this if you change these
-                                         // properties and want to for update
-                                         // of existing app docs
+                    title: null,
+                    // increment this if you change these properties and
+                    // want to for update of existing app docs:
+                    format_version: App.format_version
                 };
                 if (!app_url) {
                     // show document in futon
                     doc.url = '/_utils/document.html?' +
                         ddoc_url.replace(/^\//, '');
                     doc.unknown_root = true;
+                }
+                if (ddoc.app) {
+                    if (ddoc.app.icons) {
+                        doc.icons = ddoc.app.icons;
+                        doc.dashicon = ddoc.app.icons['128'];
+                    }
+                    if (ddoc.app.title) {
+                        doc.title = ddoc.app.title;
+                    }
                 }
 
                 var app = that.get(ddoc_url);

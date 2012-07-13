@@ -7668,3 +7668,63 @@ body {
 .navbar .nav li a:hover .caret {
   border-top: 4px solid white !important;
 }
+/* Landscape phones and down */
+@media (min-width: 768px) {
+  ul.app-list {
+    width: 592px;
+  }
+}
+@media (min-width: 944px) {
+  ul.app-list {
+    width: 768px;
+  }
+}
+@media (min-width: 1120px) {
+  ul.app-list {
+    width: 944px;
+  }
+}
+@media (min-width: 1296px) {
+  ul.app-list {
+    width: 1120px;
+  }
+}
+ul.app-list {
+  margin: 2.618em auto;
+  padding: 0 32px;
+  list-style-type: none;
+}
+ul.app-list li {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+ul.app-list li a {
+  display: block;
+  margin: 8px 24px;
+  padding: 0;
+  width: 128px;
+  height: 172px;
+  overflow: hidden;
+  position: relative;
+}
+ul.app-list li a .icon {
+  width: 128px;
+  height: 128px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+ul.app-list li a .title {
+  text-align: center;
+  color: #000000;
+  font-size: 118%;
+  display: block;
+  height: 39px;
+  width: 120px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  position: absolute;
+  top: 132px;
+  left: 4px;
+}

@@ -2,9 +2,17 @@ CACHE MANIFEST
 index.html
 jam/require.js
 css/dashboard.css
+img/icons/futon_16.png
+img/icons/futon_48.png
+img/icons/futon_96.png
+img/icons/futon_128.png
+img/icons/default_16.png
+img/icons/default_48.png
+img/icons/default_96.png
+img/icons/default_128.png
 
 NETWORK:
 /
 
 
-# Thu Jul 12 2012 11:34:29 GMT-0700 (PDT)
+# Thu Jul 12 2012 20:39:01 GMT-0700 (PDT)

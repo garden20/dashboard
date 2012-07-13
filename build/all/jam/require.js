@@ -16876,7 +16876,7 @@ function (exports, require, $, _) {
 
     // increment this value to force update of
     // all existing app documents to a new format
-    exports.App.format_version = 1;
+    exports.App.format_version = 8;
 
 });
 
@@ -18768,7 +18768,7 @@ define('text', ['text/text'], function (main) { return main; });
 
 define("text/text", function(){});
 
-define('text!tmpl/apps.handlebars',[],function () { return '{{#each apps}}\n    <li><a href="{{url}}">{{name}}</a></li>\n{{/each}}\n';});
+define('text!tmpl/apps.handlebars',[],function () { return '{{#each apps}}\n<li>\n    <a href="{{url}}">\n        <img class="icon",\n             alt="{{title}}"\n             {{#if title}}\n             title="Open {{title}}"\n             {{else}}\n             title="Open {{db}} / {{name}}"\n             {{/if}}\n             width="128"\n             height="128"\n             src="{{#if dashicon}}{{_id}}/{{dashicon}}{{else}}img/icons/default_128.png{{/if}}" />\n         <div class="title">\n             {{#if title}}\n                 {{title}}\n             {{else}}\n                 <span style="white-space: nowrap">{{name}}</span>\n             {{/if}}\n         </div>\n    </a>\n</li>\n{{/each}}\n';});
 
 define('dashboard/views/apps', [
     'exports',
@@ -18786,11 +18786,10 @@ function (exports, require, $, _) {
 
 
     exports.AppsView = Backbone.View.extend({
-        tagname: 'ul',
+        tagName: 'ul',
         className: 'app-list',
         template: require('hbt!../../tmpl/apps'),
         initialize: function (apps) {
-            console.log(['AppsView init', apps]);
             this.apps = apps;
             //this.apps.on('add', this.addOne, this);
             // ...
@@ -18805,7 +18804,7 @@ function (exports, require, $, _) {
 
 });
 
-define('text!tmpl/dashboard.handlebars',[],function () { return '<div class="container-fluid">\n\n    <h1>Dashboard home</h1>\n\n    <div id="apps"></div>\n\n</div>\n';});
+define('text!tmpl/dashboard.handlebars',[],function () { return '<div class="container-fluid">\n\n    <div id="apps"></div>\n\n</div>\n';});
 
 define('dashboard/views/dashboard', [
     'exports',
@@ -19745,7 +19744,12 @@ function (exports, require, $, _) {
             view: {
                 map: function (doc) {
                     if (doc.type === 'app') {
-                        emit([doc.title], null);
+                        if (doc.title) {
+                            emit([doc.title], null);
+                        }
+                        else {
+                            emit([doc.db + ' / ' + doc.name], null);
+                        }
                     }
                 }
             }
@@ -19824,16 +19828,27 @@ function (exports, require, $, _) {
                     ddoc_rev: ddoc._rev,
                     type: 'app',
                     url: app_url,
+                    db: ddoc_url.split('/')[1],
                     name: ddoc._id.split('/')[1],
-                    format_version: App.format_version // increment this if you change these
-                                         // properties and want to for update
-                                         // of existing app docs
+                    title: null,
+                    // increment this if you change these properties and
+                    // want to for update of existing app docs:
+                    format_version: App.format_version
                 };
                 if (!app_url) {
                     // show document in futon
                     doc.url = '/_utils/document.html?' +
                         ddoc_url.replace(/^\//, '');
                     doc.unknown_root = true;
+                }
+                if (ddoc.app) {
+                    if (ddoc.app.icons) {
+                        doc.icons = ddoc.app.icons;
+                        doc.dashicon = ddoc.app.icons['128'];
+                    }
+                    if (ddoc.app.title) {
+                        doc.title = ddoc.app.title;
+                    }
                 }
 
                 var app = that.get(ddoc_url);

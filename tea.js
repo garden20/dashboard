@@ -12,7 +12,8 @@ exports.builds = {
             "index.html",
             "kanso.json",
             "dashboard.appcache",
-            "ddoc.js"
+            "ddoc.js",
+            "img"
         ]}
     },
     all: ['assets', {

@@ -2,6 +2,14 @@ CACHE MANIFEST
 index.html
 jam/require.js
 css/dashboard.css
+img/icons/futon_16.png
+img/icons/futon_48.png
+img/icons/futon_96.png
+img/icons/futon_128.png
+img/icons/default_16.png
+img/icons/default_48.png
+img/icons/default_96.png
+img/icons/default_128.png
 
 NETWORK:
 /

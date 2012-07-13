@@ -6,7 +6,8 @@
         "dashboard.appcache",
         "index.html",
         "jam",
-        "css"
+        "css",
+        "img"
     ],
     "modules": [
         "ddoc.js"
