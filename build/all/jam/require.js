@@ -18863,6 +18863,10 @@ function (exports, require, $, _) {
 
             window.dashboard_view.render();
             window.dashboard_view.showAppList(window.app_list);
+            console.log([
+                'Time to icon list',
+                (new Date().getTime() - window.dashboard_start_time) + 'ms'
+            ]);
         }
     });
 
