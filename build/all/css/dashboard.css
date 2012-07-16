@@ -7668,98 +7668,63 @@ body {
 .navbar .nav li a:hover .caret {
   border-top: 4px solid white !important;
 }
-/* Landscape phones and down */
-@media (min-width: 768px) {
-  ul.app-list {
-    width: 592px;
-  }
+/*
+.visible-admin {
+    display: none;
 }
-@media (min-width: 944px) {
-  ul.app-list {
-    width: 768px;
-  }
+.is-admin .visible-admin {
+    display: inherit;
 }
-@media (min-width: 1120px) {
-  ul.app-list {
-    width: 944px;
-  }
+*/
+.admin-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 42px;
+  width: 100%;
+  background: #f2f2f2;
+  border-top: 1px solid #ccc;
 }
-@media (min-width: 1296px) {
-  ul.app-list {
-    width: 1120px;
-  }
-}
-ul.app-list {
-  margin: 2.618em auto;
-  padding: 0 32px;
-  list-style-type: none;
-}
-ul.app-list li {
-  display: inline-block;
-  margin: 0;
+.admin-bar-inner {
+  height: 42px;
+  margin: 0 20px;
   padding: 0;
-}
-ul.app-list li a {
-  display: block;
-  margin: 8px 24px;
-  padding: 0;
-  width: 128px;
-  height: 172px;
-  overflow: hidden;
   position: relative;
 }
-ul.app-list li a .icon {
-  width: 128px;
-  height: 128px;
+#admin-bar-status {
+  width: 33%;
+  height: 42px;
+  padding: 7px 0;
   position: absolute;
   top: 0;
   left: 0;
+  text-align: left;
 }
-ul.app-list li a .title {
-  text-align: center;
-  color: #000000;
-  font-size: 118%;
-  display: block;
-  height: 39px;
-  width: 120px;
-  text-overflow: ellipsis;
-  overflow: hidden;
+#admin-bar-status .progress {
+  margin: 5px 0;
+}
+#admin-bar-controls {
+  width: 33%;
+  height: 42px;
+  padding: 7px 0;
   position: absolute;
-  top: 132px;
-  left: 4px;
+  top: 0;
+  right: 0;
+  text-align: right;
 }
-ul.admin-extras {
-  position: fixed;
-  bottom: -2px;
-  right: 40px;
-  border: 1px solid #000000;
-  height: 42px;
-  margin: 0;
-  padding: 0;
-  list-style-type: none;
+#main {
+  /* make space for admin bar when scrolling to bottom */
+
+  margin-bottom: 42px;
 }
-ul.admin-extras li {
-  margin: -1px;
-  padding: 0;
-  height: 42px;
-  float: left;
+.table-databases .icon {
+  margin-right: 0.618em;
+  width: 22px;
 }
-ul.admin-extras a {
-  color: #000000;
-  margin: 0;
-  display: block;
-  padding: 12px 18px;
-  background: white;
-  border: 1px solid #000000;
-  float: left;
+.table-databases .title {
   font-weight: bold;
+  margin-right: 0.618em;
 }
-ul.admin-extras a:hover {
-  text-decoration: none;
-  background: #ccc;
-}
-ul.admin-extras a i {
-  font-size: 120%;
-  position: relative;
-  top: 1px;
+.table-databases .db {
+  color: #999999;
 }

@@ -27,7 +27,8 @@ exports.builds = {
         },
         "@jam-compile": {
             output: "jam/require.js",
-            includes: ["dashboard/app"],
+            deepExcludes: ['dashboard-data'],
+            includes: ["lib/app"],
             nominify: true
             // TODO: fix excluding plugins (and use of stubModules in r.js)
             //deepExcludes: ["hbt"]

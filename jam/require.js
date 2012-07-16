@@ -2075,6 +2075,11 @@ var jam = {
             "main": "director.js"
         },
         {
+            "name": "events",
+            "location": "jam/events",
+            "main": "events.js"
+        },
+        {
             "name": "text",
             "location": "jam/text",
             "main": "text.js"

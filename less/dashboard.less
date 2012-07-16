@@ -175,95 +175,67 @@ body {
     //.opacity(100);
 }
 
-/* Landscape phones and down */
-//@media (min-width: 592px)  { ul.app-list {width: 416px;} }  // 2 icons wide
-@media (min-width: 768px)  { ul.app-list {width: 592px;} }  // 3
-@media (min-width: 944px)  { ul.app-list {width: 768px;} }  // 4
-@media (min-width: 1120px) { ul.app-list {width: 944px;} }  // 5
-@media (min-width: 1296px) { ul.app-list {width: 1120px;} } // 6
-
-ul.app-list {
-    margin: 2.618em auto;
-    padding: 0 32px;
-    list-style-type: none;
-}
-ul.app-list li {
-    display: inline-block;
-    margin: 0;
-    padding: 0;
-}
-ul.app-list li a {
-    display: block;
-    margin: 8px 24px;
-    padding: 0;
-    width: 128px;
-    height: 172px;
-    overflow: hidden;
-    position: relative;
-}
-ul.app-list li a .icon {
-    width: 128px;
-    height: 128px;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-ul.app-list li a .title {
-    text-align: center;
-    color: @black;
-    font-size: 118%;
-    display: block;
-    height: 39px;
-    width: 120px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    position: absolute;
-    top: 132px;
-    left: 4px;
-}
-
-
-ul.admin-extras {
-    position: fixed;
-    bottom: -2px;
-    right: 40px;
-    border: 1px solid @black;
-    height: 42px;
-    margin: 0;
-    padding: 0;
-    list-style-type: none;
-}
-ul.admin-extras li {
-    margin: -1px;
-    padding: 0;
-    height: 42px;
-    float: left;
-}
-ul.admin-extras a {
-    color: @black;
-    margin: 0;
-    display: block;
-    padding: 12px 18px;
-    background: white;
-    border: 1px solid @black;
-    float: left;
-    font-weight: bold;
-}
-ul.admin-extras a:hover {
-    text-decoration: none;
-    background: #ccc;
-}
-ul.admin-extras a i {
-    font-size: 120%;
-    position: relative;
-    top: 1px;
-}
 
 /*
 .visible-admin {
     display: none;
 }
-#has-admin .visible-admin {
+.is-admin .visible-admin {
     display: inherit;
 }
 */
+
+.admin-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 42px;
+    width: 100%;
+    background: #f2f2f2;
+    border-top: 1px solid #ccc;
+}
+.admin-bar-inner {
+    height: 42px;
+    margin: 0 20px;
+    padding: 0;
+    position: relative;
+}
+#admin-bar-status {
+    width: 33%;
+    height: 42px;
+    padding: 7px 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    text-align: left;
+}
+#admin-bar-status .progress {
+    margin: 5px 0;
+}
+#admin-bar-controls {
+    width: 33%;
+    height: 42px;
+    padding: 7px 0;
+    position: absolute;
+    top: 0;
+    right: 0;
+    text-align: right;
+}
+
+#main {
+    /* make space for admin bar when scrolling to bottom */
+    margin-bottom: 42px;
+}
+
+
+.table-databases .icon {
+    margin-right: 0.618em;
+    width: 22px;
+}
+.table-databases .title {
+    font-weight: bold;
+    margin-right: 0.618em;
+}
+.table-databases .db {
+    color: @grayLight;
+}

@@ -9,6 +9,7 @@
         "async": null,
         "jquery": null,
         "underscore": null,
-        "director": null
+        "director": null,
+        "events": null
     }
 }
