@@ -1,14 +1,14 @@
 {
     "jam_version": "0.1.11",
     "dependencies": {
-        "backbone": null,
         "bootstrap": null,
         "font-awesome": null,
-        "pouchdb": null,
         "handlebars": null,
         "hbt": null,
         "couchr": "linked",
-        "backbone-pouchdb": "linked",
-        "async": null
+        "async": null,
+        "jquery": null,
+        "underscore": null,
+        "director": null
     }
 }

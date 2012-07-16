@@ -7728,3 +7728,38 @@ ul.app-list li a .title {
   top: 132px;
   left: 4px;
 }
+ul.admin-extras {
+  position: fixed;
+  bottom: -2px;
+  right: 40px;
+  border: 1px solid #000000;
+  height: 42px;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+ul.admin-extras li {
+  margin: -1px;
+  padding: 0;
+  height: 42px;
+  float: left;
+}
+ul.admin-extras a {
+  color: #000000;
+  margin: 0;
+  display: block;
+  padding: 12px 18px;
+  background: white;
+  border: 1px solid #000000;
+  float: left;
+  font-weight: bold;
+}
+ul.admin-extras a:hover {
+  text-decoration: none;
+  background: #ccc;
+}
+ul.admin-extras a i {
+  font-size: 120%;
+  position: relative;
+  top: 1px;
+}

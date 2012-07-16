@@ -1,22 +1,12 @@
 var jam = {
     "packages": [
         {
-            "name": "backbone",
-            "location": "jam/backbone",
-            "main": "backbone.js"
-        },
-        {
             "name": "bootstrap",
             "location": "jam/bootstrap"
         },
         {
             "name": "font-awesome",
             "location": "jam/font-awesome"
-        },
-        {
-            "name": "pouchdb",
-            "location": "jam/pouchdb",
-            "main": "pouch.amd.alpha.js"
         },
         {
             "name": "handlebars",
@@ -34,11 +24,6 @@ var jam = {
             "main": "couchr.js"
         },
         {
-            "name": "backbone-pouchdb",
-            "location": "jam/backbone-pouchdb",
-            "main": "backbone-pouchdb.js"
-        },
-        {
             "name": "async",
             "location": "jam/async",
             "main": "./lib/async"
@@ -54,14 +39,9 @@ var jam = {
             "main": "underscore.js"
         },
         {
-            "name": "simple-uuid",
-            "location": "jam/simple-uuid",
-            "main": "uuid.js"
-        },
-        {
-            "name": "md5",
-            "location": "jam/md5",
-            "main": "md5.js"
+            "name": "director",
+            "location": "jam/director",
+            "main": "director.js"
         },
         {
             "name": "text",
@@ -70,7 +50,11 @@ var jam = {
         }
     ],
     "version": "0.1.11",
-    "shim": {}
+    "shim": {
+        "director": {
+            "exports": "Router"
+        }
+    }
 };
 
 if (typeof require !== "undefined" && require.config) {

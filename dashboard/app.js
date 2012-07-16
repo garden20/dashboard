@@ -1,35 +1,34 @@
-define('dashboard/app', [
+define([
     'exports',
     'require',
-    'jquery',
-    'underscore',
-    'backbone',
-    'backbone-pouchdb',
-    './routes',
-    './collections/applist'
+    'director',
+    './views/databases'
 ],
-function (exports, require, $, _) {
+function (exports, require) {
 
-    var Backbone = require('backbone'),
-        routes = require('./routes'),
-        AppList = require('./collections/applist').AppList;
+    var director = require('director');
 
+
+    exports.routes = {
+        '/': require('./views/databases')
+    };
 
     exports.init = function () {
-        // refresh app list
-        window.app_list = new AppList();
-        window.app_list.fetch({
-            error: function (err) {
-                console.error(err);
-            },
-            success: function () {
-                window.app_list.update();
+        // TODO: refresh db list
+        window.Dashboard = {
+            databases: [
+                {title: 'Kujua', url: '/kujua/_design/kujua-base/_rewrite/'},
+                {title: 'Todo List', url: '/todo/_design/todo/_rewrite/'}
+            ]
+        };
 
-                // setup URL router
-                new routes.WorkspaceRouter();
-                Backbone.history.start({pushstate: false});
-            }
-        });
+        var router = new director.Router(exports.routes);
+        router.init();
+
+        if (!window.location.hash || window.location.hash === '#') {
+            window.location = '#/';
+            $(window).trigger('hashchange');
+        }
     };
 
 });

@@ -1,0 +1,29 @@
+<div class="container-fluid">
+
+  {{#if databases}}
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>Name</th>
+    </tr>
+    </thead>
+    <tbody>
+      {{#each databases}}
+      <tr>
+        <td><a href="{{url}}">{{title}}</a></td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  {{/if}}
+
+</div>
+
+<ul class="admin-extras visible-admin">
+    <li id="databases-add-new-btn">
+        <a href="#"><i class="icon-plus-sign"></i> Add new</a>
+    </li>
+    <li id="databases-refresh-btn">
+        <a href="#"><i class="icon-refresh"></i> Refresh</a>
+    </li>
+</ul>
