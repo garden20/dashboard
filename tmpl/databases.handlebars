@@ -7,6 +7,8 @@
       <tr>
         <th>Name</th>
         <th>Template</th>
+        <th>Admins</th>
+        <th>Members</th>
       </tr>
       </thead>
       <tbody>
@@ -26,6 +28,14 @@
           </td>
           <td class="template">
             {{#if title}}{{title}}{{else}}{{name}}{{/if}}
+          </td>
+          <td class="admins">
+            {{security.admins.names}}
+            {{security.admins.roles}}
+          </td>
+          <td class="members">
+            {{security.members.names}}
+            {{security.members.roles}}
           </td>
         </tr>
         {{/each}}
