@@ -6,12 +6,13 @@
       <thead>
       <tr>
         <th>Name</th>
+        <th>Template</th>
       </tr>
       </thead>
       <tbody>
         {{#each databases}}
         <tr>
-          <td>
+          <td class="name">
             <a title="{{db}}/{{name}}" href="{{url}}">
               {{#if dashicon}}
               <img class="icon" alt="Icon" src="{{ddoc_url}}/{{dashicon}}" />
@@ -19,12 +20,12 @@
               <img class="icon" alt="Icon" src="img/icons/default_22.png" />
               {{/if}}
             </a>
-            <a class="title" title="{{db}}/{{name}}" href="{{url}}">
-              {{#if title}}{{title}}{{else}}{{name}}{{/if}}
-            </a>
-            <span class="db">
+            <a title="{{db}}/{{name}}" href="{{url}}">
               {{db}}
-            </span>
+            </a>
+          </td>
+          <td class="template">
+            {{#if title}}{{title}}{{else}}{{name}}{{/if}}
           </td>
         </tr>
         {{/each}}
