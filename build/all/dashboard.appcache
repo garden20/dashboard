@@ -3,16 +3,25 @@ index.html
 jam/require.js
 css/dashboard.css
 img/icons/futon_16.png
+img/icons/futon_22.png
 img/icons/futon_48.png
 img/icons/futon_96.png
 img/icons/futon_128.png
 img/icons/default_16.png
+img/icons/default_22.png
 img/icons/default_48.png
 img/icons/default_96.png
 img/icons/default_128.png
+jam/font-awesome/font/fontawesome-webfont.eot
+jam/font-awesome/font/fontawesome-webfont.svg
+jam/font-awesome/font/fontawesome-webfont.ttf
+jam/font-awesome/font/fontawesome-webfont.woff
+
+FALLBACK:
+dashboard-data.js   dashboard-data-fallback.js
 
 NETWORK:
-/
+/_api
 
 
-# Sun Jul 15 2012 23:46:57 GMT-0700 (PDT)
+# Mon Jul 16 2012 14:15:20 GMT-0700 (PDT)

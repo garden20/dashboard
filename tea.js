@@ -12,6 +12,7 @@ exports.builds = {
             "index.html",
             "kanso.json",
             "dashboard.appcache",
+            "dashboard-data-fallback.js",
             "ddoc.js",
             "img"
         ]}

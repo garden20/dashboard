@@ -14349,6 +14349,33 @@ EventEmitter.prototype.listeners = function(type) {
 });
 define('events', ['events/events'], function (main) { return main; });
 
+define('lib/utils',[
+    'exports',
+    'require'
+],
+function (exports, require) {
+
+    exports.imgToDataURI = function (src, callback) {
+        var img = new Image();
+        img.src = src;
+        img.onload = function () {
+            var canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            var context = canvas.getContext('2d');
+            context.drawImage(img, 0, 0);
+            return callback(null, canvas.toDataURL());
+        };
+        img.onerror = function () {
+            return callback(new Error('Error loading image: ' + src));
+        };
+        img.onabort = function () {
+            return callback(new Error('Loading of image aborted: ' + src));
+        };
+    };
+
+});
+
 define('lib/dblist',[
     'exports',
     'require',
@@ -14357,13 +14384,15 @@ define('lib/dblist',[
     'couchr',
     'async',
     '../dashboard-data',
-    'events'
+    'events',
+    './utils'
 ],
 function (exports, require, $, _) {
 
     var couchr = require('couchr'),
         async = require('async'),
         events = require('events'),
+        utils = require('./utils'),
         DATA = require('../dashboard-data');
 
 
@@ -14414,6 +14443,25 @@ function (exports, require, $, _) {
         });
     };
 
+    // Feature test (from Modernizr)
+    var hasStorage = (function() {
+        try {
+            localStorage.setItem('dashboard-test', 'dashboard-test');
+            localStorage.removeItem('dashboard-test');
+            return true;
+        } catch(e) {
+            return false;
+        }
+    }());
+
+    exports.saveLocal = function () {
+        if (hasStorage) {
+            localStorage.setItem(
+                'dashboard-databases', JSON.stringify(DATA.databases)
+            );
+        }
+    };
+
     exports.exists = function (ddoc_url, /*optional*/ddoc_rev) {
         var id = window.btoa(ddoc_url);
         var db = exports.get(id);
@@ -14430,7 +14478,7 @@ function (exports, require, $, _) {
         callback = callback || logErrorsCallback;
         var ev = new events.EventEmitter();
 
-        couchr.get('/_all_dbs', function (err, dbs) {
+        couchr.get('/_api/_all_dbs', function (err, dbs) {
             if (err) {
                 return callback('Failed to update app list\n' + err);
             }
@@ -14447,7 +14495,14 @@ function (exports, require, $, _) {
                     );
                     cb();
                 });
-            }, callback);
+            },
+            function (err) {
+                if (err) {
+                    return callback(err);
+                }
+                exports.saveLocal();
+                callback();
+            });
         });
         return ev;
     };
@@ -14455,7 +14510,7 @@ function (exports, require, $, _) {
     exports.refreshDB = function (db, /*optional*/callback) {
         callback = callback || logErrorsCallback;
 
-        var url = '/' + encodeURIComponent(db) + '/_all_docs';
+        var url = '/_api/' + encodeURIComponent(db) + '/_all_docs';
         var q = {
             startkey: '"_design/"',
             endkey: '"_design0"'
@@ -14487,7 +14542,7 @@ function (exports, require, $, _) {
     exports.refreshDoc = function (ddoc_url, /*optional*/callback) {
         callback = callback || logErrorsCallback;
 
-        couchr.get(ddoc_url, function (err, ddoc) {
+        couchr.get('/_api/' + ddoc_url, function (err, ddoc) {
             if (err) {
                 return callback(
                     'Failed to app from doc: ' + ddoc_url + '\n' + err
@@ -14517,6 +14572,13 @@ function (exports, require, $, _) {
                 name: ddoc._id.split('/')[1],
                 title: null
             };
+
+            // called after icons have been downloaded etc
+            var doUpdate = function () {
+                console.log(['update', ddoc_url, doc]);
+                exports.update(doc, callback);
+            };
+
             if (!app_url) {
                 // show document in futon
                 doc.url = '/_utils/document.html?' +
@@ -14524,17 +14586,29 @@ function (exports, require, $, _) {
                 doc.unknown_root = true;
             }
             if (ddoc.app) {
-                if (ddoc.app.icons) {
-                    doc.icons = ddoc.app.icons;
-                    doc.dashicon = ddoc.app.icons['22'];
-                }
                 if (ddoc.app.title) {
                     doc.title = ddoc.app.title;
                 }
+                if (ddoc.app.icons) {
+                    doc.icons = ddoc.app.icons;
+                    var dashicon_url = '/_api/' + doc.ddoc_url + '/' +
+                        ddoc.app.icons['22'];
+
+                    utils.imgToDataURI(dashicon_url, function (err, url) {
+                        if (!err && url) {
+                            doc.dashicon = url;
+                        }
+                        doUpdate();
+                    });
+                }
+                else {
+                    doUpdate();
+                }
+            }
+            else {
+                doUpdate();
             }
 
-            console.log(['update', ddoc_url, doc]);
-            exports.update(doc, callback);
         });
     };
 
@@ -16428,7 +16502,7 @@ define('text', ['text/text'], function (main) { return main; });
 
 define("text/text", function(){});
 
-define('text!tmpl/databases.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n\n    {{#if databases}}\n    <table class="table table-striped table-databases">\n      <thead>\n      <tr>\n        <th>Name</th>\n        <th>Template</th>\n      </tr>\n      </thead>\n      <tbody>\n        {{#each databases}}\n        <tr>\n          <td class="name">\n            <a title="{{db}}/{{name}}" href="{{url}}">\n              {{#if dashicon}}\n              <img class="icon" alt="Icon" src="{{ddoc_url}}/{{dashicon}}" />\n              {{else}}\n              <img class="icon" alt="Icon" src="img/icons/default_22.png" />\n              {{/if}}\n            </a>\n            <a title="{{db}}/{{name}}" href="{{url}}">\n              {{db}}\n            </a>\n          </td>\n          <td class="template">\n            {{#if title}}{{title}}{{else}}{{name}}{{/if}}\n          </td>\n        </tr>\n        {{/each}}\n      </tbody>\n    </table>\n    {{/if}}\n\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="databases-add-btn" class="btn btn-success" href="#">\n        <i class="icon-plus-sign"></i> Add new\n      </a>\n      <a id="databases-refresh-btn" class="btn btn-primary" href="#">\n        <i class="icon-refresh"></i> Refresh list\n      </a>\n    </div>\n  </div>\n</div>\n';});
+define('text!tmpl/databases.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n\n    {{#if databases}}\n    <table class="table table-striped table-databases">\n      <thead>\n      <tr>\n        <th>Name</th>\n        <th>Template</th>\n      </tr>\n      </thead>\n      <tbody>\n        {{#each databases}}\n        <tr>\n          <td class="name">\n            <a title="{{db}}/{{name}}" href="{{url}}">\n              {{#if dashicon}}\n              <img class="icon" alt="Icon" src="{{dashicon}}" />\n              {{else}}\n              <img class="icon" alt="Icon" src="img/icons/default_22.png" />\n              {{/if}}\n            </a>\n            <a title="{{db}}/{{name}}" href="{{url}}">\n              {{db}}\n            </a>\n          </td>\n          <td class="template">\n            {{#if title}}{{title}}{{else}}{{name}}{{/if}}\n          </td>\n        </tr>\n        {{/each}}\n      </tbody>\n    </table>\n    {{/if}}\n\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="databases-add-btn" class="btn btn-success" href="#">\n        <i class="icon-plus-sign"></i> Add new\n      </a>\n      <a id="databases-refresh-btn" class="btn btn-primary" href="#">\n        <i class="icon-refresh"></i> Refresh list\n      </a>\n    </div>\n  </div>\n</div>\n';});
 
 /* ============================================================
  * bootstrap-button.js v2.0.3
@@ -16589,11 +16663,13 @@ define('lib/app',[
     'exports',
     'require',
     'director',
-    './views/databases'
+    './views/databases',
+    './dblist'
 ],
 function (exports, require) {
 
-    var director = require('director');
+    var director = require('director'),
+        dblist = require('./dblist');
 
 
     exports.routes = {
@@ -16608,6 +16684,7 @@ function (exports, require) {
             window.location = '#/';
             $(window).trigger('hashchange');
         }
+        dblist.saveLocal();
     };
 
 });
