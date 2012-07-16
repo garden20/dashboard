@@ -14485,7 +14485,7 @@ function (exports, require, $, _) {
                 return callback('Failed to update app list\n' + err);
             }
             var completed = 0;
-            async.forEachSeries(dbs, function (db, cb) {
+            async.forEachLimit(dbs, 4, function (db, cb) {
                 exports.refreshDB(db, function (err) {
                     if (err) {
                         return cb(err);
@@ -14523,8 +14523,6 @@ function (exports, require, $, _) {
                     'Failed to update apps from DB: ' + db + '\n' + err
                 );
             }
-            // do in series otherwise chrome likes to cancel the ajax
-            // calls with status 0
             async.forEachSeries(data.rows || [], function (r, cb) {
                 var ddoc_url = ['', db, r.id].join('/');
 
@@ -16632,8 +16630,10 @@ define('lib/views/databases',[
 ],
 function (require, $, dblist, DATA) {
 
+    var tmpl = require('hbt!../../tmpl/databases');
+
     return function () {
-        $('#content').html(require('hbt!../../tmpl/databases')({
+        $('#content').html(tmpl({
             databases: DATA.databases
         }));
 
@@ -16643,6 +16643,7 @@ function (require, $, dblist, DATA) {
 
             $(this).button('loading');
             $('#admin-bar-status').html('');
+            $('#main').html('');
 
             var refresher = dblist.refresh(function (err) {
                 if (err) {
@@ -16653,7 +16654,10 @@ function (require, $, dblist, DATA) {
                 var bar = $('#admin-bar-status .progress .bar');
                 var fn = function () {
                     $('#admin-bar-status .progress').fadeOut(function () {
-                        $('#admin-bar-status').html('');
+                        //$('#admin-bar-status').html('');
+                        $('#content').html(tmpl({
+                            databases: DATA.databases
+                        }));
                     });
                     $(that).button('reset');
                 };
