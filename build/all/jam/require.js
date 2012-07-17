@@ -14503,6 +14503,10 @@ function (exports, require, $, _) {
                     return callback(err);
                 }
                 exports.saveLocal();
+                $.get('dashboard-data.js', function (data) {
+                    // cache bust
+                    console.log(data);
+                });
                 callback();
             });
         });
