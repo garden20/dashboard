@@ -4,7 +4,7 @@
     "version": "0.0.1",
     "attachments": [
         "dashboard.appcache",
-        "dashboard-data-fallback.js",
+        "data",
         "index.html",
         "jam",
         "css",

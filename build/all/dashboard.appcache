@@ -18,10 +18,10 @@ jam/font-awesome/font/fontawesome-webfont.ttf
 jam/font-awesome/font/fontawesome-webfont.woff
 
 FALLBACK:
-dashboard-data.js   dashboard-data-fallback.js
+data/dashboard-data.js   data/dashboard-data-fallback.js
 
 NETWORK:
 /_api
 
 
-# Tue Jul 17 2012 11:22:52 GMT-0700 (PDT)
+# Tue Jul 17 2012 13:36:44 GMT-0700 (PDT)

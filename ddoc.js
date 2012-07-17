@@ -2,7 +2,7 @@ exports.rewrites = [
     {from: '/', to: 'index.html'},
     {from: '/api', to: '../..'},
     {from: '/api/*', to: '../../*'},
-    {from: '/dashboard-data.js', to: '_list/datajs/databases', query: {
+    {from: '/data/dashboard-data.js', to: '_list/datajs/databases', query: {
         include_docs: 'true'
     }},
     {from: '/*', to: '*'}
@@ -22,7 +22,7 @@ exports.lists = {
     datajs: function (head, req) {
         start({code: 200, headers: {'Content-Type': 'application/javascript'}});
         send(
-            'define("dashboard-data", function () {\n' +
+            'define("data/dashboard-data", function () {\n' +
             '\n' +
             'return {databases: ['
         );

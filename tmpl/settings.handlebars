@@ -1,4 +1,53 @@
 <div id="main">
   <div class="container-fluid">
+
+    <form class="form-horizontal">
+
+      <fieldset>
+        <legend>Template sources</legend>
+        <div class="control-group">
+          <label class="control-label" for="textarea">Source URLs</label>
+          <div class="controls">
+            <textarea class="input-xlarge" id="textarea" rows="5"></textarea>
+            <p class="help-block">Enter one full URL per line (including http://)</p>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Database listing</legend>
+        <div class="control-group">
+          <label class="control-label" for="dblist-display-no-template">No templates</label>
+          <div class="controls">
+            <label class="checkbox" for="dblist-display-no-template">
+              <input type="checkbox" id="dblist-display-no-template" />
+              Include databases with no template (open in Futon)
+            </label>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="dblist-display-unknown">Unknown templates</label>
+          <div class="controls">
+            <label class="checkbox" for="dblist-display-unknown">
+              <input type="checkbox" id="dblist-display-unknown" />
+              Include databases with unknown templates in the list
+            </label>
+          </div>
+        </div>
+      </fieldset>
+
+    </form>
+
+  </div>
+</div>
+
+<div class="admin-bar visible-admin">
+  <div class="admin-bar-inner">
+    <div id="admin-bar-status"></div>
+    <div id="admin-bar-controls">
+      <a id="templates-installed-add-btn" class="btn btn-primary" href="#">
+        <i class="icon-save"></i> Save changes
+      </a>
+    </div>
   </div>
 </div>

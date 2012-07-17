@@ -14383,7 +14383,7 @@ define('lib/dblist',[
     'underscore',
     'couchr',
     'async',
-    '../dashboard-data',
+    '../data/dashboard-data',
     'events',
     './utils'
 ],
@@ -14393,7 +14393,7 @@ function (exports, require, $, _) {
         async = require('async'),
         events = require('events'),
         utils = require('./utils'),
-        DATA = require('../dashboard-data');
+        DATA = require('../data/dashboard-data');
 
 
     var logErrorsCallback = function (err) {
@@ -16629,7 +16629,7 @@ define('lib/views/databases',[
     'require',
     'jquery',
     '../dblist',
-    '../../dashboard-data',
+    '../../data/dashboard-data',
     'hbt!../../tmpl/databases',
     'hbt!../../tmpl/navigation',
     'bootstrap/js/bootstrap-button'
@@ -16745,32 +16745,7 @@ function (require, $) {
 
 });
 
-define('text!tmpl/library.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="databases-add-btn" class="btn btn-success" href="#/settings">\n        <i class="icon-plus-sign"></i> Add library sources\n      </a>\n    </div>\n  </div>\n</div>\n';});
-
-define('lib/views/library',[
-    'require',
-    'jquery',
-    'hbt!../../tmpl/library',
-    'hbt!../../tmpl/navigation',
-    'bootstrap/js/bootstrap-button'
-],
-function (require, $) {
-
-    var tmpl = require('hbt!../../tmpl/library');
-
-    return function () {
-        $('#content').html(tmpl({}));
-
-        $('.navbar .container-fluid').html(
-            require('hbt!../../tmpl/navigation')({
-                library: true
-            })
-        );
-    };
-
-});
-
-define('text!tmpl/settings.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n  </div>\n</div>\n';});
+define('text!tmpl/settings.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n\n    <form class="form-horizontal">\n\n      <fieldset>\n        <legend>Template sources</legend>\n        <div class="control-group">\n          <label class="control-label" for="textarea">Source URLs</label>\n          <div class="controls">\n            <textarea class="input-xlarge" id="textarea" rows="5"></textarea>\n            <p class="help-block">Enter one full URL per line (including http://)</p>\n          </div>\n        </div>\n      </fieldset>\n\n      <fieldset>\n        <legend>Database listing</legend>\n        <div class="control-group">\n          <label class="control-label" for="dblist-display-no-template">No templates</label>\n          <div class="controls">\n            <label class="checkbox" for="dblist-display-no-template">\n              <input type="checkbox" id="dblist-display-no-template" />\n              Include databases with no template (open in Futon)\n            </label>\n          </div>\n        </div>\n        <div class="control-group">\n          <label class="control-label" for="dblist-display-unknown">Unknown templates</label>\n          <div class="controls">\n            <label class="checkbox" for="dblist-display-unknown">\n              <input type="checkbox" id="dblist-display-unknown" />\n              Include databases with unknown templates in the list\n            </label>\n          </div>\n        </div>\n      </fieldset>\n\n    </form>\n\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="templates-installed-add-btn" class="btn btn-primary" href="#">\n        <i class="icon-save"></i> Save changes\n      </a>\n    </div>\n  </div>\n</div>\n';});
 
 define('lib/views/settings',[
     'require',
@@ -16802,7 +16777,6 @@ define('lib/app',[
     './views/databases',
     './views/templates-installed',
     './views/templates-available',
-    './views/library',
     './views/settings',
     './dblist'
 ],
@@ -16816,7 +16790,6 @@ function (exports, require) {
         '/':                    require('./views/databases'),
         '/templates':           require('./views/templates-installed'),
         '/templates/available': require('./views/templates-available'),
-        '/library':             require('./views/library'),
         '/settings':            require('./views/settings')
     };
 

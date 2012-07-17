@@ -12,7 +12,7 @@ exports.builds = {
             "index.html",
             "kanso.json",
             "dashboard.appcache",
-            "dashboard-data-fallback.js",
+            "data",
             "ddoc.js",
             "img"
         ]}
@@ -28,7 +28,7 @@ exports.builds = {
         },
         "@jam-compile": {
             output: "jam/require.js",
-            deepExcludes: ['dashboard-data'],
+            deepExcludes: ['data/dashboard-data'],
             includes: ["lib/app"],
             nominify: true
             // TODO: fix excluding plugins (and use of stubModules in r.js)
