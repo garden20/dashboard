@@ -8,6 +8,11 @@ module.exports = function (tea, context, config, callback) {
     if (!config.output) {
         return callback('You must specify and output file');
     }
-    process.chdir(tea.source);
-    jam.compile(config, callback);
+    var wd = config.dir ? path.resolve(tea.source, config.dir): tea.source;
+    var _cwd = process.cwd();
+    process.chdir(wd);
+    jam.compile(config, function () {
+        process.chdir(_cwd);
+        callback.apply(this, arguments);
+    });
 };

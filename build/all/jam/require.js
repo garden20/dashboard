@@ -2030,7 +2030,7 @@ var requirejs, require, define;
     req(cfg);
 }(this));
 
-define("../jam/node_modules/requirejs/require.js", function(){});
+define("../../jam/node_modules/requirejs/require.js", function(){});
 
 var jam = {
     "packages": [
@@ -16695,7 +16695,7 @@ function (require, $, projects, DATA) {
 
 });
 
-define('text!tmpl/templates.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="templates-instaled-update-btn" class="btn" href="#">\n        <i class="icon-refresh"></i> Check for updates\n      </a>\n      <a id="templates-installed-add-btn" class="btn btn-success" href="#/settings">\n        <i class="icon-plus-sign"></i> Add sources\n      </a>\n    </div>\n  </div>\n</div>\n';});
+define('text!tmpl/templates.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="templates-instaled-update-btn" class="btn" href="#">\n        <i class="icon-refresh"></i> Check for updates\n      </a>\n      <a id="templates-installed-add-btn" class="btn btn-success" href="#/settings">\n        <i class="icon-plus-sign"></i> Add template sources\n      </a>\n    </div>\n  </div>\n</div>\n';});
 
 define('lib/views/templates',[
     'require',

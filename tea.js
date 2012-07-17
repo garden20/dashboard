@@ -6,16 +6,16 @@ exports.tasks = {
 
 exports.builds = {
     assets: {
-        "include": {paths: [
-            "jam",
-            "packages",
-            "index.html",
-            "kanso.json",
-            "dashboard.appcache",
-            "data",
-            "ddoc.js",
-            "img"
-        ]}
+        "include": {paths: {
+            "jam": "src/jam",
+            "packages": "src/packages",
+            "index.html": "src/index.html",
+            "kanso.json": "src/kanso.json",
+            "dashboard.appcache": "src/dashboard.appcache",
+            "data": "src/data",
+            "ddoc.js": "src/ddoc.js",
+            "img": "src/img"
+        }}
     },
     all: ['assets', {
         "@cache-manifest-timestamp": {
@@ -23,10 +23,11 @@ exports.builds = {
         },
         "@less-compile": {
             compile: {
-                "less/dashboard.less": "css/dashboard.css"
+                "src/less/dashboard.less": "css/dashboard.css"
             }
         },
         "@jam-compile": {
+            dir: "src",
             output: "jam/require.js",
             deepExcludes: ['data/dashboard-data'],
             includes: ["lib/app"],
