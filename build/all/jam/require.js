@@ -16695,43 +16695,18 @@ function (require, $, projects, DATA) {
 
 });
 
-define('text!tmpl/templates-installed.handlebars',[],function () { return '<div id="main">\n\n  <div class="subnav">\n    <div class="subnav-inner">\n      <div class="container-fluid">\n        <ul class="nav">\n          <li class="active"><a href="#/templates">Installed</a></li>\n          <li><a href="#/templates/available">Available</a></li>\n        </ul>\n      </div>\n    </div>\n  </div>\n\n  <div class="container-fluid">\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="templates-instaled-update-btn" class="btn" href="#">\n        <i class="icon-refresh"></i> Check for updates\n      </a>\n      <a id="templates-installed-add-btn" class="btn btn-success" href="#/templates/available">\n        <i class="icon-plus-sign"></i> Get more templates\n      </a>\n    </div>\n  </div>\n</div>\n';});
+define('text!tmpl/templates.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="templates-instaled-update-btn" class="btn" href="#">\n        <i class="icon-refresh"></i> Check for updates\n      </a>\n      <a id="templates-installed-add-btn" class="btn btn-success" href="#/settings">\n        <i class="icon-plus-sign"></i> Add sources\n      </a>\n    </div>\n  </div>\n</div>\n';});
 
-define('lib/views/templates-installed',[
+define('lib/views/templates',[
     'require',
     'jquery',
-    'hbt!../../tmpl/templates-installed',
+    'hbt!../../tmpl/templates',
     'hbt!../../tmpl/navigation',
     'bootstrap/js/bootstrap-button'
 ],
 function (require, $) {
 
-    var tmpl = require('hbt!../../tmpl/templates-installed');
-
-    return function () {
-        $('#content').html(tmpl({}));
-
-        $('.navbar .container-fluid').html(
-            require('hbt!../../tmpl/navigation')({
-                templates: true
-            })
-        );
-    };
-
-});
-
-define('text!tmpl/templates-available.handlebars',[],function () { return '<div id="main">\n\n  <div class="subnav">\n    <div class="subnav-inner">\n      <div class="container-fluid">\n        <ul class="nav">\n          <li><a href="#/templates">Installed</a></li>\n          <li class="active"><a href="#/templates/available">Available</a></li>\n        </ul>\n      </div>\n    </div>\n  </div>\n\n  <div class="container-fluid">\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="templates-instaled-update-btn" class="btn" href="#">\n        <i class="icon-refresh"></i> Check for updates\n      </a>\n      <a id="templates-installed-add-btn" class="btn btn-success" href="#/settings">\n        <i class="icon-plus-sign"></i> Add sources\n      </a>\n    </div>\n  </div>\n</div>\n';});
-
-define('lib/views/templates-available',[
-    'require',
-    'jquery',
-    'hbt!../../tmpl/templates-available',
-    'hbt!../../tmpl/navigation',
-    'bootstrap/js/bootstrap-button'
-],
-function (require, $) {
-
-    var tmpl = require('hbt!../../tmpl/templates-available');
+    var tmpl = require('hbt!../../tmpl/templates');
 
     return function () {
         $('#content').html(tmpl({}));
@@ -16775,8 +16750,7 @@ define('lib/app',[
     'require',
     'director',
     './views/projects',
-    './views/templates-installed',
-    './views/templates-available',
+    './views/templates',
     './views/settings',
     './projects'
 ],
@@ -16788,8 +16762,7 @@ function (exports, require) {
 
     exports.routes = {
         '/':                    require('./views/projects'),
-        '/templates':           require('./views/templates-installed'),
-        '/templates/available': require('./views/templates-available'),
+        '/templates':           require('./views/templates'),
         '/settings':            require('./views/settings')
     };
 
