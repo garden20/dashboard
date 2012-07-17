@@ -1,8 +1,8 @@
-define('dashboard-data', function () {
+define('data/dashboard-data', function () {
 
     // this module is used when loaded from appCache
 
-    var DATA = {databases: []};
+    var DATA = {projects: []};
 
     // Feature test (from Modernizr)
     var hasStorage = (function() {
@@ -16,8 +16,8 @@ define('dashboard-data', function () {
     }());
 
     if (hasStorage) {
-        DATA.databases = JSON.parse(
-            localStorage.getItem('dashboard-databases')
+        DATA.projects = JSON.parse(
+            localStorage.getItem('dashboard-projects')
         );
     }
 

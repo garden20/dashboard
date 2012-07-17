@@ -2,16 +2,16 @@ exports.rewrites = [
     {from: '/', to: 'index.html'},
     {from: '/api', to: '../..'},
     {from: '/api/*', to: '../../*'},
-    {from: '/data/dashboard-data.js', to: '_list/datajs/databases', query: {
+    {from: '/data/dashboard-data.js', to: '_list/datajs/projects', query: {
         include_docs: 'true'
     }},
     {from: '/*', to: '*'}
 ];
 
 exports.views = {
-    databases: {
+    projects: {
         map: function (doc) {
-            if (doc.type === 'database') {
+            if (doc.type === 'project') {
                 emit([doc.db, doc.title || doc.name], null);
             }
         }
@@ -24,7 +24,7 @@ exports.lists = {
         send(
             'define("data/dashboard-data", function () {\n' +
             '\n' +
-            'return {databases: ['
+            'return {projects: ['
         );
         var first = true;
         var row;

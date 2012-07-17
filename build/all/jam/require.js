@@ -14376,7 +14376,7 @@ function (exports, require) {
 
 });
 
-define('lib/dblist',[
+define('lib/projects',[
     'exports',
     'require',
     'jquery',
@@ -14403,7 +14403,7 @@ function (exports, require, $, _) {
     };
 
     exports.get = function (id) {
-        return _.detect(DATA.databases, function (db) {
+        return _.detect(DATA.projects, function (db) {
             return db._id === id;
         });
     };
@@ -14422,21 +14422,21 @@ function (exports, require, $, _) {
             doc._rev = data.rev;
 
             // update if already exists
-            for (var i = 0; i < DATA.databases.length; i++) {
-                var db = DATA.databases[i];
+            for (var i = 0; i < DATA.projects.length; i++) {
+                var db = DATA.projects[i];
                 if (db._id === doc._id) {
-                    DATA.databases.splice(i, 1, doc);
+                    DATA.projects.splice(i, 1, doc);
                     return callback();
                 }
             };
 
             // does not exist, create new db doc
-            var dbs = DATA.databases;
+            var dbs = DATA.projects;
             dbs.push(doc);
             dbs = _.sortBy(dbs, function (db) {
                 return db.title;
             });
-            DATA.databases = _.uniq(dbs, true, function (db) {
+            DATA.projects = _.uniq(dbs, true, function (db) {
                 return db._id;
             });
             return callback();
@@ -14457,7 +14457,7 @@ function (exports, require, $, _) {
     exports.saveLocal = function () {
         if (hasStorage) {
             localStorage.setItem(
-                'dashboard-databases', JSON.stringify(DATA.databases)
+                'dashboard-projects', JSON.stringify(DATA.projects)
             );
         }
     };
@@ -14503,7 +14503,7 @@ function (exports, require, $, _) {
                     return callback(err);
                 }
                 exports.saveLocal();
-                $.get('dashboard-data.js', function (data) {
+                $.get('data/dashboard-data.js', function (data) {
                     // cache bust
                 });
                 callback();
@@ -14574,7 +14574,7 @@ function (exports, require, $, _) {
                 _id: window.btoa(ddoc_url),
                 ddoc_url: ddoc_url,
                 ddoc_rev: ddoc._rev,
-                type: 'database',
+                type: 'project',
                 url: app_url,
                 db: ddoc_url.split('/')[1],
                 name: ddoc._id.split('/')[1],
@@ -16523,9 +16523,9 @@ define('text', ['text/text'], function (main) { return main; });
 
 define("text/text", function(){});
 
-define('text!tmpl/databases.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n\n    {{#if databases}}\n    <table class="table table-striped table-databases">\n      <thead>\n      <tr>\n        <th>Name</th>\n        <th>Template</th>\n        <th>Admins</th>\n        <th>Members</th>\n      </tr>\n      </thead>\n      <tbody>\n        {{#each databases}}\n        <tr>\n          <td class="name">\n            <a title="{{db}}/{{name}}" href="{{url}}">\n              {{#if dashicon}}\n              <img class="icon" alt="Icon" src="{{dashicon}}" />\n              {{else}}\n              <img class="icon" alt="Icon" src="img/icons/default_22.png" />\n              {{/if}}\n            </a>\n            <a title="{{db}}/{{name}}" href="{{url}}">\n              {{db}}\n            </a>\n          </td>\n          <td class="template">\n            {{#if title}}{{title}}{{else}}{{name}}{{/if}}\n          </td>\n          <td class="admins">\n            {{security.admins.names}}\n            {{security.admins.roles}}\n          </td>\n          <td class="members">\n            {{security.members.names}}\n            {{security.members.roles}}\n          </td>\n        </tr>\n        {{/each}}\n      </tbody>\n    </table>\n    {{/if}}\n\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="databases-refresh-btn" class="btn" href="#">\n        <i class="icon-refresh"></i> Refresh list\n      </a>\n      <a id="databases-add-btn" class="btn btn-success" href="#/templates">\n        <i class="icon-plus-sign"></i> Create database\n      </a>\n    </div>\n  </div>\n</div>\n';});
+define('text!tmpl/projects.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n\n    {{#if projects}}\n    <table class="table table-striped table-projects">\n      <thead>\n      <tr>\n        <th>Name</th>\n        <th>Template</th>\n        <th>Admins</th>\n        <th>Members</th>\n      </tr>\n      </thead>\n      <tbody>\n        {{#each projects}}\n        <tr>\n          <td class="name">\n            <a title="{{db}}/{{name}}" href="{{url}}">\n              {{#if dashicon}}\n              <img class="icon" alt="Icon" src="{{dashicon}}" />\n              {{else}}\n              <img class="icon" alt="Icon" src="img/icons/default_22.png" />\n              {{/if}}\n            </a>\n            <a title="{{db}}/{{name}}" href="{{url}}">\n              {{db}}\n            </a>\n          </td>\n          <td class="template">\n            {{#if title}}{{title}}{{else}}{{name}}{{/if}}\n          </td>\n          <td class="admins">\n            {{security.admins.names}}\n            {{security.admins.roles}}\n          </td>\n          <td class="members">\n            {{security.members.names}}\n            {{security.members.roles}}\n          </td>\n        </tr>\n        {{/each}}\n      </tbody>\n    </table>\n    {{/if}}\n\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="projects-refresh-btn" class="btn" href="#">\n        <i class="icon-refresh"></i> Refresh list\n      </a>\n      <a id="projects-add-btn" class="btn btn-success" href="#/templates">\n        <i class="icon-plus-sign"></i> Create new project\n      </a>\n    </div>\n  </div>\n</div>\n';});
 
-define('text!tmpl/navigation.handlebars',[],function () { return '<ul class="nav">\n  <li{{#if databases}} class="active"{{/if}}>\n    <a href="#/">Databases</a>\n  </li>\n  <li{{#if templates}} class="active"{{/if}}>\n    <a href="#/templates">Templates</a>\n  </li>\n  <!--\n  <li{{#if library}} class="active"{{/if}}>\n    <a href="#/library">Library</a>\n  </li>\n  -->\n  <li{{#if settings}} class="active"{{/if}}>\n    <a href="#/settings">Settings</a>\n  </li>\n</ul>\n';});
+define('text!tmpl/navigation.handlebars',[],function () { return '<ul class="nav">\n  <li{{#if projects}} class="active"{{/if}}>\n    <a href="#/">Projects</a>\n  </li>\n  <li{{#if templates}} class="active"{{/if}}>\n    <a href="#/templates">Templates</a>\n  </li>\n  <!--\n  <li{{#if library}} class="active"{{/if}}>\n    <a href="#/library">Library</a>\n  </li>\n  -->\n  <li{{#if settings}} class="active"{{/if}}>\n    <a href="#/settings">Settings</a>\n  </li>\n</ul>\n';});
 
 /* ============================================================
  * bootstrap-button.js v2.0.3
@@ -16625,31 +16625,31 @@ define('text!tmpl/navigation.handlebars',[],function () { return '<ul class="nav
 }(window.jQuery);
 define("bootstrap/js/bootstrap-button", function(){});
 
-define('lib/views/databases',[
+define('lib/views/projects',[
     'require',
     'jquery',
-    '../dblist',
+    '../projects',
     '../../data/dashboard-data',
-    'hbt!../../tmpl/databases',
+    'hbt!../../tmpl/projects',
     'hbt!../../tmpl/navigation',
     'bootstrap/js/bootstrap-button'
 ],
-function (require, $, dblist, DATA) {
+function (require, $, projects, DATA) {
 
-    var tmpl = require('hbt!../../tmpl/databases');
+    var tmpl = require('hbt!../../tmpl/projects');
 
     return function () {
         $('#content').html(tmpl({
-            databases: DATA.databases
+            projects: DATA.projects
         }));
 
         $('.navbar .container-fluid').html(
             require('hbt!../../tmpl/navigation')({
-                databases: true
+                projects: true
             })
         );
 
-        $('#databases-refresh-btn').click(function (ev) {
+        $('#projects-refresh-btn').click(function (ev) {
             ev.preventDefault();
             var that = this;
 
@@ -16657,7 +16657,7 @@ function (require, $, dblist, DATA) {
             $('#admin-bar-status').html('');
             $('#main').html('');
 
-            var refresher = dblist.refresh(function (err) {
+            var refresher = projects.refresh(function (err) {
                 if (err) {
                     // TODO: add error alert box to status area
                     return console.error(err);
@@ -16668,7 +16668,7 @@ function (require, $, dblist, DATA) {
                     $('#admin-bar-status .progress').fadeOut(function () {
                         //$('#admin-bar-status').html('');
                         $('#content').html(tmpl({
-                            databases: DATA.databases
+                            projects: DATA.projects
                         }));
                     });
                     $(that).button('reset');
@@ -16774,20 +16774,20 @@ define('lib/app',[
     'exports',
     'require',
     'director',
-    './views/databases',
+    './views/projects',
     './views/templates-installed',
     './views/templates-available',
     './views/settings',
-    './dblist'
+    './projects'
 ],
 function (exports, require) {
 
     var director = require('director'),
-        dblist = require('./dblist');
+        projects = require('./projects');
 
 
     exports.routes = {
-        '/':                    require('./views/databases'),
+        '/':                    require('./views/projects'),
         '/templates':           require('./views/templates-installed'),
         '/templates/available': require('./views/templates-available'),
         '/settings':            require('./views/settings')
@@ -16801,7 +16801,7 @@ function (exports, require) {
             window.location = '#/';
             $(window).trigger('hashchange');
         }
-        dblist.saveLocal();
+        projects.saveLocal();
     };
 
 });
