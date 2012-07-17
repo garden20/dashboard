@@ -7644,9 +7644,6 @@ body {
   border-radius: 0;
   -webkit-border-radius: 0;
 }
-.navbar .container-fluid {
-  padding: 0;
-}
 .navbar .nav li a {
   padding-top: 12px;
   font-weight: bold;
@@ -7713,9 +7710,9 @@ body {
   text-align: right;
 }
 #main {
-  /* make space for admin bar when scrolling to bottom */
+  /* make space for navbar and admin bar when scrolling to bottom */
 
-  margin-bottom: 42px;
+  margin: 63px 0 42px 0;
 }
 .table-databases .name .icon {
   margin-right: 0.618em;
