@@ -16,13 +16,13 @@
       </fieldset>
 
       <fieldset>
-        <legend>Database listing</legend>
+        <legend>Projects list</legend>
         <div class="control-group">
           <label class="control-label" for="projects_show_no_templates">No templates</label>
           <div class="controls">
             <label class="checkbox" for="projects_show_no_templates">
               <input type="checkbox" id="projects_show_no_templates" {{#if settings.projects.show_no_templates}}checked="checked" {{/if}}/>
-              Include databases with no template (open in Futon)
+              Include projects with no template (opens database in Futon)
             </label>
           </div>
         </div>
@@ -31,7 +31,7 @@
           <div class="controls">
             <label class="checkbox" for="projects_show_unknown_templates">
               <input type="checkbox" id="projects_show_unknown_templates" {{#if settings.projects.show_unknown_templates}}checked="checked" {{/if}}/>
-              Include databases with unknown templates in the list
+              Include projects with unknown templates in the list
             </label>
           </div>
         </div>
