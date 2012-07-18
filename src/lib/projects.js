@@ -171,8 +171,11 @@ function (exports, require, $, _) {
             };
             if (!app_url) {
                 // show document in futon
-                doc.url = '/_utils/document.html?' +
-                    ddoc_url.replace(/^\//, '');
+                //doc.url = '/_utils/document.html?' +
+                //    ddoc_url.replace(/^\//,'');
+
+                // show db in futon
+                doc.url = '/_utils/database.html?' + doc.db;
                 doc.unknown_root = true;
             }
             if (ddoc.app) {
