@@ -57,14 +57,14 @@ function (exports, require, $, _) {
                 }
             };
 
-            // does not exist, create new db doc
-            var dbs = DATA.projects;
-            dbs.push(doc);
-            dbs = _.sortBy(dbs, function (db) {
-                return db.title;
+            // does not exist, create new project doc
+            var plist = DATA.projects;
+            plist.push(doc);
+            plist = _.sortBy(plist, function (p) {
+                return [p.db, (p.app && p.app.title) || p.name];
             });
-            DATA.projects = _.uniq(dbs, true, function (db) {
-                return db._id;
+            DATA.projects = _.uniq(plist, true, function (p) {
+                return p._id;
             });
             return callback();
         });
@@ -77,20 +77,6 @@ function (exports, require, $, _) {
             );
         }
     };
-
-    /*
-    exports.exists = function (ddoc_url, ddoc_rev) {
-        var id = window.btoa(ddoc_url);
-        var db = exports.get(id);
-        if (db) {
-            if (ddoc_rev) {
-                return db.ddoc_rev === ddoc_rev;
-            }
-            return true
-        }
-        return false;
-    };
-    */
 
     exports.refresh = function (/*optional*/callback) {
         callback = callback || logErrorsCallback;
@@ -144,18 +130,6 @@ function (exports, require, $, _) {
             }
             async.forEachSeries(data.rows || [], function (r, cb) {
                 var ddoc_url = ['', db, r.id].join('/');
-
-                /*
-                if (!exports.exists(ddoc_url, r.value.rev)) {
-                    // does not exist at this revision, update
-                    exports.refreshDoc(ddoc_url, cb);
-                }
-                else {
-                    console.log(['skip', ddoc_url]);
-                    cb();
-                }
-                */
-
                 // For now, update all documents on refresh
                 exports.refreshDoc(ddoc_url, cb);
             },
@@ -193,8 +167,7 @@ function (exports, require, $, _) {
                 type: 'project',
                 url: app_url,
                 db: ddoc_url.split('/')[1],
-                name: ddoc._id.split('/')[1],
-                title: null
+                name: ddoc._id.split('/')[1]
             };
             if (!app_url) {
                 // show document in futon
@@ -203,19 +176,14 @@ function (exports, require, $, _) {
                 doc.unknown_root = true;
             }
             if (ddoc.app) {
-                if (ddoc.app.title) {
-                    doc.title = ddoc.app.title;
-                }
-                if (ddoc.app.icons) {
-                    doc.icons = ddoc.app.icons;
-                }
+                doc.app = ddoc.app;
             }
 
             async.parallel([
                 function (cb) {
-                    if (doc.icons && doc.icons['22']) {
+                    if (doc.app && doc.app.icons && doc.app.icons['22']) {
                         var dashicon_url = '/_api/' + doc.ddoc_url + '/' +
-                            ddoc.app.icons['22'];
+                            doc.app.icons['22'];
 
                         utils.imgToDataURI(dashicon_url, function (err, url) {
                             if (!err && url) {

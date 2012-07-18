@@ -1,18 +1,41 @@
 define([
     'require',
     'jquery',
+    'underscore',
     '../projects',
+    '../settings',
     'hbt!../../templates/projects',
     'hbt!../../templates/navigation',
     'bootstrap/js/bootstrap-button'
 ],
-function (require, $, projects) {
+function (require, $, _) {
 
-    var tmpl = require('hbt!../../templates/projects');
+    var tmpl = require('hbt!../../templates/projects'),
+        projects = require('../projects'),
+        settings = require('../settings');
+
+
+    function getProjectList() {
+        var plist = projects.get();
+        var cfg = settings.get().projects;
+
+        if (!cfg.show_no_templates) {
+            plist = _.reject(plist, function (p) {
+                return p.unknown_root;
+            });
+        }
+        if (!cfg.show_unknown_templates) {
+            plist = _.reject(plist, function (p) {
+                return !p.unknown_root && !p.app;
+            });
+        }
+        return plist;
+    }
+
 
     return function () {
         $('#content').html(tmpl({
-            projects: projects.get()
+            projects: getProjectList()
         }));
 
         $('.navbar .container-fluid').html(
@@ -40,7 +63,7 @@ function (require, $, projects) {
                     $('#admin-bar-status .progress').fadeOut(function () {
                         //$('#admin-bar-status').html('');
                         $('#content').html(tmpl({
-                            projects: projects.get()
+                            projects: getProjectList()
                         }));
                     });
                     $(that).button('reset');

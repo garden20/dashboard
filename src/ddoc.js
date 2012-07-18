@@ -13,7 +13,7 @@ exports.views = {
     projects: {
         map: function (doc) {
             if (doc.type === 'project') {
-                emit([doc.db, doc.title || doc.name], null);
+                emit([doc.db, (doc.app && doc.app.title) || doc.name], null);
             }
         }
     }
