@@ -1,19 +1,19 @@
 define([
     'require',
     'jquery',
-    'hbt!../../tmpl/settings',
-    'hbt!../../tmpl/navigation',
+    'hbt!../../templates/settings',
+    'hbt!../../templates/navigation',
     'bootstrap/js/bootstrap-button'
 ],
 function (require, $) {
 
-    var tmpl = require('hbt!../../tmpl/settings');
+    var tmpl = require('hbt!../../templates/settings');
 
     return function () {
         $('#content').html(tmpl({}));
 
         $('.navbar .container-fluid').html(
-            require('hbt!../../tmpl/navigation')({
+            require('hbt!../../templates/navigation')({
                 settings: true
             })
         );

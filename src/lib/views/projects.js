@@ -3,13 +3,13 @@ define([
     'jquery',
     '../projects',
     '../../data/dashboard-data',
-    'hbt!../../tmpl/projects',
-    'hbt!../../tmpl/navigation',
+    'hbt!../../templates/projects',
+    'hbt!../../templates/navigation',
     'bootstrap/js/bootstrap-button'
 ],
 function (require, $, projects, DATA) {
 
-    var tmpl = require('hbt!../../tmpl/projects');
+    var tmpl = require('hbt!../../templates/projects');
 
     return function () {
         $('#content').html(tmpl({
@@ -17,7 +17,7 @@ function (require, $, projects, DATA) {
         }));
 
         $('.navbar .container-fluid').html(
-            require('hbt!../../tmpl/navigation')({
+            require('hbt!../../templates/navigation')({
                 projects: true
             })
         );

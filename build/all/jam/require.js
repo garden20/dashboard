@@ -16523,9 +16523,9 @@ define('text', ['text/text'], function (main) { return main; });
 
 define("text/text", function(){});
 
-define('text!tmpl/projects.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n\n    {{#if projects}}\n    <table class="table table-striped table-projects">\n      <thead>\n      <tr>\n        <th>Name</th>\n        <th>Template</th>\n        <th>Admins</th>\n        <th>Members</th>\n      </tr>\n      </thead>\n      <tbody>\n        {{#each projects}}\n        <tr>\n          <td class="name">\n            <a title="{{db}}/{{name}}" href="{{url}}">\n              {{#if dashicon}}\n              <img class="icon" alt="Icon" src="{{dashicon}}" />\n              {{else}}\n              <img class="icon" alt="Icon" src="img/icons/default_22.png" />\n              {{/if}}\n            </a>\n            <a title="{{db}}/{{name}}" href="{{url}}">\n              {{db}}\n            </a>\n          </td>\n          <td class="template">\n            {{#if title}}{{title}}{{else}}{{name}}{{/if}}\n          </td>\n          <td class="admins">\n            {{security.admins.names}}\n            {{security.admins.roles}}\n          </td>\n          <td class="members">\n            {{security.members.names}}\n            {{security.members.roles}}\n          </td>\n        </tr>\n        {{/each}}\n      </tbody>\n    </table>\n    {{/if}}\n\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="projects-refresh-btn" class="btn" href="#">\n        <i class="icon-refresh"></i> Refresh list\n      </a>\n      <a id="projects-add-btn" class="btn btn-success" href="#/templates">\n        <i class="icon-plus-sign"></i> Create new project\n      </a>\n    </div>\n  </div>\n</div>\n';});
+define('text!templates/projects.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n\n    {{#if projects}}\n    <table class="table table-striped table-projects">\n      <thead>\n      <tr>\n        <th>Name</th>\n        <th>Template</th>\n        <th>Admins</th>\n        <th>Members</th>\n      </tr>\n      </thead>\n      <tbody>\n        {{#each projects}}\n        <tr>\n          <td class="name">\n            <a title="{{db}}/{{name}}" href="{{url}}">\n              {{#if dashicon}}\n              <img class="icon" alt="Icon" src="{{dashicon}}" />\n              {{else}}\n              <img class="icon" alt="Icon" src="img/icons/default_22.png" />\n              {{/if}}\n            </a>\n            <a title="{{db}}/{{name}}" href="{{url}}">\n              {{db}}\n            </a>\n          </td>\n          <td class="template">\n            {{#if title}}{{title}}{{else}}{{name}}{{/if}}\n          </td>\n          <td class="admins">\n            {{security.admins.names}}\n            {{security.admins.roles}}\n          </td>\n          <td class="members">\n            {{security.members.names}}\n            {{security.members.roles}}\n          </td>\n        </tr>\n        {{/each}}\n      </tbody>\n    </table>\n    {{/if}}\n\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="projects-refresh-btn" class="btn" href="#">\n        <i class="icon-refresh"></i> Refresh list\n      </a>\n      <a id="projects-add-btn" class="btn btn-success" href="#/templates">\n        <i class="icon-plus-sign"></i> Create new project\n      </a>\n    </div>\n  </div>\n</div>\n';});
 
-define('text!tmpl/navigation.handlebars',[],function () { return '<ul class="nav">\n  <li{{#if projects}} class="active"{{/if}}>\n    <a href="#/">Projects</a>\n  </li>\n  <li{{#if templates}} class="active"{{/if}}>\n    <a href="#/templates">Templates</a>\n  </li>\n  <!--\n  <li{{#if library}} class="active"{{/if}}>\n    <a href="#/library">Library</a>\n  </li>\n  -->\n  <li{{#if settings}} class="active"{{/if}}>\n    <a href="#/settings">Settings</a>\n  </li>\n</ul>\n';});
+define('text!templates/navigation.handlebars',[],function () { return '<ul class="nav">\n  <li{{#if projects}} class="active"{{/if}}>\n    <a href="#/">Projects</a>\n  </li>\n  <li{{#if templates}} class="active"{{/if}}>\n    <a href="#/templates">Templates</a>\n  </li>\n  <!--\n  <li{{#if library}} class="active"{{/if}}>\n    <a href="#/library">Library</a>\n  </li>\n  -->\n  <li{{#if settings}} class="active"{{/if}}>\n    <a href="#/settings">Settings</a>\n  </li>\n</ul>\n';});
 
 /* ============================================================
  * bootstrap-button.js v2.0.3
@@ -16630,13 +16630,13 @@ define('lib/views/projects',[
     'jquery',
     '../projects',
     '../../data/dashboard-data',
-    'hbt!../../tmpl/projects',
-    'hbt!../../tmpl/navigation',
+    'hbt!../../templates/projects',
+    'hbt!../../templates/navigation',
     'bootstrap/js/bootstrap-button'
 ],
 function (require, $, projects, DATA) {
 
-    var tmpl = require('hbt!../../tmpl/projects');
+    var tmpl = require('hbt!../../templates/projects');
 
     return function () {
         $('#content').html(tmpl({
@@ -16644,7 +16644,7 @@ function (require, $, projects, DATA) {
         }));
 
         $('.navbar .container-fluid').html(
-            require('hbt!../../tmpl/navigation')({
+            require('hbt!../../templates/navigation')({
                 projects: true
             })
         );
@@ -16695,24 +16695,24 @@ function (require, $, projects, DATA) {
 
 });
 
-define('text!tmpl/templates.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="templates-instaled-update-btn" class="btn" href="#">\n        <i class="icon-refresh"></i> Check for updates\n      </a>\n      <a id="templates-installed-add-btn" class="btn btn-success" href="#/settings">\n        <i class="icon-plus-sign"></i> Add template sources\n      </a>\n    </div>\n  </div>\n</div>\n';});
+define('text!templates/templates.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="templates-instaled-update-btn" class="btn" href="#">\n        <i class="icon-refresh"></i> Check for updates\n      </a>\n      <a id="templates-installed-add-btn" class="btn btn-success" href="#/settings">\n        <i class="icon-plus-sign"></i> Add template sources\n      </a>\n    </div>\n  </div>\n</div>\n';});
 
 define('lib/views/templates',[
     'require',
     'jquery',
-    'hbt!../../tmpl/templates',
-    'hbt!../../tmpl/navigation',
+    'hbt!../../templates/templates',
+    'hbt!../../templates/navigation',
     'bootstrap/js/bootstrap-button'
 ],
 function (require, $) {
 
-    var tmpl = require('hbt!../../tmpl/templates');
+    var tmpl = require('hbt!../../templates/templates');
 
     return function () {
         $('#content').html(tmpl({}));
 
         $('.navbar .container-fluid').html(
-            require('hbt!../../tmpl/navigation')({
+            require('hbt!../../templates/navigation')({
                 templates: true
             })
         );
@@ -16720,24 +16720,24 @@ function (require, $) {
 
 });
 
-define('text!tmpl/settings.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n\n    <form class="form-horizontal">\n\n      <fieldset>\n        <legend>Template sources</legend>\n        <div class="control-group">\n          <label class="control-label" for="textarea">Source URLs</label>\n          <div class="controls">\n            <textarea class="input-xlarge" id="textarea" rows="5"></textarea>\n            <p class="help-block">Enter one full URL per line (including http://)</p>\n          </div>\n        </div>\n      </fieldset>\n\n      <fieldset>\n        <legend>Database listing</legend>\n        <div class="control-group">\n          <label class="control-label" for="dblist-display-no-template">No templates</label>\n          <div class="controls">\n            <label class="checkbox" for="dblist-display-no-template">\n              <input type="checkbox" id="dblist-display-no-template" />\n              Include databases with no template (open in Futon)\n            </label>\n          </div>\n        </div>\n        <div class="control-group">\n          <label class="control-label" for="dblist-display-unknown">Unknown templates</label>\n          <div class="controls">\n            <label class="checkbox" for="dblist-display-unknown">\n              <input type="checkbox" id="dblist-display-unknown" />\n              Include databases with unknown templates in the list\n            </label>\n          </div>\n        </div>\n      </fieldset>\n\n    </form>\n\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="templates-installed-add-btn" class="btn btn-primary" href="#">\n        <i class="icon-save"></i> Save changes\n      </a>\n    </div>\n  </div>\n</div>\n';});
+define('text!templates/settings.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n\n    <form class="form-horizontal">\n\n      <fieldset>\n        <legend>Template sources</legend>\n        <div class="control-group">\n          <label class="control-label" for="textarea">Source URLs</label>\n          <div class="controls">\n            <textarea class="input-xlarge" id="textarea" rows="5"></textarea>\n            <p class="help-block">Enter one full URL per line (including http://)</p>\n          </div>\n        </div>\n      </fieldset>\n\n      <fieldset>\n        <legend>Database listing</legend>\n        <div class="control-group">\n          <label class="control-label" for="dblist-display-no-template">No templates</label>\n          <div class="controls">\n            <label class="checkbox" for="dblist-display-no-template">\n              <input type="checkbox" id="dblist-display-no-template" />\n              Include databases with no template (open in Futon)\n            </label>\n          </div>\n        </div>\n        <div class="control-group">\n          <label class="control-label" for="dblist-display-unknown">Unknown templates</label>\n          <div class="controls">\n            <label class="checkbox" for="dblist-display-unknown">\n              <input type="checkbox" id="dblist-display-unknown" />\n              Include databases with unknown templates in the list\n            </label>\n          </div>\n        </div>\n      </fieldset>\n\n    </form>\n\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="templates-installed-add-btn" class="btn btn-primary" href="#">\n        <i class="icon-save"></i> Save changes\n      </a>\n    </div>\n  </div>\n</div>\n';});
 
 define('lib/views/settings',[
     'require',
     'jquery',
-    'hbt!../../tmpl/settings',
-    'hbt!../../tmpl/navigation',
+    'hbt!../../templates/settings',
+    'hbt!../../templates/navigation',
     'bootstrap/js/bootstrap-button'
 ],
 function (require, $) {
 
-    var tmpl = require('hbt!../../tmpl/settings');
+    var tmpl = require('hbt!../../templates/settings');
 
     return function () {
         $('#content').html(tmpl({}));
 
         $('.navbar .container-fluid').html(
-            require('hbt!../../tmpl/navigation')({
+            require('hbt!../../templates/navigation')({
                 settings: true
             })
         );
