@@ -10,7 +10,8 @@ define([
 function (exports, require) {
 
     var director = require('director'),
-        projects = require('./projects');
+        projects = require('./projects'),
+        settings = require('./settings');
 
 
     exports.routes = {
@@ -28,6 +29,7 @@ function (exports, require) {
             $(window).trigger('hashchange');
         }
         projects.saveLocal();
+        settings.saveLocal();
     };
 
 });

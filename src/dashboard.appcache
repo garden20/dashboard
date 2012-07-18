@@ -19,6 +19,7 @@ jam/font-awesome/font/fontawesome-webfont.woff
 
 FALLBACK:
 data/dashboard-data.js   data/dashboard-data-fallback.js
+data/settings.js         data/settings-fallback.js
 
 NETWORK:
 /_api

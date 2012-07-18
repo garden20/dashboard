@@ -2,18 +2,17 @@ define([
     'require',
     'jquery',
     '../projects',
-    '../../data/dashboard-data',
     'hbt!../../templates/projects',
     'hbt!../../templates/navigation',
     'bootstrap/js/bootstrap-button'
 ],
-function (require, $, projects, DATA) {
+function (require, $, projects) {
 
     var tmpl = require('hbt!../../templates/projects');
 
     return function () {
         $('#content').html(tmpl({
-            projects: DATA.projects
+            projects: projects.get()
         }));
 
         $('.navbar .container-fluid').html(
@@ -41,7 +40,7 @@ function (require, $, projects, DATA) {
                     $('#admin-bar-status .progress').fadeOut(function () {
                         //$('#admin-bar-status').html('');
                         $('#content').html(tmpl({
-                            projects: DATA.projects
+                            projects: projects.get()
                         }));
                     });
                     $(that).button('reset');

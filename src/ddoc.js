@@ -5,6 +5,7 @@ exports.rewrites = [
     {from: '/data/dashboard-data.js', to: '_list/datajs/projects', query: {
         include_docs: 'true'
     }},
+    {from: '/data/settings.js', to: '_show/settingsjs/settings'},
     {from: '/*', to: '*'}
 ];
 
@@ -33,5 +34,24 @@ exports.lists = {
             first = false;
         }
         send('\n]};\n\n});');
+    }
+};
+
+exports.shows = {
+    settingsjs: function (doc, req) {
+        // don't send this property to client
+        delete doc._revisions;
+
+        return {
+            code: 200,
+            headers: {
+                'Content-Type': 'application/javascript'
+            },
+            body: 'define("data/settings", function () {\n' +
+                '\n' +
+                'return ' + JSON.stringify(doc) + ';\n' +
+                '\n' +
+                '});'
+        };
     }
 };

@@ -7,7 +7,8 @@ define([
     'async',
     '../data/dashboard-data',
     'events',
-    './utils'
+    './utils',
+    './env'
 ],
 function (exports, require, $, _) {
 
@@ -15,7 +16,8 @@ function (exports, require, $, _) {
         async = require('async'),
         events = require('events'),
         utils = require('./utils'),
-        DATA = require('../data/dashboard-data');
+        DATA = require('../data/dashboard-data'),
+        env = require('./env');
 
 
     var logErrorsCallback = function (err) {
@@ -25,9 +27,12 @@ function (exports, require, $, _) {
     };
 
     exports.get = function (id) {
-        return _.detect(DATA.projects, function (db) {
-            return db._id === id;
-        });
+        if (id) {
+            return _.detect(DATA.projects, function (db) {
+                return db._id === id;
+            });
+        }
+        return DATA.projects;
     };
 
     exports.update = function (newDoc, /*optional*/callback) {
@@ -65,19 +70,8 @@ function (exports, require, $, _) {
         });
     };
 
-    // Feature test (from Modernizr)
-    var hasStorage = (function() {
-        try {
-            localStorage.setItem('dashboard-test', 'dashboard-test');
-            localStorage.removeItem('dashboard-test');
-            return true;
-        } catch(e) {
-            return false;
-        }
-    }());
-
     exports.saveLocal = function () {
-        if (hasStorage) {
+        if (env.hasStorage) {
             localStorage.setItem(
                 'dashboard-projects', JSON.stringify(DATA.projects)
             );

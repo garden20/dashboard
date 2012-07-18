@@ -1,14 +1,15 @@
 <div id="main">
   <div class="container-fluid">
 
-    <form class="form-horizontal">
+    <form id="settings-form" class="form-horizontal">
 
       <fieldset>
         <legend>Template sources</legend>
         <div class="control-group">
-          <label class="control-label" for="textarea">Source URLs</label>
+          <label class="control-label" for="template_sources">Source URLs</label>
           <div class="controls">
-            <textarea class="input-xlarge" id="textarea" rows="5"></textarea>
+            <textarea class="input-xlarge" id="template_sources" rows="5">{{#each settings.templates.sources}}{{this}}
+{{/each}}</textarea>
             <p class="help-block">Enter one full URL per line (including http://)</p>
           </div>
         </div>
@@ -17,19 +18,19 @@
       <fieldset>
         <legend>Database listing</legend>
         <div class="control-group">
-          <label class="control-label" for="dblist-display-no-template">No templates</label>
+          <label class="control-label" for="projects_show_no_templates">No templates</label>
           <div class="controls">
-            <label class="checkbox" for="dblist-display-no-template">
-              <input type="checkbox" id="dblist-display-no-template" />
+            <label class="checkbox" for="projects_show_no_templates">
+              <input type="checkbox" id="projects_show_no_templates" {{#if settings.projects.show_no_templates}}checked="checked" {{/if}}/>
               Include databases with no template (open in Futon)
             </label>
           </div>
         </div>
         <div class="control-group">
-          <label class="control-label" for="dblist-display-unknown">Unknown templates</label>
+          <label class="control-label" for="projects_show_unknown_templates">Unknown templates</label>
           <div class="controls">
-            <label class="checkbox" for="dblist-display-unknown">
-              <input type="checkbox" id="dblist-display-unknown" />
+            <label class="checkbox" for="projects_show_unknown_templates">
+              <input type="checkbox" id="projects_show_unknown_templates" {{#if settings.projects.show_unknown_templates}}checked="checked" {{/if}}/>
               Include databases with unknown templates in the list
             </label>
           </div>
@@ -45,7 +46,7 @@
   <div class="admin-bar-inner">
     <div id="admin-bar-status"></div>
     <div id="admin-bar-controls">
-      <a id="templates-installed-add-btn" class="btn btn-primary" href="#">
+      <a id="settings-save-btn" class="btn btn-primary" href="#">
         <i class="icon-save"></i> Save changes
       </a>
     </div>

@@ -14376,6 +14376,21 @@ function (exports, require) {
 
 });
 
+define('lib/env',['exports'], function (exports) {
+
+    // Feature test (from Modernizr)
+    exports.hasStorage = (function() {
+        try {
+            localStorage.setItem('dashboard-test', 'dashboard-test');
+            localStorage.removeItem('dashboard-test');
+            return true;
+        } catch(e) {
+            return false;
+        }
+    }());
+
+});
+
 define('lib/projects',[
     'exports',
     'require',
@@ -14385,7 +14400,8 @@ define('lib/projects',[
     'async',
     '../data/dashboard-data',
     'events',
-    './utils'
+    './utils',
+    './env'
 ],
 function (exports, require, $, _) {
 
@@ -14393,7 +14409,8 @@ function (exports, require, $, _) {
         async = require('async'),
         events = require('events'),
         utils = require('./utils'),
-        DATA = require('../data/dashboard-data');
+        DATA = require('../data/dashboard-data'),
+        env = require('./env');
 
 
     var logErrorsCallback = function (err) {
@@ -14403,9 +14420,12 @@ function (exports, require, $, _) {
     };
 
     exports.get = function (id) {
-        return _.detect(DATA.projects, function (db) {
-            return db._id === id;
-        });
+        if (id) {
+            return _.detect(DATA.projects, function (db) {
+                return db._id === id;
+            });
+        }
+        return DATA.projects;
     };
 
     exports.update = function (newDoc, /*optional*/callback) {
@@ -14443,19 +14463,8 @@ function (exports, require, $, _) {
         });
     };
 
-    // Feature test (from Modernizr)
-    var hasStorage = (function() {
-        try {
-            localStorage.setItem('dashboard-test', 'dashboard-test');
-            localStorage.removeItem('dashboard-test');
-            return true;
-        } catch(e) {
-            return false;
-        }
-    }());
-
     exports.saveLocal = function () {
-        if (hasStorage) {
+        if (env.hasStorage) {
             localStorage.setItem(
                 'dashboard-projects', JSON.stringify(DATA.projects)
             );
@@ -16629,18 +16638,17 @@ define('lib/views/projects',[
     'require',
     'jquery',
     '../projects',
-    '../../data/dashboard-data',
     'hbt!../../templates/projects',
     'hbt!../../templates/navigation',
     'bootstrap/js/bootstrap-button'
 ],
-function (require, $, projects, DATA) {
+function (require, $, projects) {
 
     var tmpl = require('hbt!../../templates/projects');
 
     return function () {
         $('#content').html(tmpl({
-            projects: DATA.projects
+            projects: projects.get()
         }));
 
         $('.navbar .container-fluid').html(
@@ -16668,7 +16676,7 @@ function (require, $, projects, DATA) {
                     $('#admin-bar-status .progress').fadeOut(function () {
                         //$('#admin-bar-status').html('');
                         $('#content').html(tmpl({
-                            projects: DATA.projects
+                            projects: projects.get()
                         }));
                     });
                     $(that).button('reset');
@@ -16720,21 +16728,116 @@ function (require, $) {
 
 });
 
-define('text!templates/settings.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n\n    <form class="form-horizontal">\n\n      <fieldset>\n        <legend>Template sources</legend>\n        <div class="control-group">\n          <label class="control-label" for="textarea">Source URLs</label>\n          <div class="controls">\n            <textarea class="input-xlarge" id="textarea" rows="5"></textarea>\n            <p class="help-block">Enter one full URL per line (including http://)</p>\n          </div>\n        </div>\n      </fieldset>\n\n      <fieldset>\n        <legend>Database listing</legend>\n        <div class="control-group">\n          <label class="control-label" for="dblist-display-no-template">No templates</label>\n          <div class="controls">\n            <label class="checkbox" for="dblist-display-no-template">\n              <input type="checkbox" id="dblist-display-no-template" />\n              Include databases with no template (open in Futon)\n            </label>\n          </div>\n        </div>\n        <div class="control-group">\n          <label class="control-label" for="dblist-display-unknown">Unknown templates</label>\n          <div class="controls">\n            <label class="checkbox" for="dblist-display-unknown">\n              <input type="checkbox" id="dblist-display-unknown" />\n              Include databases with unknown templates in the list\n            </label>\n          </div>\n        </div>\n      </fieldset>\n\n    </form>\n\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="templates-installed-add-btn" class="btn btn-primary" href="#">\n        <i class="icon-save"></i> Save changes\n      </a>\n    </div>\n  </div>\n</div>\n';});
+define('lib/settings',[
+    'exports',
+    'require',
+    'underscore',
+    '../data/settings',
+    'couchr',
+    './env'
+],
+function (exports, require, _) {
+
+    var couchr = require('couchr'),
+        DATA = require('../data/settings'),
+        env = require('./env');
+
+
+    exports.DEFAULTS = {
+        templates: {
+            sources: []
+        },
+        projects: {
+            show_no_templates: false,
+            show_unknown_templates: false
+        }
+    };
+
+    exports.update = function (cfg, callback) {
+        // TODO: should this be a deep extend?
+        var doc = _.extend(exports.DEFAULTS, DATA || {}, cfg);
+        couchr.put('api/settings', doc, function (err, res) {
+            if (err) {
+                return callback(err);
+            }
+            doc._rev = res.rev;
+            DATA = doc;
+            $.get('data/settings.js', function (data) {
+                // cache bust
+            });
+            exports.saveLocal();
+            callback();
+        });
+    };
+
+    exports.get = function () {
+        if (!DATA) {
+            return exports.DEFAULTS;
+        }
+        // TODO: should this be a deep extend?
+        return _.extend(exports.DEFAULTS, DATA);
+    };
+
+    exports.saveLocal = function () {
+        if (env.hasStorage) {
+            localStorage.setItem('dashboard-settings', JSON.stringify(DATA));
+        }
+    };
+
+});
+
+define('text!templates/settings.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n\n    <form id="settings-form" class="form-horizontal">\n\n      <fieldset>\n        <legend>Template sources</legend>\n        <div class="control-group">\n          <label class="control-label" for="template_sources">Source URLs</label>\n          <div class="controls">\n            <textarea class="input-xlarge" id="template_sources" rows="5">{{#each settings.templates.sources}}{{this}}\n{{/each}}</textarea>\n            <p class="help-block">Enter one full URL per line (including http://)</p>\n          </div>\n        </div>\n      </fieldset>\n\n      <fieldset>\n        <legend>Database listing</legend>\n        <div class="control-group">\n          <label class="control-label" for="projects_show_no_templates">No templates</label>\n          <div class="controls">\n            <label class="checkbox" for="projects_show_no_templates">\n              <input type="checkbox" id="projects_show_no_templates" {{#if settings.projects.show_no_templates}}checked="checked" {{/if}}/>\n              Include databases with no template (open in Futon)\n            </label>\n          </div>\n        </div>\n        <div class="control-group">\n          <label class="control-label" for="projects_show_unknown_templates">Unknown templates</label>\n          <div class="controls">\n            <label class="checkbox" for="projects_show_unknown_templates">\n              <input type="checkbox" id="projects_show_unknown_templates" {{#if settings.projects.show_unknown_templates}}checked="checked" {{/if}}/>\n              Include databases with unknown templates in the list\n            </label>\n          </div>\n        </div>\n      </fieldset>\n\n    </form>\n\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="settings-save-btn" class="btn btn-primary" href="#">\n        <i class="icon-save"></i> Save changes\n      </a>\n    </div>\n  </div>\n</div>\n';});
 
 define('lib/views/settings',[
     'require',
     'jquery',
+    'underscore',
+    '../settings',
     'hbt!../../templates/settings',
     'hbt!../../templates/navigation',
     'bootstrap/js/bootstrap-button'
 ],
-function (require, $) {
+function (require, $, _) {
 
-    var tmpl = require('hbt!../../templates/settings');
+    var tmpl = require('hbt!../../templates/settings'),
+        settings = require('../settings');
+
 
     return function () {
-        $('#content').html(tmpl({}));
+        $('#content').html(tmpl({
+            settings: settings.get()
+        }));
+
+        $('#settings-form').submit(function () {
+            $('#settings-save-btn').button('loading');
+
+            var cfg = {templates: {}, projects: {}};
+            cfg.templates.sources = _.compact(
+                $('#template_sources').val().split('\n')
+            );
+
+            var no_templates = $('#projects_show_no_templates').is(':checked');
+            cfg.projects.show_no_templates = no_templates;
+
+            var unknown = $('#projects_show_unknown_templates').is(':checked');
+            cfg.projects.show_unknown_templates = unknown;
+
+            settings.update(cfg, function (err) {
+                if (err) {
+                    // TODO: add message to admin status bar
+                    console.error(err);
+                    return;
+                }
+                $('#settings-save-btn').button('reset');
+            });
+            return false;
+        });
+
+        $('#settings-save-btn').click(function (ev) {
+            ev.preventDefault();
+            $('#settings-form').submit();
+            return false;
+        });
 
         $('.navbar .container-fluid').html(
             require('hbt!../../templates/navigation')({
@@ -16757,7 +16860,8 @@ define('lib/app',[
 function (exports, require) {
 
     var director = require('director'),
-        projects = require('./projects');
+        projects = require('./projects'),
+        settings = require('./settings');
 
 
     exports.routes = {
@@ -16775,6 +16879,7 @@ function (exports, require) {
             $(window).trigger('hashchange');
         }
         projects.saveLocal();
+        settings.saveLocal();
     };
 
 });
