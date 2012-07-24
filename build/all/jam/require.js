@@ -2030,7 +2030,7 @@ var requirejs, require, define;
     req(cfg);
 }(this));
 
-define("../../jam/node_modules/requirejs/require.js", function(){});
+define("../../tea/node_modules/jamjs/node_modules/requirejs/require.js", function(){});
 
 var jam = {
     "packages": [
@@ -2083,12 +2083,22 @@ var jam = {
             "main": "events.js"
         },
         {
+            "name": "url",
+            "location": "jam/url",
+            "main": "url.js"
+        },
+        {
             "name": "text",
             "location": "jam/text",
             "main": "text.js"
+        },
+        {
+            "name": "querystring",
+            "location": "jam/querystring",
+            "main": "querystring.js"
         }
     ],
-    "version": "0.1.11",
+    "version": "0.1.14",
     "shim": {
         "director": {
             "exports": "Router"
@@ -16563,7 +16573,7 @@ define("text/text", function(){});
 
 define('text!templates/projects.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n\n    {{#if projects}}\n    <table class="table table-striped table-projects">\n      <thead>\n      <tr>\n        <th>Name</th>\n        <th>Template</th>\n        <th>Admins</th>\n        <th>Members</th>\n      </tr>\n      </thead>\n      <tbody>\n        {{#each projects}}\n        <tr>\n          <td class="name">\n            <a title="{{db}}/{{name}}" href="{{url}}">\n              {{#if dashicon}}\n              <img class="icon" alt="Icon" src="{{dashicon}}" />\n              {{else}}\n              <img class="icon" alt="Icon" src="img/icons/default_22.png" />\n              {{/if}}\n            </a>\n            <a title="{{db}}/{{name}}" href="{{url}}">\n              {{db}}\n            </a>\n          </td>\n          <td class="template">\n            {{#if title}}{{title}}{{else}}{{name}}{{/if}}\n          </td>\n          <td class="admins">\n            {{security.admins.names}}\n            {{security.admins.roles}}\n          </td>\n          <td class="members">\n            {{security.members.names}}\n            {{security.members.roles}}\n          </td>\n        </tr>\n        {{/each}}\n      </tbody>\n    </table>\n    {{/if}}\n\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="projects-refresh-btn" class="btn" href="#">\n        <i class="icon-refresh"></i> Refresh list\n      </a>\n      <a id="projects-add-btn" class="btn btn-success" href="#/templates">\n        <i class="icon-plus-sign"></i> Create new project\n      </a>\n    </div>\n  </div>\n</div>\n';});
 
-define('text!templates/navigation.handlebars',[],function () { return '<ul class="nav">\n  <li{{#if projects}} class="active"{{/if}}>\n    <a href="#/">Projects</a>\n  </li>\n  <li{{#if templates}} class="active"{{/if}}>\n    <a href="#/templates">Templates</a>\n  </li>\n  <!--\n  <li{{#if library}} class="active"{{/if}}>\n    <a href="#/library">Library</a>\n  </li>\n  -->\n  <li{{#if settings}} class="active"{{/if}}>\n    <a href="#/settings">Settings</a>\n  </li>\n</ul>\n';});
+define('text!templates/navigation.handlebars',[],function () { return '<ul class="nav">\n  <li{{#if projects}} class="active"{{/if}}>\n    <a href="#/"><i class="icon-briefcase"></i> Projects</a>\n  </li>\n  <li{{#if templates}} class="active"{{/if}}>\n    <a href="#/templates"><i class="icon-paste"></i> Templates</a>\n  </li>\n  <li{{#if settings}} class="active"{{/if}}>\n    <a href="#/settings"><i class="icon-wrench"></i> Settings</a>\n  </li>\n</ul>\n';});
 
 /* ============================================================
  * bootstrap-button.js v2.0.3
@@ -16755,18 +16765,961 @@ function (require, $, _) {
 
 });
 
-define('text!templates/templates.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="templates-instaled-update-btn" class="btn" href="#">\n        <i class="icon-refresh"></i> Check for updates\n      </a>\n      <a id="templates-installed-add-btn" class="btn btn-success" href="#/settings">\n        <i class="icon-plus-sign"></i> Add template sources\n      </a>\n    </div>\n  </div>\n</div>\n';});
+
+
+define('querystring/querystring',['require', 'underscore'],function(require) {
+
+var _ = require('underscore')._;
+var QueryString = {};
+/**
+ * Querystring functions ported from node.js to work in CouchDB and the browser.
+ * This module is used internally by Kanso, although you can use it in your
+ * apps too if you find the functions useful.
+ *
+ * @module
+ */
+
+
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// Query String Utilities
+
+
+/**
+ * Decodes a URI Component, provided so that it could be overridden if
+ * necessary.
+ *
+ * @name unescape(str)
+ * @param {String} str
+ * @returns {String}
+ * @api public
+ */
+
+QueryString.unescape = function (str) {
+    return decodeURIComponent(str);
+};
+
+/**
+ * Encodes a URI Component, provided so that it could be overridden if
+ * necessary.
+ *
+ * @name escape(str)
+ * @param {String} str
+ * @returns {String}
+ * @api public
+ */
+
+QueryString.escape = function (str) {
+    return encodeURIComponent(str);
+};
+
+var stringifyPrimitive = function (v) {
+    switch (typeof v) {
+    case 'string':
+        return v;
+
+    case 'boolean':
+        return v ? 'true' : 'false';
+
+    case 'number':
+        return isFinite(v) ? v : '';
+
+    default:
+        return '';
+    }
+};
+
+/**
+ * Serialize an object to a query string. Optionally override the default
+ * separator and assignment characters.
+ *
+ * **Example:**
+ *
+ * <pre><code class="javascript">
+ * querystring.stringify({foo: 'bar'})
+ * // returns
+ * 'foo=bar'
+ *
+ * querystring.stringify({foo: 'bar', baz: 'bob'}, ';', ':')
+ * // returns
+ * 'foo:bar;baz:bob'
+ * </code></pre>
+ *
+ * @name stringify(obj, [sep, eq, name])
+ * @param {Object} obj
+ * @param {String} sep
+ * @param {String} eq
+ * @param {String} name
+ * @returns {String}
+ * @api public
+ */
+
+QueryString.stringify = QueryString.encode = function (obj, sep, eq, name) {
+    sep = sep || '&';
+    eq = eq || '=';
+    obj = (obj === null) ? undefined : obj;
+
+    if (typeof obj === 'object') {
+        return _.map(_.keys(obj), function (k) {
+            if (_.isArray(obj[k])) {
+                return _.map(obj[k], function (v) {
+                    return QueryString.escape(stringifyPrimitive(k)) +
+                           eq +
+                           QueryString.escape(stringifyPrimitive(v));
+                }).join(sep);
+            }
+            else {
+                return QueryString.escape(stringifyPrimitive(k)) +
+                       eq +
+                       QueryString.escape(stringifyPrimitive(obj[k]));
+            }
+        }).join(sep);
+    }
+    if (!name) {
+        return '';
+    }
+    return QueryString.escape(stringifyPrimitive(name)) + eq +
+           QueryString.escape(stringifyPrimitive(obj));
+};
+
+/**
+ * Deserialize a query string to an object. Optionally override the default
+ * separator and assignment characters.
+ *
+ * **Example:**
+ *
+ * <pre><code class="javascript">
+ * querystring.parse('a=b&b=c')
+ * // returns
+ * // { a: 'b', b: 'c' }
+ * </code></pre>
+ *
+ * @name decode(qs, [sep, eq])
+ * @param {String} qs
+ * @param {String} sep
+ * @param {String} eq
+ * @returns {Object}
+ * @api public
+ */
+
+QueryString.parse = QueryString.decode = function (qs, sep, eq) {
+    sep = sep || '&';
+    eq = eq || '=';
+    var obj = {};
+
+    if (typeof qs !== 'string' || qs.length === 0) {
+        return obj;
+    }
+
+    qs.split(sep).forEach(function (kvp) {
+        var x = kvp.split(eq);
+        var k = QueryString.unescape(x[0]);
+        var v = QueryString.unescape(x.slice(1).join(eq));
+
+        if (!(k in obj)) {
+            obj[k] = v;
+        }
+        else if (!_.isArray(obj[k])) {
+            obj[k] = [obj[k], v];
+        }
+        else {
+            obj[k].push(v);
+        }
+    });
+
+    return obj;
+};
+
+    return QueryString;
+});
+define('querystring', ['querystring/querystring'], function (main) { return main; });
+
+/**
+ * Adapted for use in the browser and packaged for Kanso by Caolan McMahon.
+ * This build does not include IDNA Support in order to avoid the punycode
+ * dependency.
+ *
+ * Adding amd support.
+ *
+ * @module
+ */
+
+
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+// IDNA SUPPORT REMOVED FOR KANSO BUILD
+//var punycode = require('punycode');
+
+
+
+define('url/url',['require', 'querystring'], function(require) {
+
+var querystring = require('querystring');
+var exports = {};
+
+// ADDED FOR BROWSER SUPPORT - functions borrowed from underscore.js
+var _keys = Object.keys || function(obj) {
+  if (obj !== Object(obj)) throw new TypeError('Invalid object');
+  var keys = [];
+  for (var key in obj) if (hasOwnProperty.call(obj, key)) keys[keys.length] = key;
+  return keys;
+};
+var nativeIndexOf = Array.prototype.indexOf;
+var _indexOf = function(array, item) {
+  if (array == null) return -1;
+  var i, l;
+  if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
+  for (i = 0, l = array.length; i < l; i++) if (array[i] === item) return i;
+  return -1;
+};
+
+
+exports.parse = urlParse;
+exports.resolve = urlResolve;
+exports.resolveObject = urlResolveObject;
+exports.format = urlFormat;
+
+// Reference: RFC 3986, RFC 1808, RFC 2396
+
+// define these here so at least they only have to be
+// compiled once on the first module load.
+var protocolPattern = /^([a-z0-9.+-]+:)/i,
+    portPattern = /:[0-9]+$/,
+    // RFC 2396: characters reserved for delimiting URLs.
+    delims = ['<', '>', '"', '`', ' ', '\r', '\n', '\t'],
+    // RFC 2396: characters not allowed for various reasons.
+    unwise = ['{', '}', '|', '\\', '^', '~', '[', ']', '`'].concat(delims),
+    // Allowed by RFCs, but cause of XSS attacks.  Always escape these.
+    autoEscape = ['\''],
+    // Characters that are never ever allowed in a hostname.
+    // Note that any invalid chars are also handled, but these
+    // are the ones that are *expected* to be seen, so we fast-path
+    // them.
+    nonHostChars = ['%', '/', '?', ';', '#']
+      .concat(unwise).concat(autoEscape),
+    nonAuthChars = ['/', '@', '?', '#'].concat(delims),
+    hostnameMaxLen = 255,
+    hostnamePartPattern = /^[a-zA-Z0-9][a-z0-9A-Z_-]{0,62}$/,
+    hostnamePartStart = /^([a-zA-Z0-9][a-z0-9A-Z_-]{0,62})(.*)$/,
+    // protocols that can allow "unsafe" and "unwise" chars.
+    unsafeProtocol = {
+      'javascript': true,
+      'javascript:': true
+    },
+    // protocols that never have a hostname.
+    hostlessProtocol = {
+      'javascript': true,
+      'javascript:': true
+    },
+    // protocols that always have a path component.
+    pathedProtocol = {
+      'http': true,
+      'https': true,
+      'ftp': true,
+      'gopher': true,
+      'file': true,
+      'http:': true,
+      'ftp:': true,
+      'gopher:': true,
+      'file:': true
+    },
+    // protocols that always contain a // bit.
+    slashedProtocol = {
+      'http': true,
+      'https': true,
+      'ftp': true,
+      'gopher': true,
+      'file': true,
+      'http:': true,
+      'https:': true,
+      'ftp:': true,
+      'gopher:': true,
+      'file:': true
+    }
+
+
+function urlParse(url, parseQueryString, slashesDenoteHost) {
+  if (url && typeof(url) === 'object' && url.href) return url;
+
+  if (typeof url !== 'string') {
+    throw new TypeError("Parameter 'url' must be a string, not " + typeof url);
+  }
+
+  var out = {},
+      rest = url;
+
+  // cut off any delimiters.
+  // This is to support parse stuff like "<http://foo.com>"
+  for (var i = 0, l = rest.length; i < l; i++) {
+    if (_indexOf(delims, rest.charAt(i)) === -1) break;
+  }
+  if (i !== 0) rest = rest.substr(i);
+
+
+  var proto = protocolPattern.exec(rest);
+  if (proto) {
+    proto = proto[0];
+    var lowerProto = proto.toLowerCase();
+    out.protocol = lowerProto;
+    rest = rest.substr(proto.length);
+  }
+
+  // figure out if it's got a host
+  // user@server is *always* interpreted as a hostname, and url
+  // resolution will treat //foo/bar as host=foo,path=bar because that's
+  // how the browser resolves relative URLs.
+  if (slashesDenoteHost || proto || rest.match(/^\/\/[^@\/]+@[^@\/]+/)) {
+    var slashes = rest.substr(0, 2) === '//';
+    if (slashes && !(proto && hostlessProtocol[proto])) {
+      rest = rest.substr(2);
+      out.slashes = true;
+    }
+  }
+
+  if (!hostlessProtocol[proto] &&
+      (slashes || (proto && !slashedProtocol[proto]))) {
+    // there's a hostname.
+    // the first instance of /, ?, ;, or # ends the host.
+    // don't enforce full RFC correctness, just be unstupid about it.
+
+    // If there is an @ in the hostname, then non-host chars *are* allowed
+    // to the left of the first @ sign, unless some non-auth character
+    // comes *before* the @-sign.
+    // URLs are obnoxious.
+    var atSign = rest.indexOf('@');
+    if (atSign !== -1) {
+      // there *may be* an auth
+      var hasAuth = true;
+      for (var i = 0, l = nonAuthChars.length; i < l; i++) {
+        var index = rest.indexOf(nonAuthChars[i]);
+        if (index !== -1 && index < atSign) {
+          // not a valid auth.  Something like http://foo.com/bar@baz/
+          hasAuth = false;
+          break;
+        }
+      }
+      if (hasAuth) {
+        // pluck off the auth portion.
+        out.auth = rest.substr(0, atSign);
+        rest = rest.substr(atSign + 1);
+      }
+    }
+
+    var firstNonHost = -1;
+    for (var i = 0, l = nonHostChars.length; i < l; i++) {
+      var index = rest.indexOf(nonHostChars[i]);
+      if (index !== -1 &&
+          (firstNonHost < 0 || index < firstNonHost)) firstNonHost = index;
+    }
+
+    if (firstNonHost !== -1) {
+      out.host = rest.substr(0, firstNonHost);
+      rest = rest.substr(firstNonHost);
+    } else {
+      out.host = rest;
+      rest = '';
+    }
+
+    // pull out port.
+    var p = parseHost(out.host);
+    var keys = _keys(p);
+    for (var i = 0, l = keys.length; i < l; i++) {
+      var key = keys[i];
+      out[key] = p[key];
+    }
+
+    // we've indicated that there is a hostname,
+    // so even if it's empty, it has to be present.
+    out.hostname = out.hostname || '';
+
+    // validate a little.
+    if (out.hostname.length > hostnameMaxLen) {
+      out.hostname = '';
+    } else {
+      var hostparts = out.hostname.split(/\./);
+      for (var i = 0, l = hostparts.length; i < l; i++) {
+        var part = hostparts[i];
+        if (!part) continue;
+        if (!part.match(hostnamePartPattern)) {
+          var newpart = '';
+          for (var j = 0, k = part.length; j < k; j++) {
+            if (part.charCodeAt(j) > 127) {
+              // we replace non-ASCII char with a temporary placeholder
+              // we need this to make sure size of hostname is not
+              // broken by replacing non-ASCII by nothing
+              newpart += 'x';
+            } else {
+              newpart += part[j];
+            }
+          }
+          // we test again with ASCII char only
+          if (!newpart.match(hostnamePartPattern)) {
+            var validParts = hostparts.slice(0, i);
+            var notHost = hostparts.slice(i + 1);
+            var bit = part.match(hostnamePartStart);
+            if (bit) {
+              validParts.push(bit[1]);
+              notHost.unshift(bit[2]);
+            }
+            if (notHost.length) {
+              rest = '/' + notHost.join('.') + rest;
+            }
+            out.hostname = validParts.join('.');
+            break;
+          }
+        }
+      }
+    }
+
+    // hostnames are always lower case.
+    out.hostname = out.hostname.toLowerCase();
+
+
+    // IDNA SUPPORT REMOVED FOR KANSO BUILD
+
+    // IDNA Support: Returns a puny coded representation of "domain".
+    // It only converts the part of the domain name that
+    // has non ASCII characters. I.e. it dosent matter if
+    // you call it with a domain that already is in ASCII.
+    /*
+    var domainArray = out.hostname.split('.');
+    var newOut = [];
+    for (var i = 0; i < domainArray.length; ++i) {
+      var s = domainArray[i];
+      newOut.push(s.match(/[^A-Za-z0-9_-]/) ?
+          'xn--' + punycode.encode(s) : s);
+    }
+    out.hostname = newOut.join('.');
+    */
+
+
+    out.host = (out.hostname || '') +
+        ((out.port) ? ':' + out.port : '');
+    out.href += out.host;
+  }
+
+  // now rest is set to the post-host stuff.
+  // chop off any delim chars.
+  if (!unsafeProtocol[lowerProto]) {
+
+    // First, make 100% sure that any "autoEscape" chars get
+    // escaped, even if encodeURIComponent doesn't think they
+    // need to be.
+    for (var i = 0, l = autoEscape.length; i < l; i++) {
+      var ae = autoEscape[i];
+      var esc = encodeURIComponent(ae);
+      if (esc === ae) {
+        esc = escape(ae);
+      }
+      rest = rest.split(ae).join(esc);
+    }
+
+    // Now make sure that delims never appear in a url.
+    var chop = rest.length;
+    for (var i = 0, l = delims.length; i < l; i++) {
+      var c = rest.indexOf(delims[i]);
+      if (c !== -1) {
+        chop = Math.min(c, chop);
+      }
+    }
+    rest = rest.substr(0, chop);
+  }
+
+
+  // chop off from the tail first.
+  var hash = rest.indexOf('#');
+  if (hash !== -1) {
+    // got a fragment string.
+    out.hash = rest.substr(hash);
+    rest = rest.slice(0, hash);
+  }
+  var qm = rest.indexOf('?');
+  if (qm !== -1) {
+    out.search = rest.substr(qm);
+    out.query = rest.substr(qm + 1);
+    if (parseQueryString) {
+      out.query = querystring.parse(out.query);
+    }
+    rest = rest.slice(0, qm);
+  } else if (parseQueryString) {
+    // no query string, but parseQueryString still requested
+    out.search = '';
+    out.query = {};
+  }
+  if (rest) out.pathname = rest;
+  if (slashedProtocol[proto] &&
+      out.hostname && !out.pathname) {
+    out.pathname = '/';
+  }
+
+  //to support http.request
+  if (out.pathname || out.search) {
+    out.path = (out.pathname ? out.pathname : '') +
+               (out.search ? out.search : '');
+  }
+
+  // finally, reconstruct the href based on what has been validated.
+  out.href = urlFormat(out);
+  return out;
+}
+
+// format a parsed object into a url string
+function urlFormat(obj) {
+  // ensure it's an object, and not a string url.
+  // If it's an obj, this is a no-op.
+  // this way, you can call url_format() on strings
+  // to clean up potentially wonky urls.
+  if (typeof(obj) === 'string') obj = urlParse(obj);
+
+  var auth = obj.auth || '';
+  if (auth) {
+    auth = auth.split('@').join('%40');
+    for (var i = 0, l = nonAuthChars.length; i < l; i++) {
+      var nAC = nonAuthChars[i];
+      auth = auth.split(nAC).join(encodeURIComponent(nAC));
+    }
+    auth += '@';
+  }
+
+  var protocol = obj.protocol || '',
+      host = (obj.host !== undefined) ? auth + obj.host :
+          obj.hostname !== undefined ? (
+              auth + obj.hostname +
+              (obj.port ? ':' + obj.port : '')
+          ) :
+          false,
+      pathname = obj.pathname || '',
+      query = obj.query &&
+              ((typeof obj.query === 'object' &&
+                _keys(obj.query).length) ?
+                 querystring.stringify(obj.query) :
+                 '') || '',
+      search = obj.search || (query && ('?' + query)) || '',
+      hash = obj.hash || '';
+
+  if (protocol && protocol.substr(protocol.length - 1) !== ':') protocol += ':';
+
+  // only the slashedProtocols get the //.  Not mailto:, xmpp:, etc.
+  // unless they had them to begin with.
+  if (obj.slashes ||
+      (!protocol || slashedProtocol[protocol]) && host !== false) {
+    host = '//' + (host || '');
+    if (pathname && pathname.charAt(0) !== '/') pathname = '/' + pathname;
+  } else if (!host) {
+    host = '';
+  }
+
+  if (hash && hash.charAt(0) !== '#') hash = '#' + hash;
+  if (search && search.charAt(0) !== '?') search = '?' + search;
+
+  return protocol + host + pathname + search + hash;
+}
+
+function urlResolve(source, relative) {
+  return urlFormat(urlResolveObject(source, relative));
+}
+
+function urlResolveObject(source, relative) {
+  if (!source) return relative;
+
+  source = urlParse(urlFormat(source), false, true);
+  relative = urlParse(urlFormat(relative), false, true);
+
+  // hash is always overridden, no matter what.
+  source.hash = relative.hash;
+
+  if (relative.href === '') {
+    source.href = urlFormat(source);
+    return source;
+  }
+
+  // hrefs like //foo/bar always cut to the protocol.
+  if (relative.slashes && !relative.protocol) {
+    relative.protocol = source.protocol;
+    //urlParse appends trailing / to urls like http://www.example.com
+    if (slashedProtocol[relative.protocol] &&
+        relative.hostname && !relative.pathname) {
+      relative.path = relative.pathname = '/';
+    }
+    relative.href = urlFormat(relative);
+    return relative;
+  }
+
+  if (relative.protocol && relative.protocol !== source.protocol) {
+    // if it's a known url protocol, then changing
+    // the protocol does weird things
+    // first, if it's not file:, then we MUST have a host,
+    // and if there was a path
+    // to begin with, then we MUST have a path.
+    // if it is file:, then the host is dropped,
+    // because that's known to be hostless.
+    // anything else is assumed to be absolute.
+    if (!slashedProtocol[relative.protocol]) {
+      relative.href = urlFormat(relative);
+      return relative;
+    }
+    source.protocol = relative.protocol;
+    if (!relative.host && !hostlessProtocol[relative.protocol]) {
+      var relPath = (relative.pathname || '').split('/');
+      while (relPath.length && !(relative.host = relPath.shift()));
+      if (!relative.host) relative.host = '';
+      if (!relative.hostname) relative.hostname = '';
+      if (relPath[0] !== '') relPath.unshift('');
+      if (relPath.length < 2) relPath.unshift('');
+      relative.pathname = relPath.join('/');
+    }
+    source.pathname = relative.pathname;
+    source.search = relative.search;
+    source.query = relative.query;
+    source.host = relative.host || '';
+    source.auth = relative.auth;
+    source.hostname = relative.hostname || relative.host;
+    source.port = relative.port;
+    //to support http.request
+    if (source.pathname !== undefined || source.search !== undefined) {
+      source.path = (source.pathname ? source.pathname : '') +
+                    (source.search ? source.search : '');
+    }
+    source.slashes = source.slashes || relative.slashes;
+    source.href = urlFormat(source);
+    return source;
+  }
+
+  var isSourceAbs = (source.pathname && source.pathname.charAt(0) === '/'),
+      isRelAbs = (
+          relative.host !== undefined ||
+          relative.pathname && relative.pathname.charAt(0) === '/'
+      ),
+      mustEndAbs = (isRelAbs || isSourceAbs ||
+                    (source.host && relative.pathname)),
+      removeAllDots = mustEndAbs,
+      srcPath = source.pathname && source.pathname.split('/') || [],
+      relPath = relative.pathname && relative.pathname.split('/') || [],
+      psychotic = source.protocol &&
+          !slashedProtocol[source.protocol];
+
+  // if the url is a non-slashed url, then relative
+  // links like ../.. should be able
+  // to crawl up to the hostname, as well.  This is strange.
+  // source.protocol has already been set by now.
+  // Later on, put the first path part into the host field.
+  if (psychotic) {
+
+    delete source.hostname;
+    delete source.port;
+    if (source.host) {
+      if (srcPath[0] === '') srcPath[0] = source.host;
+      else srcPath.unshift(source.host);
+    }
+    delete source.host;
+    if (relative.protocol) {
+      delete relative.hostname;
+      delete relative.port;
+      if (relative.host) {
+        if (relPath[0] === '') relPath[0] = relative.host;
+        else relPath.unshift(relative.host);
+      }
+      delete relative.host;
+    }
+    mustEndAbs = mustEndAbs && (relPath[0] === '' || srcPath[0] === '');
+  }
+
+  if (isRelAbs) {
+    // it's absolute.
+    source.host = (relative.host || relative.host === '') ?
+                      relative.host : source.host;
+    source.hostname = (relative.hostname || relative.hostname === '') ?
+                      relative.hostname : source.hostname;
+    source.search = relative.search;
+    source.query = relative.query;
+    srcPath = relPath;
+    // fall through to the dot-handling below.
+  } else if (relPath.length) {
+    // it's relative
+    // throw away the existing file, and take the new path instead.
+    if (!srcPath) srcPath = [];
+    srcPath.pop();
+    srcPath = srcPath.concat(relPath);
+    source.search = relative.search;
+    source.query = relative.query;
+  } else if ('search' in relative) {
+    // just pull out the search.
+    // like href='?foo'.
+    // Put this after the other two cases because it simplifies the booleans
+    if (psychotic) {
+      source.hostname = source.host = srcPath.shift();
+      //occationaly the auth can get stuck only in host
+      //this especialy happens in cases like
+      //url.resolveObject('mailto:local1@domain1', 'local2@domain2')
+      var authInHost = source.host && source.host.indexOf('@') > 0 ?
+                       source.host.split('@') : false;
+      if (authInHost) {
+        source.auth = authInHost.shift();
+        source.host = source.hostname = authInHost.shift();
+      }
+    }
+    source.search = relative.search;
+    source.query = relative.query;
+    //to support http.request
+    if (source.pathname !== undefined || source.search !== undefined) {
+      source.path = (source.pathname ? source.pathname : '') +
+                    (source.search ? source.search : '');
+    }
+    source.href = urlFormat(source);
+    return source;
+  }
+  if (!srcPath.length) {
+    // no path at all.  easy.
+    // we've already handled the other stuff above.
+    delete source.pathname;
+    //to support http.request
+    if (!source.search) {
+      source.path = '/' + source.search;
+    } else {
+      delete source.path;
+    }
+    source.href = urlFormat(source);
+    return source;
+  }
+  // if a url ENDs in . or .., then it must get a trailing slash.
+  // however, if it ends in anything else non-slashy,
+  // then it must NOT get a trailing slash.
+  var last = srcPath.slice(srcPath.length - 1)[0];
+  var hasTrailingSlash = (
+      (source.host || relative.host) && (last === '.' || last === '..') ||
+      last === '');
+
+  // strip single dots, resolve double dots to parent dir
+  // if the path tries to go above the root, `up` ends up > 0
+  var up = 0;
+  for (var i = srcPath.length; i >= 0; i--) {
+    last = srcPath[i];
+    if (last == '.') {
+      srcPath.splice(i, 1);
+    } else if (last === '..') {
+      srcPath.splice(i, 1);
+      up++;
+    } else if (up) {
+      srcPath.splice(i, 1);
+      up--;
+    }
+  }
+
+  // if the path is allowed to go above the root, restore leading ..s
+  if (!mustEndAbs && !removeAllDots) {
+    for (; up--; up) {
+      srcPath.unshift('..');
+    }
+  }
+
+  if (mustEndAbs && srcPath[0] !== '' &&
+      (!srcPath[0] || srcPath[0].charAt(0) !== '/')) {
+    srcPath.unshift('');
+  }
+
+  if (hasTrailingSlash && (srcPath.join('/').substr(srcPath.join('/').length - 1) !== '/')) {
+    srcPath.push('');
+  }
+
+  var isAbsolute = srcPath[0] === '' ||
+      (srcPath[0] && srcPath[0].charAt(0) === '/');
+
+  // put the host back
+  if (psychotic) {
+    source.hostname = source.host = isAbsolute ? '' :
+                                    srcPath.length ? srcPath.shift() : '';
+    //occationaly the auth can get stuck only in host
+    //this especialy happens in cases like
+    //url.resolveObject('mailto:local1@domain1', 'local2@domain2')
+    var authInHost = source.host && source.host.indexOf('@') > 0 ?
+                     source.host.split('@') : false;
+    if (authInHost) {
+      source.auth = authInHost.shift();
+      source.host = source.hostname = authInHost.shift();
+    }
+  }
+
+  mustEndAbs = mustEndAbs || (source.host && srcPath.length);
+
+  if (mustEndAbs && !isAbsolute) {
+    srcPath.unshift('');
+  }
+
+  source.pathname = srcPath.join('/');
+  //to support request.http
+  if (source.pathname !== undefined || source.search !== undefined) {
+    source.path = (source.pathname ? source.pathname : '') +
+                  (source.search ? source.search : '');
+  }
+  source.auth = relative.auth || source.auth;
+  source.slashes = source.slashes || relative.slashes;
+  source.href = urlFormat(source);
+  return source;
+}
+
+function parseHost(host) {
+  var out = {};
+  var port = portPattern.exec(host);
+  if (port) {
+    port = port[0];
+    out.port = port.substr(1);
+    host = host.substr(0, host.length - port.length);
+  }
+  if (host) out.hostname = host;
+  return out;
+}
+    return exports;
+});
+define('url', ['url/url'], function (main) { return main; });
+
+define('lib/templates',[
+    'exports',
+    'require',
+    'jquery',
+    'underscore',
+    'async',
+    'url',
+    'couchr',
+    './settings',
+],
+function (exports, require, $, _) {
+
+    var settings = require('./settings'),
+        couchr = require('couchr'),
+        async = require('async'),
+        url = require('url');
+
+
+    exports.update = function (callback) {
+        var cfg = settings.get();
+
+        async.concat(cfg.templates.sources, function (s, cb) {
+
+            // force trailing slash on library db url
+            s = s.replace(/\/$/, '') + '/';
+
+            $.ajax({
+                type: 'GET',
+                dataType: 'jsonp',
+                url: url.resolve(s,'_design/library/_list/jsonp/templates'),
+                success: function (data) {
+                    cb(null, _.map(data.rows, function (r) {
+                        r.source = s;
+                        return r;
+                    }));
+                },
+                error: function () {
+                    cb('Could not load templates from source: ' + s);
+                }
+            });
+        },
+        function (err, results) {
+            if (err) {
+                return callback(err);
+            }
+            async.forEach(results, function (r, cb) {
+                var id = 'template:' + r.id;
+                var durl = 'api/' + encodeURIComponent(id);
+                couchr.get(durl, function (err, doc) {
+                    if (err) {
+                        if (err.status === 404) {
+                            doc = {_id: id};
+                        }
+                        else {
+                            return cb(err);
+                        }
+                    }
+                    doc = _.extend(doc, {
+                        type: 'template',
+                        remote: r.value,
+                        source: r.source,
+                        ddoc_id: r.id
+                    });
+                    if (r.value.icons && r.value.icons['22']) {
+                        doc.dashicon = url.resolve(
+                            r.source, r.id + '/' + r.value.icons['22']
+                        );
+                    }
+                    couchr.put(durl, doc, cb);
+                });
+            },
+            callback);
+        });
+    };
+
+
+    exports.install = function (source, ddoc_id, callback) {
+        var repdoc = {
+            source: source,
+            target: url.resolve(window.location, 'api'),
+            doc_ids: [ddoc_id]
+        };
+        couchr.post('/_replicate', repdoc, function (err, data) {
+            console.log(['replicate callback', err, data]);
+        });
+    };
+
+});
+
+define('text!templates/templates.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n    <div id="templates-list"><p>Loading</p></div>\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="templates-refresh-btn" class="btn" href="#">\n        <i class="icon-refresh"></i> Check for updates\n      </a>\n      <a id="templates-add-btn" class="btn btn-success" href="#/settings">\n        <i class="icon-plus-sign"></i> Add template sources\n      </a>\n    </div>\n  </div>\n</div>\n';});
+
+define('text!templates/templates-list.handlebars',[],function () { return '<table class="table table-striped">\n  <thead>\n    <tr>\n      <th>Name</th>\n      <th>Source</th>\n      <th>Installed</th>\n      <th>Available</th>\n      <th>Actions</th>\n    </tr>\n  </thead>\n  <tbody>\n    {{#each templates}}\n    <tr data-source="{{doc.source}}" data-ddoc="{{doc.ddoc_id}}">\n      <td>\n        <div class="name">\n          {{#if doc.dashicon}}\n          <img class="icon" alt="Icon" src="{{doc.dashicon}}" />\n          {{else}}\n          <img class="icon" alt="Icon" src="img/icons/default_22.png" />\n          {{/if}}\n          {{doc.ddoc_id}}\n        </div>\n      </td>\n      <td class="source" style="color: #999">\n        {{doc.source}}\n      </td>\n      <td>\n        --\n      </td>\n      <td>\n        {{doc.remote.version}}\n      </td>\n      <td>\n        {{#if doc.installed}}\n          <a class="btn"><i class="icon-trash"></i> Uninstall</a>\n          <a class="btn"><i class="icon-briefcase"></i> Create Project</a>\n        {{else}}\n          <a class="btn template-install-btn">\n            <i class="icon-download"></i> Install\n          </a>\n        {{/if}}\n      </td>\n    </tr>\n    {{/each}}\n  </tbody>\n</table>\n';});
 
 define('lib/views/templates',[
     'require',
     'jquery',
+    'couchr',
+    '../templates',
     'hbt!../../templates/templates',
+    'hbt!../../templates/templates-list',
     'hbt!../../templates/navigation',
     'bootstrap/js/bootstrap-button'
 ],
 function (require, $) {
 
-    var tmpl = require('hbt!../../templates/templates');
+    var tmpl = require('hbt!../../templates/templates'),
+        templates = require('../templates'),
+        couchr = require('couchr');
+
 
     return function () {
         $('#content').html(tmpl({}));
@@ -16776,6 +17729,47 @@ function (require, $) {
                 templates: true
             })
         );
+
+        // fetch template list from couchdb
+        var vurl = 'api/_design/dashboard/_view/templates';
+        couchr.get(vurl, {include_docs: true}, function (err, data) {
+            if (err) {
+                // TODO: show error message to user
+                return console.error(err);
+            }
+            $('#templates-list').html(
+                require('hbt!../../templates/templates-list')({
+                    templates: data.rows
+                })
+            );
+            $('#templates-list .template-install-btn').click(function (ev) {
+                ev.preventDefault();
+                var tr = $(this).parents('tr'),
+                    source = tr.data('source'),
+                    ddoc_id = tr.data('ddoc');
+
+                templates.install(source, ddoc_id, function (err) {
+                    if (err) {
+                        // TODO: show error message to user
+                        return console.error(err);
+                    }
+                });
+                return false;
+            });
+        });
+
+        $('#templates-refresh-btn').click(function (ev) {
+            ev.preventDefault();
+            templates.update(function (err) {
+                if (err) {
+                    // TODO: show error message to user
+                    return console.error(err);
+                }
+                // TODO: refresh templates row
+                console.log('done');
+            });
+            return false;
+        });
     };
 
 });

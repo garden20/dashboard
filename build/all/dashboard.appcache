@@ -23,6 +23,7 @@ data/settings.js         data/settings-fallback.js
 
 NETWORK:
 /_api
+*
 
 
-# Tue Jul 17 2012 18:54:58 GMT-0700 (PDT)
+# Mon Jul 23 2012 17:39:50 GMT-0700 (PDT)

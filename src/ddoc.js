@@ -13,7 +13,23 @@ exports.views = {
     projects: {
         map: function (doc) {
             if (doc.type === 'project') {
-                emit([doc.db, (doc.app && doc.app.title) || doc.name], null);
+                emit(
+                    [
+                        doc.db,
+                        (doc.dashboard && doc.dashboard.title) || doc.name
+                    ],
+                    null
+                );
+            }
+        }
+    },
+    templates: {
+        map: function (doc) {
+            if (doc.type === 'template') {
+                emit(
+                    [doc.ddoc_id, (doc.dashboard && doc.dashboard.title) || {}],
+                    null
+                );
             }
         }
     }

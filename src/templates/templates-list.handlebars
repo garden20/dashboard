@@ -1,0 +1,46 @@
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Source</th>
+      <th>Installed</th>
+      <th>Available</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each templates}}
+    <tr data-source="{{doc.source}}" data-ddoc="{{doc.ddoc_id}}">
+      <td>
+        <div class="name">
+          {{#if doc.dashicon}}
+          <img class="icon" alt="Icon" src="{{doc.dashicon}}" />
+          {{else}}
+          <img class="icon" alt="Icon" src="img/icons/default_22.png" />
+          {{/if}}
+          {{doc.ddoc_id}}
+        </div>
+      </td>
+      <td class="source" style="color: #999">
+        {{doc.source}}
+      </td>
+      <td>
+        --
+      </td>
+      <td>
+        {{doc.remote.version}}
+      </td>
+      <td>
+        {{#if doc.installed}}
+          <a class="btn"><i class="icon-trash"></i> Uninstall</a>
+          <a class="btn"><i class="icon-briefcase"></i> Create Project</a>
+        {{else}}
+          <a class="btn template-install-btn">
+            <i class="icon-download"></i> Install
+          </a>
+        {{/if}}
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>

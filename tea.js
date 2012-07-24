@@ -1,20 +1,20 @@
 exports.tasks = {
     "cache-manifest-timestamp": "./tasks/cache-manifest-timestamp",
-    "less-compile": "./tasks/less-compile",
-    "jam-compile": "./tasks/jam-compile"
+    "less-compile": "./tasks/less-compile"//,
+    //"jam-compile": "./tasks/jam-compile"
 };
 
 exports.builds = {
     assets: {
         "include": {paths: {
-            "jam": "src/jam",
-            "packages": "src/packages",
-            "index.html": "src/index.html",
-            "kanso.json": "src/kanso.json",
-            "dashboard.appcache": "src/dashboard.appcache",
-            "data": "src/data",
-            "ddoc.js": "src/ddoc.js",
-            "img": "src/img"
+            "src/jam": "jam",
+            "src/packages": "packages",
+            "src/index.html": "index.html",
+            "src/kanso.json": "kanso.json",
+            "src/dashboard.appcache": "dashboard.appcache",
+            "src/data": "data",
+            "src/ddoc.js": "ddoc.js",
+            "src/img": "img"
         }}
     },
     all: ['assets', {
