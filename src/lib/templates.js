@@ -167,7 +167,7 @@ function (exports, require, $, _) {
             if (err) {
                 return callback(err);
             }
-            tdoc.installed = ddoc.dashboard;
+            tdoc.installed = {dashboard: ddoc.dashboard, rev: ddoc._rev};
             couchr.put('api/' + tid, tdoc, function (err, data) {
                 if (err) {
                     return callback(err);

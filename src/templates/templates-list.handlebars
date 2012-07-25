@@ -25,14 +25,14 @@
         {{doc.source}}
       </td>
       <td>
-        {{#if doc.installed.version}}
-          {{doc.installed.version}}
+        {{#if doc.installed.dashboard.version}}
+          {{doc.installed.dashboard.version}}
         {{else}}
           --
         {{/if}}
       </td>
       <td>
-        {{doc.remote.version}}
+        {{doc.remote.dashboard.version}}
       </td>
       <td>
         {{#if doc.installed}}
