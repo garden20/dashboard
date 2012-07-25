@@ -83,16 +83,25 @@ function (exports, require, $, _) {
             function poll() {
                 couchr.get('/_replicator/' + data.id, function (err, doc) {
                     if (err) {
-                        return callback(err);
+                        return callback(err, doc);
                     }
                     if (doc._replication_state === 'error') {
                         return callback(new Error(
                             'Error replicating from ' + repdoc.source +
                             ' to ' + repdoc.target
-                        ));
+                        ), doc);
                     }
                     if (doc._replication_state === 'completed') {
-                        return callback();
+                        // clean up completed doc
+                        var id = doc._id;
+                        var rurl = '/_replicator/' + id + '?rev=' + doc._rev;
+                        couchr.delete(rurl, function (err) {
+                            if (err) {
+                                // is this important enough to stop processing??
+                                return callback(err, doc);
+                            }
+                            return callback(null, doc);
+                        });
                     }
                     else {
                         // poll again after delay
@@ -105,71 +114,54 @@ function (exports, require, $, _) {
         });
     };
 
-
-    // checks if the design ddoc rev already exists locally
-    exports.checkForLocalRev = function (ddoc_id, ddoc_rev, callback) {
-        console.log(['checkForLocalRev', ddoc_id, ddoc_rev]);
-        couchr.get('api/' + ddoc_id, {rev: ddoc_rev}, function (err, ddoc) {
-            if (err && err.status === 404) {
-                return callback(null, null);
-            }
-            return callback(err, ddoc);
-        });
-    };
-
-    exports.promoteDDocRev = function (ddoc, callback) {
-        console.log(['promoteDDocRev', ddoc._id, ddoc._rev]);
-        // get current _rev number
-        couchr.head('api/' + ddoc._id, function (err, data, req) {
-            // if status is 404 then the current head rev is a deleted doc
-            if (err && err.status !== 404) {
+    exports.clearCheckpoint = function (replication_id, callback) {
+        var id = '_local/' + replication_id;
+        exports.getRev(id, function (err, rev) {
+            if (err) {
                 return callback(err);
             }
-            var cfg = settings.get();
-                db = cfg.info.db_name,
-                etag = (req.getResponseHeader('ETag') || ''),
-                rev = etag.replace(/^"/,'').replace(/"$/,''),
-                source = '/' + db + '/' + ddoc._id + '?rev=' + ddoc._rev,
-                dest = '/' + db + '/' + ddoc._id + (rev ? '?rev=' + rev: '');
-
-            if (source === dest) {
-                return exports.updateTemplateDoc(ddoc, callback);
+            if (rev) {
+                couchr.delete('api/' + id + '?rev=' + rev, callback);
             }
-            couchr.copy(source, dest, function (err, info) {
-                if (err) {
-                    return callback(err);
-                }
-                ddoc._rev = info.rev;
-                return exports.updateTemplateDoc(ddoc, callback);
-            });
+            else {
+                // unknown rev, may not exist
+                return callback();
+            }
         });
     };
 
     // replicates a ddoc from remote source and ensure it's installed
-    exports.replicateDDoc = function (source, ddoc_id, ddoc_rev, callback) {
+    exports.replicateDDoc = function (source, ddoc_id, callback) {
         var repdoc = {
             source: source,
             target: settings.get().info.db_name,
             doc_ids: [ddoc_id]
         };
-        // TODO: reset any previous replication checkpoints stored on template
-        // meta doc by doing DELETE /<db_name>/_local/<_replication_id>
-        exports.replicate(repdoc, function (err) {
+        exports.replicate(repdoc, function (err, repdoc) {
             if (err) {
                 return callback(err);
             }
             // TODO: check for conflicts
             couchr.get('api/' + ddoc_id, function (err, ddoc) {
-                if (err) {
-                    return callback(err);
+                if (err && err.status === 404) {
+                    // checkpoint stopped the doc from being replicated
+                    var rid = repdoc._replication_id;
+                    exports.clearCheckpoint(rid, function (err) {
+                        if (err) {
+                            return callback(err);
+                        }
+                        // retry replication
+                        exports.replicateDDoc(source, ddoc_id, callback);
+                    });
+                    return;
                 }
-                return exports.updateTemplateDoc(ddoc, callback);
+                return callback(err, ddoc);
             });
         });
     };
 
     // updates meta info on template with installed version
-    exports.updateTemplateDoc = function (ddoc, callback) {
+    exports.installTemplateDoc = function (ddoc, callback) {
         var tid = encodeURIComponent('template:' + ddoc._id);
         couchr.get('api/' + tid, function (err, tdoc) {
             if (err) {
@@ -186,15 +178,104 @@ function (exports, require, $, _) {
         });
     };
 
-    exports.install = function (src, ddoc_id, ddoc_rev, callback) {
-        exports.checkForLocalRev(ddoc_id, ddoc_rev, function (err, ddoc) {
+    // removes installed ddoc meta info on template doc
+    exports.uninstallTemplateDoc = function (ddoc_id, callback) {
+        var tid = encodeURIComponent('template:' + ddoc_id);
+        couchr.get('api/' + tid, function (err, tdoc) {
             if (err) {
                 return callback(err);
             }
-            if (ddoc) {
-                return exports.promoteDDocRev(ddoc, callback);
+            delete tdoc.installed;
+            couchr.put('api/' + tid, tdoc, function (err, data) {
+                if (err) {
+                    return callback(err);
+                }
+                tdoc._rev = data.rev;
+                return callback(null, tdoc);
+            });
+        });
+    };
+
+    /**
+     * Searches the _changes feed for updates to a document. This is able to
+     * find the last known _rev for _deleted documents.
+     */
+
+    exports.findLastEntry = function (id, callback) {
+        var q = {
+            filter: 'dashboard/id',
+            id: id
+        };
+        couchr.get('api/_changes', q, function (err, data) {
+            if (err) {
+                return callback(err);
             }
-            return exports.replicateDDoc(src, ddoc_id, ddoc_rev, callback);
+            if (!data.results || !data.results.length) {
+                // no document history found
+                return callback(null, null);
+            }
+            var r = data.results[data.results.length - 1];
+            var last_rev = r.changes[r.changes.length - 1].rev;
+            return callback(null, last_rev);
+        });
+    };
+
+    exports.getRev = function (id, callback) {
+        // test if revision is available locally
+        couchr.head('api/' + id, function (err, data, req) {
+            if (err) {
+                if (err.status === 404) {
+                    // if status is 404 then the current head rev may be a
+                    // deleted doc
+                    return exports.findLastEntry(id, callback);
+                }
+                return callback(err);
+            }
+            var etag = req.getResponseHeader('ETag') || '',
+                rev = etag.replace(/^"/, '').replace(/"$/, '');
+
+            return callback(null, rev || null);
+        });
+    };
+
+    exports.purgeDDoc = function (ddoc_id, callback) {
+        exports.getRev(ddoc_id, function (err, rev) {
+            if (err) {
+                return callback(err);
+            }
+            var cfg = settings.get();
+            var db = cfg.info.db_name;
+            var q = {};
+            // TODO: if there are conflicts, include them in this list of revs
+            if (rev) {
+                q[ddoc_id] = [rev];
+                return couchr.post('/' + db + '/_purge', q, callback);
+            }
+            // nothing to purge
+            return callback();
+        });
+    };
+
+    exports.install = function (src, ddoc_id, callback) {
+        exports.purgeDDoc(ddoc_id, function (err) {
+            if (err) {
+                return callback(err);
+            }
+            return exports.replicateDDoc(src, ddoc_id, function (err, ddoc) {
+                if (err) {
+                    return callback(err);
+                }
+                return exports.installTemplateDoc(ddoc, callback);
+            });
+        });
+    };
+
+    exports.uninstall = function (ddoc_id, callback) {
+        exports.purgeDDoc(ddoc_id, function (err) {
+            if (err) {
+                return callback(err);
+            }
+            exports.uninstallTemplateDoc(ddoc_id, callback);
         });
     };
 

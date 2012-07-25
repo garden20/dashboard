@@ -10,7 +10,7 @@
   </thead>
   <tbody>
     {{#each templates}}
-    <tr data-source="{{doc.source}}" data-ddoc-id="{{doc.ddoc_id}}" data-remote-rev="{{doc.remote.rev}}">
+    <tr data-source="{{doc.source}}" data-ddoc-id="{{doc.ddoc_id}}">
       <td>
         <div class="name">
           {{#if doc.dashicon}}
@@ -36,7 +36,7 @@
       </td>
       <td>
         {{#if doc.installed}}
-          <a class="btn"><i class="icon-trash"></i> Uninstall</a>
+          <a class="btn template-uninstall-btn"><i class="icon-trash"></i> Uninstall</a>
           <a class="btn"><i class="icon-briefcase"></i> Create Project</a>
         {{else}}
           <a class="btn template-install-btn">

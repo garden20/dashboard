@@ -9,6 +9,13 @@ exports.rewrites = [
     {from: '/*', to: '*'}
 ];
 
+/* used to filter _changes feed when searching for _rev of doc delete */
+exports.filters = {
+    id: function (doc, req) {
+        return doc._id === req.query.id;
+    }
+};
+
 exports.views = {
     projects: {
         map: function (doc) {
