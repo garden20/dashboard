@@ -15,9 +15,9 @@ function (exports, require) {
 
 
     exports.routes = {
-        '/':                    require('./views/projects'),
-        '/templates':           require('./views/templates'),
-        '/settings':            require('./views/settings')
+        '/':            require('./views/projects'),
+        '/templates':   require('./views/templates'),
+        '/settings':    require('./views/settings')
     };
 
     exports.init = function () {

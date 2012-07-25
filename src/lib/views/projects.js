@@ -26,7 +26,7 @@ function (require, $, _) {
         }
         if (!cfg.show_unknown_templates) {
             plist = _.reject(plist, function (p) {
-                return !p.unknown_root && !p.app;
+                return !p.unknown_root && !p.dashboard;
             });
         }
         return plist;

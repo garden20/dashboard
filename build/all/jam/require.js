@@ -13297,12 +13297,19 @@ define('couchr', ['exports', 'jquery'], function (exports, $) {
     };
 
 
-    exports.request = function (method, url, /*optional*/data, callback) {
+    exports.request = function (method, url, /*o*/data, /*o*/opt, callback) {
+        if (!callback) {
+            callback = opt;
+            opt = null;
+        }
         if (!callback) {
             callback = data;
             data = null;
         }
-        var options = {type: method, url: url};
+        var options = opt || {};
+        options.type = method;
+        options.url = url;
+
         if (data) {
             try {
                 if (method === 'GET' || method === 'HEAD') {
@@ -13332,7 +13339,27 @@ define('couchr', ['exports', 'jquery'], function (exports, $) {
     exports.post = makeRequest('POST');
     exports.head = makeRequest('HEAD');
     exports.put = makeRequest('PUT');
-    exports.delete = makeRequest('DELETE');
+
+    // data.rev should be in query part of URL
+    exports.delete = function (url, data, callback) {
+        if (!callback) {
+            callback = data;
+            data = null;
+        }
+        if (data && data.rev && !/\?rev=/.test(url)) {
+            url += (url.indexOf('?') === -1) ? '?': '&';
+            url += 'rev=' + encodeURIComponent(data.rev);
+        }
+        exports.request('DELETE', url, data, callback);
+    };
+
+    // non-standard HTTP method, may not work in all browsers
+    exports.copy = function (from, to, callback) {
+        var opt = {
+            headers: {'Destination': to}
+        };
+        exports.request('COPY', from, null, opt, callback);
+    };
 
 });
 
@@ -14361,9 +14388,13 @@ define('events', ['events/events'], function (main) { return main; });
 
 define('lib/utils',[
     'exports',
-    'require'
+    'require',
+    'couchr'
 ],
 function (exports, require) {
+
+    var couchr = require('couchr');
+
 
     exports.imgToDataURI = function (src, callback) {
         var img = new Image();
@@ -14384,6 +14415,47 @@ function (exports, require) {
         };
     };
 
+    exports.getProjectURL = function (db_name, ddoc) {
+        var id = ddoc._id;
+        if (!/^_design\//.test(id)) {
+            id = '_design/' + id;
+        }
+        if (ddoc._attachments) {
+            if (ddoc._attachments['index.html']) {
+                return '/' + db_name + '/' + id + '/index.html';
+            }
+            else if (ddoc._attachments['index.htm']) {
+                return '/' + db_name + '/' + id + '/index.htm';
+            }
+        }
+        if (ddoc.rewrites && ddoc.rewrites.length) {
+            return '/' + db_name + '/' + id + '/_rewrite/';
+        }
+        return null;
+    };
+
+    exports.futonDatabaseURL = function (db_name) {
+        return '/_utils/database.html?' + db_name;
+    };
+
+    exports.getRev = function (db_name, id, callback) {
+        // test if revision is available locally
+        couchr.head('/' + db_name + '/' + id, function (err, data, req) {
+            if (err) {
+                if (err.status === 404) {
+                    // if status is 404 then the current head rev may be a
+                    // deleted doc - search changes feed if you need that info
+                    return callback(null, null);
+                }
+                return callback(err);
+            }
+            var etag = req.getResponseHeader('ETag') || '',
+                rev = etag.replace(/^"/, '').replace(/"$/, '');
+
+            return callback(null, rev || null);
+        });
+    };
+
 });
 
 define('lib/env',['exports'], function (exports) {
@@ -14401,225 +14473,53 @@ define('lib/env',['exports'], function (exports) {
 
 });
 
-define('lib/projects',[
+define('lib/replicate',[
     'exports',
     'require',
-    'jquery',
-    'underscore',
-    'couchr',
-    'async',
-    '../data/dashboard-data',
-    'events',
-    './utils',
-    './env'
+    'couchr'
 ],
-function (exports, require, $, _) {
+function (exports, require) {
 
-    var couchr = require('couchr'),
-        async = require('async'),
-        events = require('events'),
-        utils = require('./utils'),
-        DATA = require('../data/dashboard-data'),
-        env = require('./env');
+    var couchr = require('couchr');
 
 
-    var logErrorsCallback = function (err) {
-        if (err) {
-            return console.error(err);
-        }
-    };
-
-    exports.get = function (id) {
-        if (id) {
-            return _.detect(DATA.projects, function (db) {
-                return db._id === id;
-            });
-        }
-        return DATA.projects;
-    };
-
-    exports.update = function (newDoc, /*optional*/callback) {
-        callback = callback || logErrorsCallback;
-
-        var oldDoc = exports.get(newDoc._id);
-        var doc = oldDoc ? _.extend(oldDoc, newDoc): newDoc;
-
-        var url = 'api/' + encodeURIComponent(doc._id);
-        couchr.put(url, doc, function (err, data) {
+    exports.replicate = function (repdoc, callback) {
+        couchr.post('/_replicator', repdoc, function (err, data) {
             if (err) {
                 return callback(err);
             }
-            doc._rev = data.rev;
-
-            // update if already exists
-            for (var i = 0; i < DATA.projects.length; i++) {
-                var db = DATA.projects[i];
-                if (db._id === doc._id) {
-                    DATA.projects.splice(i, 1, doc);
-                    return callback();
-                }
-            };
-
-            // does not exist, create new project doc
-            var plist = DATA.projects;
-            plist.push(doc);
-            plist = _.sortBy(plist, function (p) {
-                return [p.db, (p.app && p.app.title) || p.name];
-            });
-            DATA.projects = _.uniq(plist, true, function (p) {
-                return p._id;
-            });
-            return callback();
-        });
-    };
-
-    exports.saveLocal = function () {
-        if (env.hasStorage) {
-            localStorage.setItem(
-                'dashboard-projects', JSON.stringify(DATA.projects)
-            );
-        }
-    };
-
-    exports.refresh = function (/*optional*/callback) {
-        callback = callback || logErrorsCallback;
-        var ev = new events.EventEmitter();
-
-        couchr.get('/_api/_all_dbs', function (err, dbs) {
-            if (err) {
-                return callback('Failed to update app list\n' + err);
-            }
-            var completed = 0;
-            async.forEachLimit(dbs, 4, function (db, cb) {
-                exports.refreshDB(db, function (err) {
+            // polls for change in replication state
+            function poll() {
+                couchr.get('/_replicator/' + data.id, function (err, doc) {
                     if (err) {
-                        return cb(err);
+                        return callback(err, doc);
                     }
-                    completed++;
-                    ev.emit(
-                        'progress',
-                        Math.floor(completed / dbs.length * 100)
-                    );
-                    cb();
-                });
-            },
-            function (err) {
-                if (err) {
-                    return callback(err);
-                }
-                exports.saveLocal();
-                $.get('data/dashboard-data.js', function (data) {
-                    // cache bust
-                });
-                callback();
-            });
-        });
-        return ev;
-    };
-
-    exports.refreshDB = function (db, /*optional*/callback) {
-        callback = callback || logErrorsCallback;
-
-        var url = '/_api/' + encodeURIComponent(db) + '/_all_docs';
-        var q = {
-            startkey: '"_design/"',
-            endkey: '"_design0"'
-        };
-        couchr.get(url, q, function (err, data) {
-            if (err) {
-                return callback(
-                    'Failed to update apps from DB: ' + db + '\n' + err
-                );
-            }
-            async.forEachSeries(data.rows || [], function (r, cb) {
-                var ddoc_url = ['', db, r.id].join('/');
-                // For now, update all documents on refresh
-                exports.refreshDoc(ddoc_url, cb);
-            },
-            callback);
-        });
-    };
-
-    exports.refreshDoc = function (ddoc_url, /*optional*/callback) {
-        callback = callback || logErrorsCallback;
-
-        couchr.get('/_api/' + ddoc_url, function (err, ddoc) {
-            if (err) {
-                return callback(
-                    'Failed to app from doc: ' + ddoc_url + '\n' + err
-                );
-            }
-            var app_url;
-            if (ddoc._attachments) {
-                if (ddoc._attachments['index.html']) {
-                    app_url = ddoc_url + '/index.html';
-                }
-                else if (ddoc._attachments['index.htm']) {
-                    app_url = ddoc_url + '/index.htm';
-                }
-            }
-            if (ddoc.rewrites && ddoc.rewrites.length) {
-                app_url = ddoc_url + '/_rewrite/';
-            }
-
-            var doc = {
-                // TODO: use base64 encoding polyfill for older browsers?
-                _id: window.btoa(ddoc_url),
-                ddoc_url: ddoc_url,
-                ddoc_rev: ddoc._rev,
-                type: 'project',
-                url: app_url,
-                db: ddoc_url.split('/')[1],
-                name: ddoc._id.split('/')[1]
-            };
-            if (!app_url) {
-                // show document in futon
-                //doc.url = '/_utils/document.html?' +
-                //    ddoc_url.replace(/^\//,'');
-
-                // show db in futon
-                doc.url = '/_utils/database.html?' + doc.db;
-                doc.unknown_root = true;
-            }
-            if (ddoc.app) {
-                doc.app = ddoc.app;
-            }
-
-            async.parallel([
-                function (cb) {
-                    if (doc.app && doc.app.icons && doc.app.icons['22']) {
-                        var dashicon_url = '/_api/' + doc.ddoc_url + '/' +
-                            doc.app.icons['22'];
-
-                        utils.imgToDataURI(dashicon_url, function (err, url) {
-                            if (!err && url) {
-                                doc.dashicon = url;
+                    if (doc._replication_state === 'error') {
+                        return callback(new Error(
+                            'Error replicating from ' + repdoc.source +
+                            ' to ' + repdoc.target
+                        ), doc);
+                    }
+                    if (doc._replication_state === 'completed') {
+                        // clean up completed doc
+                        var id = doc._id;
+                        var rurl = '/_replicator/' + id + '?rev=' + doc._rev;
+                        couchr.delete(rurl, function (err) {
+                            if (err) {
+                                // is this important enough to stop processing??
+                                return callback(err, doc);
                             }
-                            cb();
+                            return callback(null, doc);
                         });
                     }
                     else {
-                        cb();
+                        // poll again after delay
+                        setTimeout(poll, 1000);
                     }
-                },
-                function (cb) {
-                    couchr.get(
-                        '/_api/' + doc.db + '/_security',
-                        function (err, data) {
-                            if (err) {
-                                return cb(err);
-                            }
-                            doc.security = data;
-                            cb();
-                        }
-                    );
-                }
-            ],
-            function () {
-                console.log(['update', ddoc_url, doc]);
-                exports.update(doc, callback);
-            })
-
+                });
+            }
+            // start polling
+            poll();
         });
     };
 
@@ -14679,6 +14579,305 @@ function (exports, require, _) {
         if (env.hasStorage) {
             localStorage.setItem('dashboard-settings', JSON.stringify(DATA));
         }
+    };
+
+});
+
+define('lib/projects',[
+    'exports',
+    'require',
+    'jquery',
+    'underscore',
+    'couchr',
+    'async',
+    '../data/dashboard-data',
+    'events',
+    './utils',
+    './env',
+    './replicate',
+    './settings'
+],
+function (exports, require, $, _) {
+
+    var couchr = require('couchr'),
+        async = require('async'),
+        events = require('events'),
+        utils = require('./utils'),
+        DATA = require('../data/dashboard-data'),
+        env = require('./env'),
+        replicate = require('./replicate').replicate,
+        settings = require('./settings');
+
+
+    var logErrorsCallback = function (err) {
+        if (err) {
+            return console.error(err);
+        }
+    };
+
+    exports.get = function (id) {
+        if (id) {
+            return _.detect(DATA.projects, function (db) {
+                return db._id === id;
+            });
+        }
+        return DATA.projects;
+    };
+
+    exports.update = function (newDoc, /*optional*/callback) {
+        callback = callback || logErrorsCallback;
+
+        var oldDoc = exports.get(newDoc._id);
+        var doc = oldDoc ? _.extend(oldDoc, newDoc): newDoc;
+
+        var url = 'api/' + encodeURIComponent(doc._id);
+        couchr.put(url, doc, function (err, data) {
+            if (err) {
+                return callback(err);
+            }
+            doc._rev = data.rev;
+
+            // update if already exists
+            for (var i = 0; i < DATA.projects.length; i++) {
+                var db = DATA.projects[i];
+                if (db._id === doc._id) {
+                    DATA.projects.splice(i, 1, doc);
+                    return callback(null, doc);
+                }
+            };
+
+            // does not exist, create new project doc
+            var plist = DATA.projects;
+            plist.push(doc);
+            plist = _.sortBy(plist, function (p) {
+                return [p.db, (p.dashboard && p.dashboard.title) || p.name];
+            });
+            DATA.projects = _.uniq(plist, true, function (p) {
+                return p._id;
+            });
+            return callback(null, doc);
+        });
+    };
+
+    exports.saveLocal = function () {
+        if (env.hasStorage) {
+            localStorage.setItem(
+                'dashboard-projects', JSON.stringify(DATA.projects)
+            );
+        }
+    };
+
+    exports.refresh = function (/*optional*/callback) {
+        callback = callback || logErrorsCallback;
+        var ev = new events.EventEmitter();
+
+        couchr.get('/_api/_all_dbs', function (err, dbs) {
+            if (err) {
+                return callback('Failed to update project list\n' + err);
+            }
+            var completed = 0;
+            async.forEachLimit(dbs, 4, function (db, cb) {
+                exports.refreshDB(db, function (err) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    completed++;
+                    ev.emit(
+                        'progress',
+                        Math.floor(completed / dbs.length * 100)
+                    );
+                    cb();
+                });
+            },
+            function (err) {
+                if (err) {
+                    return callback(err);
+                }
+                exports.saveLocal();
+                $.get('data/dashboard-data.js', function (data) {
+                    // cache bust
+                });
+                callback();
+            });
+        });
+        return ev;
+    };
+
+    exports.refreshDB = function (db, /*optional*/callback) {
+        callback = callback || logErrorsCallback;
+
+        var url = '/_api/' + encodeURIComponent(db) + '/_all_docs';
+        var q = {
+            startkey: '"_design/"',
+            endkey: '"_design0"'
+        };
+        couchr.get(url, q, function (err, data) {
+            if (err) {
+                return callback(
+                    'Failed to update projects from DB: ' + db + '\n' + err
+                );
+            }
+            async.forEachSeries(data.rows || [], function (r, cb) {
+                // For now, update all documents on refresh
+                exports.refreshDoc(db, r.id, cb);
+            },
+            callback);
+        });
+    };
+
+    exports.refreshDoc = function (db_name, ddoc_id, /*optional*/callback) {
+        callback = callback || logErrorsCallback;
+
+        var ddoc_url = '/' + db_name + '/' + ddoc_id;
+        couchr.get('/_api' + ddoc_url, function (err, ddoc) {
+            if (err) {
+                return callback(
+                    'Failed to read: ' + ddoc_url + '\n' + err
+                );
+            }
+            var project_url = utils.getProjectURL(db_name, ddoc);
+
+            var doc = {
+                // TODO: use base64 encoding polyfill for older browsers?
+                _id: 'project:' + window.btoa(ddoc_url),
+                ddoc_url: ddoc_url,
+                ddoc_rev: ddoc._rev,
+                type: 'project',
+                url: project_url,
+                db: db_name,
+                name: ddoc_id.split('/')[1]
+            };
+            if (!project_url) {
+                // show document in futon
+                //doc.url = '/_utils/document.html?' +
+                //    ddoc_url.replace(/^\//,'');
+
+                // show db in futon
+                doc.url = utils.futonDatabaseURL(doc.db);
+                doc.unknown_root = true;
+            }
+            if (ddoc.dashboard) {
+                doc.dashboard = ddoc.dashboard;
+            }
+
+            async.parallel([
+                function (cb) {
+                    var dash = doc.dashboard;
+                    if (dash && dash.icons && dash.icons['22']) {
+                        var dashicon_url = '/_api/' + doc.ddoc_url + '/' +
+                            dash.icons['22'];
+
+                        utils.imgToDataURI(dashicon_url, function (err, url) {
+                            if (!err && url) {
+                                doc.dashicon = url;
+                            }
+                            cb();
+                        });
+                    }
+                    else {
+                        cb();
+                    }
+                },
+                function (cb) {
+                    couchr.get(
+                        '/_api/' + doc.db + '/_security',
+                        function (err, data) {
+                            if (err) {
+                                return cb(err);
+                            }
+                            doc.security = data;
+                            cb();
+                        }
+                    );
+                }
+            ],
+            function () {
+                console.log(['update', ddoc_url, doc]);
+                exports.update(doc, callback);
+            })
+
+        });
+    };
+
+    exports.create = function (db_name, ddoc_id, callback) {
+        var ev = new events.EventEmitter(),
+            cfg = settings.get(),
+            dashboard_db = cfg.info.db_name;
+
+        // stores the final project document created in dashboard db
+        var pdoc;
+
+        async.series([
+
+            // Create database
+            async.apply(couchr.put, '/' + db_name),
+
+            // Replicate template to new database
+            function (cb) {
+                ev.emit('progress', 10);
+                var repdoc = {
+                    source: dashboard_db,
+                    target: db_name,
+                    doc_ids: [ddoc_id]
+                };
+                replicate(repdoc, cb);
+            },
+
+            // Copy replicated template to _design doc id
+            function (cb) {
+                ev.emit('progress', 60);
+                var from = '/' + db_name + '/' + ddoc_id;
+                var to = '_design/' + ddoc_id;
+                couchr.copy(from, to, cb);
+            },
+
+            // Get a copy of the design doc for inspection
+            function (cb) {
+                ev.emit('progress', 70);
+                couchr.get('/' + db_name + '/' + ddoc_id, function (err, ddoc) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    ddoc = ddoc;
+                    return cb();
+                });
+            },
+
+            // Delete the old template doc replicated initially
+            function (cb) {
+                ev.emit('progress', 80);
+                utils.getRev(db_name, ddoc_id, function (err, rev) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    var q = { rev: rev };
+                    couchr.delete('/' + db_name + '/' + ddoc_id, q, cb);
+                });
+            },
+
+            // Create project document in dashboard db
+            function (cb) {
+                ev.emit('progress', 90);
+                var id = '_design/' + ddoc_id;
+                exports.refreshDoc(db_name, id, function (err, doc) {
+                    pdoc = doc;
+                    exports.saveLocal();
+                    $.get('data/dashboard-data.js', function (data) {
+                        // cache bust
+                    });
+                    cb(err);
+                });
+            }
+        ],
+        function (err) {
+            if (err) {
+                return callback(err);
+            }
+            ev.emit('progress', 100);
+            console.log(['pdoc', pdoc]);
+            callback(null, pdoc);
+        });
+        return ev;
     };
 
 });
@@ -16701,7 +16900,7 @@ function (require, $, _) {
         }
         if (!cfg.show_unknown_templates) {
             plist = _.reject(plist, function (p) {
-                return !p.unknown_root && !p.app;
+                return !p.unknown_root && !p.dashboard;
             });
         }
         return plist;
@@ -17620,13 +17819,17 @@ define('lib/templates',[
     'url',
     'couchr',
     './settings',
+    './replicate',
+    './utils'
 ],
 function (exports, require, $, _) {
 
     var settings = require('./settings'),
         couchr = require('couchr'),
         async = require('async'),
-        url = require('url');
+        url = require('url'),
+        replicate = require('./replicate').replicate,
+        utils = require('./utils');
 
 
     exports.update = function (callback) {
@@ -17687,49 +17890,36 @@ function (exports, require, $, _) {
         });
     };
 
-    exports.replicate = function (repdoc, callback) {
-        couchr.post('/_replicator', repdoc, function (err, data) {
+    /**
+     * Searches the _changes feed for updates to a document. This is able to
+     * find the last known _rev for _deleted documents.
+     */
+
+    exports.findLastEntry = function (id, callback) {
+        var q = {
+            filter: 'dashboard/id',
+            id: id
+        };
+        couchr.get('api/_changes', q, function (err, data) {
             if (err) {
                 return callback(err);
             }
-            // polls for change in replication state
-            function poll() {
-                couchr.get('/_replicator/' + data.id, function (err, doc) {
-                    if (err) {
-                        return callback(err, doc);
-                    }
-                    if (doc._replication_state === 'error') {
-                        return callback(new Error(
-                            'Error replicating from ' + repdoc.source +
-                            ' to ' + repdoc.target
-                        ), doc);
-                    }
-                    if (doc._replication_state === 'completed') {
-                        // clean up completed doc
-                        var id = doc._id;
-                        var rurl = '/_replicator/' + id + '?rev=' + doc._rev;
-                        couchr.delete(rurl, function (err) {
-                            if (err) {
-                                // is this important enough to stop processing??
-                                return callback(err, doc);
-                            }
-                            return callback(null, doc);
-                        });
-                    }
-                    else {
-                        // poll again after delay
-                        setTimeout(poll, 1000);
-                    }
-                });
+            if (!data.results || !data.results.length) {
+                // no document history found
+                return callback(null, null);
             }
-            // start polling
-            poll();
+            var r = data.results[data.results.length - 1];
+            var last_rev = r.changes[r.changes.length - 1].rev;
+            return callback(null, last_rev);
         });
     };
 
     exports.clearCheckpoint = function (replication_id, callback) {
-        var id = '_local/' + replication_id;
-        exports.getRev(id, function (err, rev) {
+        var id = '_local/' + replication_id,
+            cfg = settings.get(),
+            db_name = cfg.info.db_name;
+
+        utils.getRev(db_name, id, function (err, rev) {
             if (err) {
                 return callback(err);
             }
@@ -17737,8 +17927,16 @@ function (exports, require, $, _) {
                 couchr.delete('api/' + id + '?rev=' + rev, callback);
             }
             else {
-                // unknown rev, may not exist
-                return callback();
+                // may be a deleted doc
+                exports.findLastEntry(id, function (err, rev) {
+                    if (rev) {
+                        couchr.delete('api/' + id + '?rev=' + rev, callback);
+                    }
+                    else {
+                        // unknown rev, may not exist
+                        return callback();
+                    }
+                });
             }
         });
     };
@@ -17750,7 +17948,7 @@ function (exports, require, $, _) {
             target: settings.get().info.db_name,
             doc_ids: [ddoc_id]
         };
-        exports.replicate(repdoc, function (err, repdoc) {
+        replicate(repdoc, function (err, repdoc) {
             if (err) {
                 return callback(err);
             }
@@ -17809,53 +18007,12 @@ function (exports, require, $, _) {
         });
     };
 
-    /**
-     * Searches the _changes feed for updates to a document. This is able to
-     * find the last known _rev for _deleted documents.
-     */
-
-    exports.findLastEntry = function (id, callback) {
-        var q = {
-            filter: 'dashboard/id',
-            id: id
-        };
-        couchr.get('api/_changes', q, function (err, data) {
-            if (err) {
-                return callback(err);
-            }
-            if (!data.results || !data.results.length) {
-                // no document history found
-                return callback(null, null);
-            }
-            var r = data.results[data.results.length - 1];
-            var last_rev = r.changes[r.changes.length - 1].rev;
-            return callback(null, last_rev);
-        });
-    };
-
-    exports.getRev = function (id, callback) {
-        // test if revision is available locally
-        couchr.head('api/' + id, function (err, data, req) {
-            if (err) {
-                if (err.status === 404) {
-                    // if status is 404 then the current head rev may be a
-                    // deleted doc
-                    return exports.findLastEntry(id, callback);
-                }
-                return callback(err);
-            }
-            var etag = req.getResponseHeader('ETag') || '',
-                rev = etag.replace(/^"/, '').replace(/"$/, '');
-
-            return callback(null, rev || null);
-        });
-    };
-
     exports.purgeDDoc = function (ddoc_id, callback) {
-        exports.getRev(ddoc_id, function (err, rev) {
-            if (err) {
-                return callback(err);
-            }
+        var cfg = settings.get(),
+            db_name = cfg.info.db_name;
+
+
+        function withRev(rev) {
             var cfg = settings.get();
             var db = cfg.info.db_name;
             var q = {};
@@ -17866,6 +18023,24 @@ function (exports, require, $, _) {
             }
             // nothing to purge
             return callback();
+        }
+
+        utils.getRev(db_name, ddoc_id, function (err, rev) {
+            if (err) {
+                return callback(err);
+            }
+            if (!rev) {
+                // may be a deleted document
+                exports.findLastEntry(ddoc_id, function (err, rev) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    withRev(rev);
+                });
+            }
+            else {
+                withRev(rev);
+            }
         });
     };
 
@@ -17896,22 +18071,245 @@ function (exports, require, $, _) {
 
 define('text!templates/templates.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n    <div id="templates-list"><p>Loading</p></div>\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="templates-refresh-btn" class="btn" href="#">\n        <i class="icon-refresh"></i> Check for updates\n      </a>\n      <a id="templates-add-btn" class="btn btn-success" href="#/settings">\n        <i class="icon-plus-sign"></i> Add template sources\n      </a>\n    </div>\n  </div>\n</div>\n';});
 
-define('text!templates/templates-list.handlebars',[],function () { return '<table class="table table-striped">\n  <thead>\n    <tr>\n      <th>Name</th>\n      <th>Source</th>\n      <th>Installed</th>\n      <th>Available</th>\n      <th>Actions</th>\n    </tr>\n  </thead>\n  <tbody>\n    {{#each templates}}\n    <tr data-source="{{doc.source}}" data-ddoc-id="{{doc.ddoc_id}}">\n      <td>\n        <div class="name">\n          {{#if doc.dashicon}}\n          <img class="icon" alt="Icon" src="{{doc.dashicon}}" />\n          {{else}}\n          <img class="icon" alt="Icon" src="img/icons/default_22.png" />\n          {{/if}}\n          {{doc.ddoc_id}}\n        </div>\n      </td>\n      <td class="source" style="color: #999">\n        {{doc.source}}\n      </td>\n      <td>\n        {{#if doc.installed.dashboard.version}}\n          {{doc.installed.dashboard.version}}\n        {{else}}\n          --\n        {{/if}}\n      </td>\n      <td>\n        {{doc.remote.dashboard.version}}\n      </td>\n      <td>\n        {{#if doc.installed}}\n          <a class="btn template-uninstall-btn"><i class="icon-trash"></i> Uninstall</a>\n          <a class="btn"><i class="icon-briefcase"></i> Create Project</a>\n        {{else}}\n          <a class="btn template-install-btn">\n            <i class="icon-download"></i> Install\n          </a>\n        {{/if}}\n      </td>\n    </tr>\n    {{/each}}\n  </tbody>\n</table>\n';});
+define('text!templates/templates-list.handlebars',[],function () { return '<table class="table table-striped">\n  <thead>\n    <tr>\n      <th>Name</th>\n      <th>Source</th>\n      <th>Installed</th>\n      <th>Available</th>\n      <th>Actions</th>\n    </tr>\n  </thead>\n  <tbody>\n    {{#each templates}}\n    <tr data-source="{{doc.source}}" data-ddoc-id="{{doc.ddoc_id}}">\n      <td>\n        <div class="name">\n          {{#if doc.dashicon}}\n          <img class="icon" alt="Icon" src="{{doc.dashicon}}" />\n          {{else}}\n          <img class="icon" alt="Icon" src="img/icons/default_22.png" />\n          {{/if}}\n          {{doc.ddoc_id}}\n        </div>\n      </td>\n      <td class="source" style="color: #999">\n        {{doc.source}}\n      </td>\n      <td>\n        {{#if doc.installed.dashboard.version}}\n          {{doc.installed.dashboard.version}}\n        {{else}}\n          --\n        {{/if}}\n      </td>\n      <td>\n        {{doc.remote.dashboard.version}}\n      </td>\n      <td>\n        {{#if doc.installed}}\n          <a class="btn template-uninstall-btn"><i class="icon-trash"></i> Uninstall</a>\n          <a class="btn template-create-btn"><i class="icon-briefcase"></i> Create Project</a>\n        {{else}}\n          <a class="btn template-install-btn">\n            <i class="icon-download"></i> Install\n          </a>\n        {{/if}}\n      </td>\n    </tr>\n    {{/each}}\n  </tbody>\n</table>\n\n<div class="modal hide" id="create-project-modal">\n  <div class="modal-header">\n    <button type="button" class="close" data-dismiss="modal">×</button>\n    <h3>Create project</h3>\n  </div>\n  <div class="modal-body">\n    <form id="create-project-form" class="form-horizontal">\n      <fieldset>\n        <div class="control-group">\n          <label class="control-label" for="input-project-template">Template</label>\n          <div class="controls">\n            <span class="template"></span>\n            <input type="hidden" id="input-project-template">\n          </div>\n        </div>\n        <div class="control-group">\n          <label class="control-label" for="input-project-name">Name</label>\n          <div class="controls">\n            <input type="text" class="input-xlarge" id="input-project-name">\n          </div>\n        </div>\n      </fieldset>\n    </form>\n    <div class="progress">\n      <div class="bar"></div>\n    </div>\n  </div>\n  <div class="modal-footer">\n    <a href="#" class="btn" data-dismiss="modal">Close</a>\n    <a href="#" class="btn btn-primary">Create</a>\n  </div>\n</div>\n\n<div class="modal hide" id="done-project-modal">\n  <div class="modal-header">\n    <button type="button" class="close" data-dismiss="modal">×</button>\n    <h3>Done!</h3>\n  </div>\n  <div class="modal-body">\n    <!-- this gets replaced with the project view url by js -->\n    <a class="project-url" href="#/">View project list</a>\n  </div>\n  <div class="modal-footer">\n    <a href="#" class="btn" data-dismiss="modal">Close</a>\n    <a href="#" class="btn btn-primary">Open</a>\n  </div>\n</div>\n';});
+
+/* =========================================================
+ * bootstrap-modal.js v2.0.3
+ * http://twitter.github.com/bootstrap/javascript.html#modals
+ * =========================================================
+ * Copyright 2012 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ========================================================= */
+
+
+!function ($) {
+
+   // jshint ;_;
+
+
+ /* MODAL CLASS DEFINITION
+  * ====================== */
+
+  var Modal = function (content, options) {
+    this.options = options
+    this.$element = $(content)
+      .delegate('[data-dismiss="modal"]', 'click.dismiss.modal', $.proxy(this.hide, this))
+  }
+
+  Modal.prototype = {
+
+      constructor: Modal
+
+    , toggle: function () {
+        return this[!this.isShown ? 'show' : 'hide']()
+      }
+
+    , show: function () {
+        var that = this
+          , e = $.Event('show')
+
+        this.$element.trigger(e)
+
+        if (this.isShown || e.isDefaultPrevented()) return
+
+        $('body').addClass('modal-open')
+
+        this.isShown = true
+
+        escape.call(this)
+        backdrop.call(this, function () {
+          var transition = $.support.transition && that.$element.hasClass('fade')
+
+          if (!that.$element.parent().length) {
+            that.$element.appendTo(document.body) //don't move modals dom position
+          }
+
+          that.$element
+            .show()
+
+          if (transition) {
+            that.$element[0].offsetWidth // force reflow
+          }
+
+          that.$element.addClass('in')
+
+          transition ?
+            that.$element.one($.support.transition.end, function () { that.$element.trigger('shown') }) :
+            that.$element.trigger('shown')
+
+        })
+      }
+
+    , hide: function (e) {
+        e && e.preventDefault()
+
+        var that = this
+
+        e = $.Event('hide')
+
+        this.$element.trigger(e)
+
+        if (!this.isShown || e.isDefaultPrevented()) return
+
+        this.isShown = false
+
+        $('body').removeClass('modal-open')
+
+        escape.call(this)
+
+        this.$element.removeClass('in')
+
+        $.support.transition && this.$element.hasClass('fade') ?
+          hideWithTransition.call(this) :
+          hideModal.call(this)
+      }
+
+  }
+
+
+ /* MODAL PRIVATE METHODS
+  * ===================== */
+
+  function hideWithTransition() {
+    var that = this
+      , timeout = setTimeout(function () {
+          that.$element.off($.support.transition.end)
+          hideModal.call(that)
+        }, 500)
+
+    this.$element.one($.support.transition.end, function () {
+      clearTimeout(timeout)
+      hideModal.call(that)
+    })
+  }
+
+  function hideModal(that) {
+    this.$element
+      .hide()
+      .trigger('hidden')
+
+    backdrop.call(this)
+  }
+
+  function backdrop(callback) {
+    var that = this
+      , animate = this.$element.hasClass('fade') ? 'fade' : ''
+
+    if (this.isShown && this.options.backdrop) {
+      var doAnimate = $.support.transition && animate
+
+      this.$backdrop = $('<div class="modal-backdrop ' + animate + '" />')
+        .appendTo(document.body)
+
+      if (this.options.backdrop != 'static') {
+        this.$backdrop.click($.proxy(this.hide, this))
+      }
+
+      if (doAnimate) this.$backdrop[0].offsetWidth // force reflow
+
+      this.$backdrop.addClass('in')
+
+      doAnimate ?
+        this.$backdrop.one($.support.transition.end, callback) :
+        callback()
+
+    } else if (!this.isShown && this.$backdrop) {
+      this.$backdrop.removeClass('in')
+
+      $.support.transition && this.$element.hasClass('fade')?
+        this.$backdrop.one($.support.transition.end, $.proxy(removeBackdrop, this)) :
+        removeBackdrop.call(this)
+
+    } else if (callback) {
+      callback()
+    }
+  }
+
+  function removeBackdrop() {
+    this.$backdrop.remove()
+    this.$backdrop = null
+  }
+
+  function escape() {
+    var that = this
+    if (this.isShown && this.options.keyboard) {
+      $(document).on('keyup.dismiss.modal', function ( e ) {
+        e.which == 27 && that.hide()
+      })
+    } else if (!this.isShown) {
+      $(document).off('keyup.dismiss.modal')
+    }
+  }
+
+
+ /* MODAL PLUGIN DEFINITION
+  * ======================= */
+
+  $.fn.modal = function (option) {
+    return this.each(function () {
+      var $this = $(this)
+        , data = $this.data('modal')
+        , options = $.extend({}, $.fn.modal.defaults, $this.data(), typeof option == 'object' && option)
+      if (!data) $this.data('modal', (data = new Modal(this, options)))
+      if (typeof option == 'string') data[option]()
+      else if (options.show) data.show()
+    })
+  }
+
+  $.fn.modal.defaults = {
+      backdrop: true
+    , keyboard: true
+    , show: true
+  }
+
+  $.fn.modal.Constructor = Modal
+
+
+ /* MODAL DATA-API
+  * ============== */
+
+  $(function () {
+    $('body').on('click.modal.data-api', '[data-toggle="modal"]', function ( e ) {
+      var $this = $(this), href
+        , $target = $($this.attr('data-target') || (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '')) //strip for ie7
+        , option = $target.data('modal') ? 'toggle' : $.extend({}, $target.data(), $this.data())
+
+      e.preventDefault()
+      $target.modal(option)
+    })
+  })
+
+}(window.jQuery);
+define("bootstrap/js/bootstrap-modal", function(){});
 
 define('lib/views/templates',[
     'require',
     'jquery',
     'couchr',
     '../templates',
+    '../projects',
     'hbt!../../templates/templates',
     'hbt!../../templates/templates-list',
     'hbt!../../templates/navigation',
-    'bootstrap/js/bootstrap-button'
+    'bootstrap/js/bootstrap-button',
+    'bootstrap/js/bootstrap-modal'
 ],
 function (require, $) {
 
     var tmpl = require('hbt!../../templates/templates'),
         templates = require('../templates'),
+        projects = require('../projects'),
         couchr = require('couchr');
 
 
@@ -17954,6 +18352,7 @@ function (require, $) {
                 });
                 return false;
             });
+
             $('#templates-list .template-uninstall-btn').click(function (ev) {
                 ev.preventDefault();
                 var that = this,
@@ -17969,6 +18368,90 @@ function (require, $) {
                     console.log(['uninstalled', tdoc]);
                     $(that).button('reset');
                 });
+                return false;
+            });
+
+            function resetModal(template_tr, db_name) {
+                $('#done-project-modal').modal('hide');
+                var ddoc_id = $(template_tr).data('ddoc-id');
+                var m = $('#create-project-modal');
+                $('.alert', m).remove();
+                $('.template', m).html($('.name', template_tr).html());
+                $('#input-project-template', m).val(ddoc_id);
+                $('.progress', m).hide();
+                $('.progress .bar', m).css({width: 0});
+                $('.btn-primary', m).button('reset');
+                $('#create-project-form', m).show();
+                $('#input-project-name', m).val(db_name || '');
+            }
+
+            $('#templates-list .template-create-btn').click(function (ev) {
+                ev.preventDefault();
+                var that = this,
+                    tr = $(this).parents('tr'),
+                    ddoc_id = tr.data('ddoc-id');
+
+                resetModal(tr);
+                var m = $('#create-project-modal');
+                m.modal('show');
+                $('#input-project-name', m).focus();
+                return false;
+            });
+
+            $('#create-project-modal .btn-primary').click(function (ev) {
+                ev.preventDefault();
+                $('#create-project-modal').submit();
+                return false;
+            });
+
+            function showDoneModal(url) {
+                $('#create-project-modal').modal('hide');
+                var m = $('#done-project-modal');
+                $('.project-url', m).attr('href', url).text(url);
+                $('.btn-primary', m).attr('href', url);
+                m.modal('show');
+                // so if you press enter you go to desired url
+                $('.btn-primary', m).focus();
+            };
+
+            $('#create-project-modal').submit(function (ev) {
+                ev.preventDefault();
+                var name = $('#input-project-name').val(),
+                    tmpl = $('#input-project-template').val(),
+                    m = $(this);
+
+                $('.btn-primary', m).button('loading');
+                $('.progress', m).show();
+                $('#create-project-form', m).hide();
+
+                var bar = $('.progress .bar', m);
+                var creator = projects.create(name, tmpl, function (err, doc) {
+                    if (err) {
+                        resetModal($('tr[data-ddoc-id=' + tmpl + ']'), name);
+                        $('.modal-body', m).prepend(
+                            '<div class="alert alert-error">' +
+                                '<button class="close" data-dismiss="alert">×</button>' +
+                                '<strong>Error</strong> ' +
+                                (err.message || err.toString()) +
+                            '</div>'
+                        );
+                        return;
+                    }
+                    var fn = function () {
+                        $('.btn-primary', m).button('reset');
+                        $(m).modal('hide');
+                        showDoneModal(doc.url);
+                    };
+                    bar.one('transitionEnd', fn);
+                    bar.one('oTransitionEnd', fn);       // opera
+                    bar.one('msTransitionEnd', fn);      // ie
+                    bar.one('transitionend', fn);        // mozilla
+                    bar.one('webkitTransitionEnd', fn);  // webkit
+                });
+                creator.on('progress', function (value) {
+                    bar.css({width: value + '%'});
+                });
+
                 return false;
             });
         });
@@ -18068,9 +18551,9 @@ function (exports, require) {
 
 
     exports.routes = {
-        '/':                    require('./views/projects'),
-        '/templates':           require('./views/templates'),
-        '/settings':            require('./views/settings')
+        '/':            require('./views/projects'),
+        '/templates':   require('./views/templates'),
+        '/settings':    require('./views/settings')
     };
 
     exports.init = function () {

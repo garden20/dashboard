@@ -7,13 +7,17 @@ define([
     'url',
     'couchr',
     './settings',
+    './replicate',
+    './utils'
 ],
 function (exports, require, $, _) {
 
     var settings = require('./settings'),
         couchr = require('couchr'),
         async = require('async'),
-        url = require('url');
+        url = require('url'),
+        replicate = require('./replicate').replicate,
+        utils = require('./utils');
 
 
     exports.update = function (callback) {
@@ -74,49 +78,36 @@ function (exports, require, $, _) {
         });
     };
 
-    exports.replicate = function (repdoc, callback) {
-        couchr.post('/_replicator', repdoc, function (err, data) {
+    /**
+     * Searches the _changes feed for updates to a document. This is able to
+     * find the last known _rev for _deleted documents.
+     */
+
+    exports.findLastEntry = function (id, callback) {
+        var q = {
+            filter: 'dashboard/id',
+            id: id
+        };
+        couchr.get('api/_changes', q, function (err, data) {
             if (err) {
                 return callback(err);
             }
-            // polls for change in replication state
-            function poll() {
-                couchr.get('/_replicator/' + data.id, function (err, doc) {
-                    if (err) {
-                        return callback(err, doc);
-                    }
-                    if (doc._replication_state === 'error') {
-                        return callback(new Error(
-                            'Error replicating from ' + repdoc.source +
-                            ' to ' + repdoc.target
-                        ), doc);
-                    }
-                    if (doc._replication_state === 'completed') {
-                        // clean up completed doc
-                        var id = doc._id;
-                        var rurl = '/_replicator/' + id + '?rev=' + doc._rev;
-                        couchr.delete(rurl, function (err) {
-                            if (err) {
-                                // is this important enough to stop processing??
-                                return callback(err, doc);
-                            }
-                            return callback(null, doc);
-                        });
-                    }
-                    else {
-                        // poll again after delay
-                        setTimeout(poll, 1000);
-                    }
-                });
+            if (!data.results || !data.results.length) {
+                // no document history found
+                return callback(null, null);
             }
-            // start polling
-            poll();
+            var r = data.results[data.results.length - 1];
+            var last_rev = r.changes[r.changes.length - 1].rev;
+            return callback(null, last_rev);
         });
     };
 
     exports.clearCheckpoint = function (replication_id, callback) {
-        var id = '_local/' + replication_id;
-        exports.getRev(id, function (err, rev) {
+        var id = '_local/' + replication_id,
+            cfg = settings.get(),
+            db_name = cfg.info.db_name;
+
+        utils.getRev(db_name, id, function (err, rev) {
             if (err) {
                 return callback(err);
             }
@@ -124,8 +115,16 @@ function (exports, require, $, _) {
                 couchr.delete('api/' + id + '?rev=' + rev, callback);
             }
             else {
-                // unknown rev, may not exist
-                return callback();
+                // may be a deleted doc
+                exports.findLastEntry(id, function (err, rev) {
+                    if (rev) {
+                        couchr.delete('api/' + id + '?rev=' + rev, callback);
+                    }
+                    else {
+                        // unknown rev, may not exist
+                        return callback();
+                    }
+                });
             }
         });
     };
@@ -137,7 +136,7 @@ function (exports, require, $, _) {
             target: settings.get().info.db_name,
             doc_ids: [ddoc_id]
         };
-        exports.replicate(repdoc, function (err, repdoc) {
+        replicate(repdoc, function (err, repdoc) {
             if (err) {
                 return callback(err);
             }
@@ -196,53 +195,12 @@ function (exports, require, $, _) {
         });
     };
 
-    /**
-     * Searches the _changes feed for updates to a document. This is able to
-     * find the last known _rev for _deleted documents.
-     */
-
-    exports.findLastEntry = function (id, callback) {
-        var q = {
-            filter: 'dashboard/id',
-            id: id
-        };
-        couchr.get('api/_changes', q, function (err, data) {
-            if (err) {
-                return callback(err);
-            }
-            if (!data.results || !data.results.length) {
-                // no document history found
-                return callback(null, null);
-            }
-            var r = data.results[data.results.length - 1];
-            var last_rev = r.changes[r.changes.length - 1].rev;
-            return callback(null, last_rev);
-        });
-    };
-
-    exports.getRev = function (id, callback) {
-        // test if revision is available locally
-        couchr.head('api/' + id, function (err, data, req) {
-            if (err) {
-                if (err.status === 404) {
-                    // if status is 404 then the current head rev may be a
-                    // deleted doc
-                    return exports.findLastEntry(id, callback);
-                }
-                return callback(err);
-            }
-            var etag = req.getResponseHeader('ETag') || '',
-                rev = etag.replace(/^"/, '').replace(/"$/, '');
-
-            return callback(null, rev || null);
-        });
-    };
-
     exports.purgeDDoc = function (ddoc_id, callback) {
-        exports.getRev(ddoc_id, function (err, rev) {
-            if (err) {
-                return callback(err);
-            }
+        var cfg = settings.get(),
+            db_name = cfg.info.db_name;
+
+
+        function withRev(rev) {
             var cfg = settings.get();
             var db = cfg.info.db_name;
             var q = {};
@@ -253,6 +211,24 @@ function (exports, require, $, _) {
             }
             // nothing to purge
             return callback();
+        }
+
+        utils.getRev(db_name, ddoc_id, function (err, rev) {
+            if (err) {
+                return callback(err);
+            }
+            if (!rev) {
+                // may be a deleted document
+                exports.findLastEntry(ddoc_id, function (err, rev) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    withRev(rev);
+                });
+            }
+            else {
+                withRev(rev);
+            }
         });
     };
 

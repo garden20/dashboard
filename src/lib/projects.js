@@ -8,7 +8,9 @@ define([
     '../data/dashboard-data',
     'events',
     './utils',
-    './env'
+    './env',
+    './replicate',
+    './settings'
 ],
 function (exports, require, $, _) {
 
@@ -17,7 +19,9 @@ function (exports, require, $, _) {
         events = require('events'),
         utils = require('./utils'),
         DATA = require('../data/dashboard-data'),
-        env = require('./env');
+        env = require('./env'),
+        replicate = require('./replicate').replicate,
+        settings = require('./settings');
 
 
     var logErrorsCallback = function (err) {
@@ -53,7 +57,7 @@ function (exports, require, $, _) {
                 var db = DATA.projects[i];
                 if (db._id === doc._id) {
                     DATA.projects.splice(i, 1, doc);
-                    return callback();
+                    return callback(null, doc);
                 }
             };
 
@@ -61,12 +65,12 @@ function (exports, require, $, _) {
             var plist = DATA.projects;
             plist.push(doc);
             plist = _.sortBy(plist, function (p) {
-                return [p.db, (p.app && p.app.title) || p.name];
+                return [p.db, (p.dashboard && p.dashboard.title) || p.name];
             });
             DATA.projects = _.uniq(plist, true, function (p) {
                 return p._id;
             });
-            return callback();
+            return callback(null, doc);
         });
     };
 
@@ -84,7 +88,7 @@ function (exports, require, $, _) {
 
         couchr.get('/_api/_all_dbs', function (err, dbs) {
             if (err) {
-                return callback('Failed to update app list\n' + err);
+                return callback('Failed to update project list\n' + err);
             }
             var completed = 0;
             async.forEachLimit(dbs, 4, function (db, cb) {
@@ -125,68 +129,58 @@ function (exports, require, $, _) {
         couchr.get(url, q, function (err, data) {
             if (err) {
                 return callback(
-                    'Failed to update apps from DB: ' + db + '\n' + err
+                    'Failed to update projects from DB: ' + db + '\n' + err
                 );
             }
             async.forEachSeries(data.rows || [], function (r, cb) {
-                var ddoc_url = ['', db, r.id].join('/');
                 // For now, update all documents on refresh
-                exports.refreshDoc(ddoc_url, cb);
+                exports.refreshDoc(db, r.id, cb);
             },
             callback);
         });
     };
 
-    exports.refreshDoc = function (ddoc_url, /*optional*/callback) {
+    exports.refreshDoc = function (db_name, ddoc_id, /*optional*/callback) {
         callback = callback || logErrorsCallback;
 
-        couchr.get('/_api/' + ddoc_url, function (err, ddoc) {
+        var ddoc_url = '/' + db_name + '/' + ddoc_id;
+        couchr.get('/_api' + ddoc_url, function (err, ddoc) {
             if (err) {
                 return callback(
-                    'Failed to app from doc: ' + ddoc_url + '\n' + err
+                    'Failed to read: ' + ddoc_url + '\n' + err
                 );
             }
-            var app_url;
-            if (ddoc._attachments) {
-                if (ddoc._attachments['index.html']) {
-                    app_url = ddoc_url + '/index.html';
-                }
-                else if (ddoc._attachments['index.htm']) {
-                    app_url = ddoc_url + '/index.htm';
-                }
-            }
-            if (ddoc.rewrites && ddoc.rewrites.length) {
-                app_url = ddoc_url + '/_rewrite/';
-            }
+            var project_url = utils.getProjectURL(db_name, ddoc);
 
             var doc = {
                 // TODO: use base64 encoding polyfill for older browsers?
-                _id: window.btoa(ddoc_url),
+                _id: 'project:' + window.btoa(ddoc_url),
                 ddoc_url: ddoc_url,
                 ddoc_rev: ddoc._rev,
                 type: 'project',
-                url: app_url,
-                db: ddoc_url.split('/')[1],
-                name: ddoc._id.split('/')[1]
+                url: project_url,
+                db: db_name,
+                name: ddoc_id.split('/')[1]
             };
-            if (!app_url) {
+            if (!project_url) {
                 // show document in futon
                 //doc.url = '/_utils/document.html?' +
                 //    ddoc_url.replace(/^\//,'');
 
                 // show db in futon
-                doc.url = '/_utils/database.html?' + doc.db;
+                doc.url = utils.futonDatabaseURL(doc.db);
                 doc.unknown_root = true;
             }
-            if (ddoc.app) {
-                doc.app = ddoc.app;
+            if (ddoc.dashboard) {
+                doc.dashboard = ddoc.dashboard;
             }
 
             async.parallel([
                 function (cb) {
-                    if (doc.app && doc.app.icons && doc.app.icons['22']) {
+                    var dash = doc.dashboard;
+                    if (dash && dash.icons && dash.icons['22']) {
                         var dashicon_url = '/_api/' + doc.ddoc_url + '/' +
-                            doc.app.icons['22'];
+                            dash.icons['22'];
 
                         utils.imgToDataURI(dashicon_url, function (err, url) {
                             if (!err && url) {
@@ -218,6 +212,87 @@ function (exports, require, $, _) {
             })
 
         });
+    };
+
+    exports.create = function (db_name, ddoc_id, callback) {
+        var ev = new events.EventEmitter(),
+            cfg = settings.get(),
+            dashboard_db = cfg.info.db_name;
+
+        // stores the final project document created in dashboard db
+        var pdoc;
+
+        async.series([
+
+            // Create database
+            async.apply(couchr.put, '/' + db_name),
+
+            // Replicate template to new database
+            function (cb) {
+                ev.emit('progress', 10);
+                var repdoc = {
+                    source: dashboard_db,
+                    target: db_name,
+                    doc_ids: [ddoc_id]
+                };
+                replicate(repdoc, cb);
+            },
+
+            // Copy replicated template to _design doc id
+            function (cb) {
+                ev.emit('progress', 60);
+                var from = '/' + db_name + '/' + ddoc_id;
+                var to = '_design/' + ddoc_id;
+                couchr.copy(from, to, cb);
+            },
+
+            // Get a copy of the design doc for inspection
+            function (cb) {
+                ev.emit('progress', 70);
+                couchr.get('/' + db_name + '/' + ddoc_id, function (err, ddoc) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    ddoc = ddoc;
+                    return cb();
+                });
+            },
+
+            // Delete the old template doc replicated initially
+            function (cb) {
+                ev.emit('progress', 80);
+                utils.getRev(db_name, ddoc_id, function (err, rev) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    var q = { rev: rev };
+                    couchr.delete('/' + db_name + '/' + ddoc_id, q, cb);
+                });
+            },
+
+            // Create project document in dashboard db
+            function (cb) {
+                ev.emit('progress', 90);
+                var id = '_design/' + ddoc_id;
+                exports.refreshDoc(db_name, id, function (err, doc) {
+                    pdoc = doc;
+                    exports.saveLocal();
+                    $.get('data/dashboard-data.js', function (data) {
+                        // cache bust
+                    });
+                    cb(err);
+                });
+            }
+        ],
+        function (err) {
+            if (err) {
+                return callback(err);
+            }
+            ev.emit('progress', 100);
+            console.log(['pdoc', pdoc]);
+            callback(null, pdoc);
+        });
+        return ev;
     };
 
 });
