@@ -38,15 +38,20 @@ function (require, $) {
             );
             $('#templates-list .template-install-btn').click(function (ev) {
                 ev.preventDefault();
-                var tr = $(this).parents('tr'),
-                    source = tr.data('source'),
-                    ddoc_id = tr.data('ddoc');
+                var that = this,
+                    tr = $(this).parents('tr'),
+                    src = tr.data('source'),
+                    ddoc_id = tr.data('ddoc-id'),
+                    rev = tr.data('remote-rev');
 
-                templates.install(source, ddoc_id, function (err) {
+                $(that).button('loading');
+                templates.install(src, ddoc_id, rev, function (err, tdoc) {
                     if (err) {
                         // TODO: show error message to user
                         return console.error(err);
                     }
+                    console.log(['installed', tdoc]);
+                    $(that).button('reset');
                 });
                 return false;
             });

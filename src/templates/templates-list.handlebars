@@ -10,7 +10,7 @@
   </thead>
   <tbody>
     {{#each templates}}
-    <tr data-source="{{doc.source}}" data-ddoc="{{doc.ddoc_id}}">
+    <tr data-source="{{doc.source}}" data-ddoc-id="{{doc.ddoc_id}}" data-remote-rev="{{doc.remote.rev}}">
       <td>
         <div class="name">
           {{#if doc.dashicon}}
@@ -25,7 +25,11 @@
         {{doc.source}}
       </td>
       <td>
-        --
+        {{#if doc.installed.version}}
+          {{doc.installed.version}}
+        {{else}}
+          --
+        {{/if}}
       </td>
       <td>
         {{doc.remote.version}}

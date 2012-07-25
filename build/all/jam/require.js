@@ -2035,6 +2035,11 @@ define("../../tea/node_modules/jamjs/node_modules/requirejs/require.js", functio
 var jam = {
     "packages": [
         {
+            "name": "couchr",
+            "location": "jam/couchr",
+            "main": "couchr.js"
+        },
+        {
             "name": "bootstrap",
             "location": "jam/bootstrap"
         },
@@ -2051,11 +2056,6 @@ var jam = {
             "name": "hbt",
             "location": "jam/hbt",
             "main": "hbt.js"
-        },
-        {
-            "name": "couchr",
-            "location": "jam/couchr",
-            "main": "couchr.js"
         },
         {
             "name": "async",
@@ -13223,7 +13223,7 @@ define('couchr', ['exports', 'jquery'], function (exports, $) {
                     resp = $.parseJSON(req.responseText)
                 }
                 catch (e) {
-                    return callback(e);
+                    return callback(e, null, req);
                 }
             }
             else {
@@ -13232,7 +13232,7 @@ define('couchr', ['exports', 'jquery'], function (exports, $) {
                 resp = xml ? req.responseXML : req.responseText;
             }
             if (req.status === 200 || req.status === 201 || req.status === 202) {
-                callback(null, resp);
+                callback(null, resp, req);
             }
             else if (resp && (resp.error || resp.reason)) {
                 var err = new Error(resp.reason || resp.error);
@@ -13240,7 +13240,7 @@ define('couchr', ['exports', 'jquery'], function (exports, $) {
                 err.reason = resp.reason;
                 err.code = resp.code;
                 err.status = req.status;
-                callback(err);
+                callback(err, null, req);
             }
             else {
                 // TODO: map status code to meaningful error message
@@ -13250,7 +13250,7 @@ define('couchr', ['exports', 'jquery'], function (exports, $) {
                 }
                 var err2 = new Error(msg);
                 err2.status = req.status;
-                callback(err2);
+                callback(err2, null, req);
             }
         };
     }
@@ -13297,12 +13297,19 @@ define('couchr', ['exports', 'jquery'], function (exports, $) {
     };
 
 
-    exports.request = function (method, url, /*optional*/data, callback) {
+    exports.request = function (method, url, /*o*/data, /*o*/opt, callback) {
+        if (!callback) {
+            callback = opt;
+            opt = null;
+        }
         if (!callback) {
             callback = data;
             data = null;
         }
-        var options = {type: method, url: url};
+        var options = opt || {};
+        options.type = method;
+        options.url = url;
+
         if (data) {
             try {
                 if (method === 'GET' || method === 'HEAD') {
@@ -13318,6 +13325,12 @@ define('couchr', ['exports', 'jquery'], function (exports, $) {
                 return callback(e);
             }
         }
+        /*
+        // set accept header to avoid mutli-part when getting inline attachments
+        options.headers = {
+            Accept : "application/json; charset=utf-8"
+        };
+        */
         exports.ajax(options, callback);
     };
 
@@ -13333,6 +13346,14 @@ define('couchr', ['exports', 'jquery'], function (exports, $) {
     exports.head = makeRequest('HEAD');
     exports.put = makeRequest('PUT');
     exports.delete = makeRequest('DELETE');
+
+    // not supported by all browsers
+    exports.copy = function (source, dest, callback) {
+        var options = {
+            headers: {'Destination': dest}
+        };
+        exports.request('COPY', source, null, options, callback);
+    };
 
 });
 
@@ -17674,9 +17695,10 @@ function (exports, require, $, _) {
                         source: r.source,
                         ddoc_id: r.id
                     });
-                    if (r.value.icons && r.value.icons['22']) {
+                    var rdash = r.value.dashboard;
+                    if (rdash.icons && rdash.icons['22']) {
                         doc.dashicon = url.resolve(
-                            r.source, r.id + '/' + r.value.icons['22']
+                            r.source, r.id + '/' + rdash.icons['22']
                         );
                     }
                     couchr.put(durl, doc, cb);
@@ -17686,15 +17708,127 @@ function (exports, require, $, _) {
         });
     };
 
+    exports.replicate = function (repdoc, callback) {
+        couchr.post('/_replicator', repdoc, function (err, data) {
+            if (err) {
+                return callback(err);
+            }
+            // polls for change in replication state
+            function poll() {
+                couchr.get('/_replicator/' + data.id, function (err, doc) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    if (doc._replication_state === 'error') {
+                        return callback(new Error(
+                            'Error replicating from ' + repdoc.source +
+                            ' to ' + repdoc.target
+                        ));
+                    }
+                    if (doc._replication_state === 'completed') {
+                        return callback();
+                    }
+                    else {
+                        // poll again after delay
+                        setTimeout(poll, 1000);
+                    }
+                });
+            }
+            // start polling
+            poll();
+        });
+    };
 
-    exports.install = function (source, ddoc_id, callback) {
+
+    // checks if the design ddoc rev already exists locally
+    exports.checkForLocalRev = function (ddoc_id, ddoc_rev, callback) {
+        console.log(['checkForLocalRev', ddoc_id, ddoc_rev]);
+        couchr.get('api/' + ddoc_id, {rev: ddoc_rev}, function (err, ddoc) {
+            if (err && err.status === 404) {
+                return callback(null, null);
+            }
+            return callback(err, ddoc);
+        });
+    };
+
+    exports.promoteDDocRev = function (ddoc, callback) {
+        console.log(['promoteDDocRev', ddoc._id, ddoc._rev]);
+        // get current _rev number
+        couchr.head('api/' + ddoc._id, function (err, data, req) {
+            // if status is 404 then the current head rev is a deleted doc
+            if (err && err.status !== 404) {
+                return callback(err);
+            }
+            var cfg = settings.get();
+                db = cfg.info.db_name,
+                etag = (req.getResponseHeader('ETag') || ''),
+                rev = etag.replace(/^"/,'').replace(/"$/,''),
+                source = '/' + db + '/' + ddoc._id + '?rev=' + ddoc._rev,
+                dest = '/' + db + '/' + ddoc._id + (rev ? '?rev=' + rev: '');
+
+            if (source === dest) {
+                return exports.updateTemplateDoc(ddoc, callback);
+            }
+            couchr.copy(source, dest, function (err, info) {
+                if (err) {
+                    return callback(err);
+                }
+                ddoc._rev = info.rev;
+                return exports.updateTemplateDoc(ddoc, callback);
+            });
+        });
+    };
+
+    // replicates a ddoc from remote source and ensure it's installed
+    exports.replicateDDoc = function (source, ddoc_id, ddoc_rev, callback) {
         var repdoc = {
             source: source,
-            target: url.resolve(window.location, 'api'),
+            target: settings.get().info.db_name,
             doc_ids: [ddoc_id]
         };
-        couchr.post('/_replicate', repdoc, function (err, data) {
-            console.log(['replicate callback', err, data]);
+        // TODO: reset any previous replication checkpoints stored on template
+        // meta doc by doing DELETE /<db_name>/_local/<_replication_id>
+        exports.replicate(repdoc, function (err) {
+            if (err) {
+                return callback(err);
+            }
+            // TODO: check for conflicts
+            couchr.get('api/' + ddoc_id, function (err, ddoc) {
+                if (err) {
+                    return callback(err);
+                }
+                return exports.updateTemplateDoc(ddoc, callback);
+            });
+        });
+    };
+
+    // updates meta info on template with installed version
+    exports.updateTemplateDoc = function (ddoc, callback) {
+        var tid = encodeURIComponent('template:' + ddoc._id);
+        couchr.get('api/' + tid, function (err, tdoc) {
+            if (err) {
+                return callback(err);
+            }
+            tdoc.installed = ddoc.dashboard;
+            couchr.put('api/' + tid, tdoc, function (err, data) {
+                if (err) {
+                    return callback(err);
+                }
+                tdoc._rev = data.rev;
+                return callback(null, tdoc);
+            });
+        });
+    };
+
+    exports.install = function (src, ddoc_id, ddoc_rev, callback) {
+        exports.checkForLocalRev(ddoc_id, ddoc_rev, function (err, ddoc) {
+            if (err) {
+                return callback(err);
+            }
+            if (ddoc) {
+                return exports.promoteDDocRev(ddoc, callback);
+            }
+            return exports.replicateDDoc(src, ddoc_id, ddoc_rev, callback);
         });
     };
 
@@ -17702,7 +17836,7 @@ function (exports, require, $, _) {
 
 define('text!templates/templates.handlebars',[],function () { return '<div id="main">\n  <div class="container-fluid">\n    <div id="templates-list"><p>Loading</p></div>\n  </div>\n</div>\n\n<div class="admin-bar visible-admin">\n  <div class="admin-bar-inner">\n    <div id="admin-bar-status"></div>\n    <div id="admin-bar-controls">\n      <a id="templates-refresh-btn" class="btn" href="#">\n        <i class="icon-refresh"></i> Check for updates\n      </a>\n      <a id="templates-add-btn" class="btn btn-success" href="#/settings">\n        <i class="icon-plus-sign"></i> Add template sources\n      </a>\n    </div>\n  </div>\n</div>\n';});
 
-define('text!templates/templates-list.handlebars',[],function () { return '<table class="table table-striped">\n  <thead>\n    <tr>\n      <th>Name</th>\n      <th>Source</th>\n      <th>Installed</th>\n      <th>Available</th>\n      <th>Actions</th>\n    </tr>\n  </thead>\n  <tbody>\n    {{#each templates}}\n    <tr data-source="{{doc.source}}" data-ddoc="{{doc.ddoc_id}}">\n      <td>\n        <div class="name">\n          {{#if doc.dashicon}}\n          <img class="icon" alt="Icon" src="{{doc.dashicon}}" />\n          {{else}}\n          <img class="icon" alt="Icon" src="img/icons/default_22.png" />\n          {{/if}}\n          {{doc.ddoc_id}}\n        </div>\n      </td>\n      <td class="source" style="color: #999">\n        {{doc.source}}\n      </td>\n      <td>\n        --\n      </td>\n      <td>\n        {{doc.remote.version}}\n      </td>\n      <td>\n        {{#if doc.installed}}\n          <a class="btn"><i class="icon-trash"></i> Uninstall</a>\n          <a class="btn"><i class="icon-briefcase"></i> Create Project</a>\n        {{else}}\n          <a class="btn template-install-btn">\n            <i class="icon-download"></i> Install\n          </a>\n        {{/if}}\n      </td>\n    </tr>\n    {{/each}}\n  </tbody>\n</table>\n';});
+define('text!templates/templates-list.handlebars',[],function () { return '<table class="table table-striped">\n  <thead>\n    <tr>\n      <th>Name</th>\n      <th>Source</th>\n      <th>Installed</th>\n      <th>Available</th>\n      <th>Actions</th>\n    </tr>\n  </thead>\n  <tbody>\n    {{#each templates}}\n    <tr data-source="{{doc.source}}" data-ddoc-id="{{doc.ddoc_id}}" data-remote-rev="{{doc.remote.rev}}">\n      <td>\n        <div class="name">\n          {{#if doc.dashicon}}\n          <img class="icon" alt="Icon" src="{{doc.dashicon}}" />\n          {{else}}\n          <img class="icon" alt="Icon" src="img/icons/default_22.png" />\n          {{/if}}\n          {{doc.ddoc_id}}\n        </div>\n      </td>\n      <td class="source" style="color: #999">\n        {{doc.source}}\n      </td>\n      <td>\n        {{#if doc.installed.version}}\n          {{doc.installed.version}}\n        {{else}}\n          --\n        {{/if}}\n      </td>\n      <td>\n        {{doc.remote.version}}\n      </td>\n      <td>\n        {{#if doc.installed}}\n          <a class="btn"><i class="icon-trash"></i> Uninstall</a>\n          <a class="btn"><i class="icon-briefcase"></i> Create Project</a>\n        {{else}}\n          <a class="btn template-install-btn">\n            <i class="icon-download"></i> Install\n          </a>\n        {{/if}}\n      </td>\n    </tr>\n    {{/each}}\n  </tbody>\n</table>\n';});
 
 define('lib/views/templates',[
     'require',
@@ -17744,15 +17878,20 @@ function (require, $) {
             );
             $('#templates-list .template-install-btn').click(function (ev) {
                 ev.preventDefault();
-                var tr = $(this).parents('tr'),
-                    source = tr.data('source'),
-                    ddoc_id = tr.data('ddoc');
+                var that = this,
+                    tr = $(this).parents('tr'),
+                    src = tr.data('source'),
+                    ddoc_id = tr.data('ddoc-id'),
+                    rev = tr.data('remote-rev');
 
-                templates.install(source, ddoc_id, function (err) {
+                $(that).button('loading');
+                templates.install(src, ddoc_id, rev, function (err, tdoc) {
                     if (err) {
                         // TODO: show error message to user
                         return console.error(err);
                     }
+                    console.log(['installed', tdoc]);
+                    $(that).button('reset');
                 });
                 return false;
             });

@@ -26,10 +26,14 @@ exports.views = {
     templates: {
         map: function (doc) {
             if (doc.type === 'template') {
-                emit(
-                    [doc.ddoc_id, (doc.dashboard && doc.dashboard.title) || {}],
-                    null
-                );
+                var dash;
+                if (doc.local) {
+                    dash = doc.local.dashboard;
+                }
+                else if (doc.remote) {
+                    dash = doc.remote.dashboard;
+                }
+                emit([doc.ddoc_id, (dash && dash.title) || {}], null);
             }
         }
     }
@@ -57,6 +61,9 @@ exports.shows = {
     settingsjs: function (doc, req) {
         // don't send this property to client
         delete doc._revisions;
+
+        // add info on current db
+        doc.info = req.info;
 
         return {
             code: 200,

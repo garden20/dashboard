@@ -2032,6 +2032,11 @@ var requirejs, require, define;
 var jam = {
     "packages": [
         {
+            "name": "couchr",
+            "location": "jam/couchr",
+            "main": "couchr.js"
+        },
+        {
             "name": "bootstrap",
             "location": "jam/bootstrap"
         },
@@ -2048,11 +2053,6 @@ var jam = {
             "name": "hbt",
             "location": "jam/hbt",
             "main": "hbt.js"
-        },
-        {
-            "name": "couchr",
-            "location": "jam/couchr",
-            "main": "couchr.js"
         },
         {
             "name": "async",
