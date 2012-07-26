@@ -253,17 +253,27 @@ function (exports, require, $, _) {
     };
 
     exports.install = function (src, ddoc_id, callback) {
+        var ev = new events.EventEmitter();
         exports.purgeDDoc(ddoc_id, function (err) {
             if (err) {
                 return callback(err);
             }
+            ev.emit('progress', 33);
             return exports.replicateDDoc(src, ddoc_id, function (err, ddoc) {
                 if (err) {
                     return callback(err);
                 }
-                return exports.installTemplateDoc(ddoc, callback);
+                ev.emit('progress', 66);
+                return exports.installTemplateDoc(ddoc, function (err, tdoc) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    ev.emit('progress', 100);
+                    callback(null, tdoc);
+                });
             });
         });
+        return ev;
     };
 
     exports.uninstall = function (ddoc_id, callback) {

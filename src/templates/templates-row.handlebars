@@ -1,0 +1,35 @@
+<tr data-source="{{source}}" data-ddoc-id="{{ddoc_id}}">
+  <td>
+    <div class="name">
+      {{#if dashicon}}
+      <img class="icon" alt="Icon" src="{{dashicon}}" />
+      {{else}}
+      <img class="icon" alt="Icon" src="img/icons/default_22.png" />
+      {{/if}}
+      {{ddoc_id}}
+    </div>
+  </td>
+  <td class="source" style="color: #999">
+    {{source}}
+  </td>
+  <td>
+    {{#if installed.dashboard.version}}
+      {{installed.dashboard.version}}
+    {{else}}
+      --
+    {{/if}}
+  </td>
+  <td>
+    {{remote.dashboard.version}}
+  </td>
+  <td class="actions">
+    {{#if installed}}
+      <a class="btn template-uninstall-btn"><i class="icon-trash"></i> Uninstall</a>
+      <a class="btn template-create-btn"><i class="icon-briefcase"></i> Create Project</a>
+    {{else}}
+      <a class="btn template-install-btn">
+        <i class="icon-download"></i> Install
+      </a>
+    {{/if}}
+  </td>
+</tr>

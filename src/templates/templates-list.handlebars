@@ -1,98 +1,13 @@
-<table class="table table-striped">
+<table class="table table-striped table-templates">
   <thead>
     <tr>
       <th>Name</th>
       <th>Source</th>
       <th>Installed</th>
       <th>Available</th>
-      <th>Actions</th>
+      <th class="actions">Actions</th>
     </tr>
   </thead>
   <tbody>
-    {{#each templates}}
-    <tr data-source="{{doc.source}}" data-ddoc-id="{{doc.ddoc_id}}">
-      <td>
-        <div class="name">
-          {{#if doc.dashicon}}
-          <img class="icon" alt="Icon" src="{{doc.dashicon}}" />
-          {{else}}
-          <img class="icon" alt="Icon" src="img/icons/default_22.png" />
-          {{/if}}
-          {{doc.ddoc_id}}
-        </div>
-      </td>
-      <td class="source" style="color: #999">
-        {{doc.source}}
-      </td>
-      <td>
-        {{#if doc.installed.dashboard.version}}
-          {{doc.installed.dashboard.version}}
-        {{else}}
-          --
-        {{/if}}
-      </td>
-      <td>
-        {{doc.remote.dashboard.version}}
-      </td>
-      <td>
-        {{#if doc.installed}}
-          <a class="btn template-uninstall-btn"><i class="icon-trash"></i> Uninstall</a>
-          <a class="btn template-create-btn"><i class="icon-briefcase"></i> Create Project</a>
-        {{else}}
-          <a class="btn template-install-btn">
-            <i class="icon-download"></i> Install
-          </a>
-        {{/if}}
-      </td>
-    </tr>
-    {{/each}}
   </tbody>
 </table>
-
-<div class="modal hide" id="create-project-modal">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal">×</button>
-    <h3>Create project</h3>
-  </div>
-  <div class="modal-body">
-    <form id="create-project-form" class="form-horizontal">
-      <fieldset>
-        <div class="control-group">
-          <label class="control-label" for="input-project-template">Template</label>
-          <div class="controls">
-            <span class="template"></span>
-            <input type="hidden" id="input-project-template">
-          </div>
-        </div>
-        <div class="control-group">
-          <label class="control-label" for="input-project-name">Name</label>
-          <div class="controls">
-            <input type="text" class="input-xlarge" id="input-project-name">
-          </div>
-        </div>
-      </fieldset>
-    </form>
-    <div class="progress">
-      <div class="bar"></div>
-    </div>
-  </div>
-  <div class="modal-footer">
-    <a href="#" class="btn" data-dismiss="modal">Close</a>
-    <a href="#" class="btn btn-primary">Create</a>
-  </div>
-</div>
-
-<div class="modal hide" id="done-project-modal">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal">×</button>
-    <h3>Done!</h3>
-  </div>
-  <div class="modal-body">
-    <!-- this gets replaced with the project view url by js -->
-    <a class="project-url" href="#/">View project list</a>
-  </div>
-  <div class="modal-footer">
-    <a href="#" class="btn" data-dismiss="modal">Close</a>
-    <a href="#" class="btn btn-primary">Open</a>
-  </div>
-</div>

@@ -7807,3 +7807,7 @@ body {
     margin: 0 10px;
   }
 }
+.table-templates td.actions,
+.table-templates th.actions {
+  width: 350px;
+}
