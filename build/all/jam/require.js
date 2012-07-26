@@ -17818,6 +17818,7 @@ define('lib/templates',[
     'async',
     'url',
     'couchr',
+    'events',
     './settings',
     './replicate',
     './utils'
@@ -17826,6 +17827,7 @@ function (exports, require, $, _) {
 
     var settings = require('./settings'),
         couchr = require('couchr'),
+        events = require('events'),
         async = require('async'),
         url = require('url'),
         replicate = require('./replicate').replicate,
@@ -17833,8 +17835,10 @@ function (exports, require, $, _) {
 
 
     exports.update = function (callback) {
+        var ev = new events.EventEmitter();
         var cfg = settings.get();
 
+        var completed_sources = 0;
         async.concat(cfg.templates.sources, function (s, cb) {
 
             // force trailing slash on library db url
@@ -17845,6 +17849,10 @@ function (exports, require, $, _) {
                 dataType: 'jsonp',
                 url: url.resolve(s,'_design/library/_list/jsonp/templates'),
                 success: function (data) {
+                    completed_sources++;
+                    ev.emit('progress', Math.floor(
+                        completed_sources / cfg.templates.sources.length * 50
+                    ));
                     cb(null, _.map(data.rows, function (r) {
                         r.source = s;
                         return r;
@@ -17859,6 +17867,7 @@ function (exports, require, $, _) {
             if (err) {
                 return callback(err);
             }
+            var completed_results = 0;
             async.forEach(results, function (r, cb) {
                 var id = 'template:' + r.id;
                 var durl = 'api/' + encodeURIComponent(id);
@@ -17883,11 +17892,22 @@ function (exports, require, $, _) {
                             r.source, r.id + '/' + rdash.icons['22']
                         );
                     }
-                    couchr.put(durl, doc, cb);
+                    couchr.put(durl, doc, function (err) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        completed_results++;
+                        ev.emit('progress', Math.floor(
+                            50 + completed_results / results.length * 50
+                        ));
+                        cb();
+                    });
                 });
             },
             callback);
         });
+
+        return ev;
     };
 
     /**
@@ -18313,15 +18333,7 @@ function (require, $) {
         couchr = require('couchr');
 
 
-    return function () {
-        $('#content').html(tmpl({}));
-
-        $('.navbar .container-fluid').html(
-            require('hbt!../../templates/navigation')({
-                templates: true
-            })
-        );
-
+    function renderList() {
         // fetch template list from couchdb
         var vurl = 'api/_design/dashboard/_view/templates';
         couchr.get(vurl, {include_docs: true}, function (err, data) {
@@ -18455,16 +18467,52 @@ function (require, $) {
                 return false;
             });
         });
+    }
+
+    return function () {
+        $('#content').html(tmpl({}));
+
+        $('.navbar .container-fluid').html(
+            require('hbt!../../templates/navigation')({
+                templates: true
+            })
+        );
+
+        renderList();
 
         $('#templates-refresh-btn').click(function (ev) {
             ev.preventDefault();
-            templates.update(function (err) {
+            var that = this;
+
+            $('#templates-list').html('');
+            $(this).button('loading');
+
+            var updator = templates.update(function (err) {
                 if (err) {
                     // TODO: show error message to user
                     return console.error(err);
                 }
-                // TODO: refresh templates row
-                console.log('done');
+                var bar = $('#admin-bar-status .progress .bar');
+                var fn = function () {
+                    $('#admin-bar-status .progress').fadeOut(function () {
+                        renderList();
+                    });
+                    $(that).button('reset');
+                };
+                bar.one('transitionEnd', fn);
+                bar.one('oTransitionEnd', fn);       // opera
+                bar.one('msTransitionEnd', fn);      // ie
+                bar.one('transitionend', fn);        // mozilla
+                bar.one('webkitTransitionEnd', fn);  // webkit
+            });
+            $('#admin-bar-status').html(
+                '<div class="progress"><div class="bar"></div></div>'
+            );
+            updator.on('progress', function (value) {
+                console.log(['progress', value]);
+                $('#admin-bar-status .progress .bar').css({
+                    width: value + '%'
+                });
             });
             return false;
         });

@@ -6,6 +6,7 @@ define([
     'async',
     'url',
     'couchr',
+    'events',
     './settings',
     './replicate',
     './utils'
@@ -14,6 +15,7 @@ function (exports, require, $, _) {
 
     var settings = require('./settings'),
         couchr = require('couchr'),
+        events = require('events'),
         async = require('async'),
         url = require('url'),
         replicate = require('./replicate').replicate,
@@ -21,8 +23,10 @@ function (exports, require, $, _) {
 
 
     exports.update = function (callback) {
+        var ev = new events.EventEmitter();
         var cfg = settings.get();
 
+        var completed_sources = 0;
         async.concat(cfg.templates.sources, function (s, cb) {
 
             // force trailing slash on library db url
@@ -33,6 +37,10 @@ function (exports, require, $, _) {
                 dataType: 'jsonp',
                 url: url.resolve(s,'_design/library/_list/jsonp/templates'),
                 success: function (data) {
+                    completed_sources++;
+                    ev.emit('progress', Math.floor(
+                        completed_sources / cfg.templates.sources.length * 50
+                    ));
                     cb(null, _.map(data.rows, function (r) {
                         r.source = s;
                         return r;
@@ -47,6 +55,7 @@ function (exports, require, $, _) {
             if (err) {
                 return callback(err);
             }
+            var completed_results = 0;
             async.forEach(results, function (r, cb) {
                 var id = 'template:' + r.id;
                 var durl = 'api/' + encodeURIComponent(id);
@@ -71,11 +80,22 @@ function (exports, require, $, _) {
                             r.source, r.id + '/' + rdash.icons['22']
                         );
                     }
-                    couchr.put(durl, doc, cb);
+                    couchr.put(durl, doc, function (err) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        completed_results++;
+                        ev.emit('progress', Math.floor(
+                            50 + completed_results / results.length * 50
+                        ));
+                        cb();
+                    });
                 });
             },
             callback);
         });
+
+        return ev;
     };
 
     /**
