@@ -14420,6 +14420,9 @@ function (exports, require) {
         if (!/^_design\//.test(id)) {
             id = '_design/' + id;
         }
+        if (ddoc.rewrites && ddoc.rewrites.length) {
+            return '/' + db_name + '/' + id + '/_rewrite/';
+        }
         if (ddoc._attachments) {
             if (ddoc._attachments['index.html']) {
                 return '/' + db_name + '/' + id + '/index.html';
@@ -14427,9 +14430,6 @@ function (exports, require) {
             else if (ddoc._attachments['index.htm']) {
                 return '/' + db_name + '/' + id + '/index.htm';
             }
-        }
-        if (ddoc.rewrites && ddoc.rewrites.length) {
-            return '/' + db_name + '/' + id + '/_rewrite/';
         }
         return null;
     };
