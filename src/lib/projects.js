@@ -24,12 +24,6 @@ function (exports, require, $, _) {
         settings = require('./settings');
 
 
-    var logErrorsCallback = function (err) {
-        if (err) {
-            return console.error(err);
-        }
-    };
-
     exports.get = function (id) {
         if (id) {
             return _.detect(DATA.projects, function (db) {
@@ -40,7 +34,7 @@ function (exports, require, $, _) {
     };
 
     exports.update = function (newDoc, /*optional*/callback) {
-        callback = callback || logErrorsCallback;
+        callback = callback || utils.logErrorsCallback;
 
         var oldDoc = exports.get(newDoc._id);
         var doc = oldDoc ? _.extend(oldDoc, newDoc): newDoc;
@@ -83,7 +77,7 @@ function (exports, require, $, _) {
     };
 
     exports.refresh = function (/*optional*/callback) {
-        callback = callback || logErrorsCallback;
+        callback = callback || utils.logErrorsCallback;
         var ev = new events.EventEmitter();
 
         couchr.get('/_api/_all_dbs', function (err, dbs) {
@@ -119,7 +113,7 @@ function (exports, require, $, _) {
     };
 
     exports.refreshDB = function (db, /*optional*/callback) {
-        callback = callback || logErrorsCallback;
+        callback = callback || utils.logErrorsCallback;
 
         var url = '/_api/' + encodeURIComponent(db) + '/_all_docs';
         var q = {
@@ -141,7 +135,7 @@ function (exports, require, $, _) {
     };
 
     exports.refreshDoc = function (db_name, ddoc_id, /*optional*/callback) {
-        callback = callback || logErrorsCallback;
+        callback = callback || utils.logErrorsCallback;
 
         var ddoc_url = '/' + db_name + '/' + ddoc_id;
         couchr.get('/_api' + ddoc_url, function (err, ddoc) {

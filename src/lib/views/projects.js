@@ -38,7 +38,7 @@ function (require, $, _) {
             projects: getProjectList()
         }));
 
-        $('.navbar .container-fluid').html(
+        $('#navigation').html(
             require('hbt!../../templates/navigation')({
                 projects: true
             })

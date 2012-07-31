@@ -8,6 +8,12 @@ function (exports, require) {
     var couchr = require('couchr');
 
 
+    exports.logErrorsCallback = function (err) {
+        if (err) {
+            return console.error(err);
+        }
+    };
+
     exports.imgToDataURI = function (src, callback) {
         var img = new Image();
         img.src = src;

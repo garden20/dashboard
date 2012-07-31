@@ -173,14 +173,12 @@ body {
 }
 
 
-/*
 .visible-admin {
-    display: none;
+    display: none !important;
 }
 .is-admin .visible-admin {
-    display: inherit;
+    display: inherit !important;
 }
-*/
 
 .admin-bar {
     position: fixed;
@@ -316,4 +314,21 @@ body {
 .table-templates td.actions,
 .table-templates th.actions {
     width: 350px;
+}
+
+
+.center-form form {
+    margin-bottom: 0;
+}
+
+.center-form {
+    margin: 6em auto 0 auto;
+    display: block;
+    width: 560px;
+    border: 20px solid white;
+    background: white;
+}
+
+.center-form .form-actions {
+    margin-bottom: 0;
 }

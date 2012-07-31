@@ -26,7 +26,6 @@ function (require, $) {
     }
 
     function showDoneModal(url) {
-        console.log(['showDoneModal', url]);
         clearModals();
         var tmpl = require('hbt!../../templates/templates-done-project-modal');
 
@@ -39,8 +38,6 @@ function (require, $) {
     };
 
     function showProjectModal(ddoc_id, db_name) {
-        console.log(['showProjectModal', ddoc_id, db_name]);
-
         clearModals();
 
         var tmpl = require(
@@ -112,7 +109,6 @@ function (require, $) {
     }
 
     function renderRow(doc) {
-        console.log(['renderRow', doc]);
         var tr = $(require('hbt!../../templates/templates-row')(doc));
 
         $('.template-install-btn', tr).click(function (ev) {
@@ -129,7 +125,6 @@ function (require, $) {
                         // TODO: show error message to user
                         return console.error(err);
                     }
-                    console.log(['installed', tdoc]);
                     var fn = function () {
                         progress.replaceWith(btn);
                         // redraw row
@@ -158,7 +153,6 @@ function (require, $) {
                     // TODO: show error message to user
                     return console.error(err);
                 }
-                console.log(['uninstalled', tdoc]);
                 //$(that).button('reset');
                 // redraw row
                 tr.replaceWith(renderRow(tdoc));
@@ -186,21 +180,19 @@ function (require, $) {
             var rows = _.map(data.rows, function (r) {
                 return renderRow(r.doc);
             });
-            console.log(['renderList rows', rows]);
             $('#templates-list').html(
                 require('hbt!../../templates/templates-list')({})
             );
             _.forEach(rows, function (tr) {
                 $('#templates-list tbody').append(tr);
             });
-            console.log(['renderList rows', $('#templates-list tbody').html()]);
         });
     }
 
     return function () {
         $('#content').html(tmpl({}));
 
-        $('.navbar .container-fluid').html(
+        $('#navigation').html(
             require('hbt!../../templates/navigation')({
                 templates: true
             })
@@ -237,7 +229,6 @@ function (require, $) {
                 '<div class="progress"><div class="bar"></div></div>'
             );
             updator.on('progress', function (value) {
-                console.log(['progress', value]);
                 $('#admin-bar-status .progress .bar').css({
                     width: value + '%'
                 });

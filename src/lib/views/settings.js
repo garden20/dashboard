@@ -49,7 +49,7 @@ function (require, $, _) {
             return false;
         });
 
-        $('.navbar .container-fluid').html(
+        $('#navigation').html(
             require('hbt!../../templates/navigation')({
                 settings: true
             })
