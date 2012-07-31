@@ -8,8 +8,9 @@ define([
     './views/settings',
     './views/sessionmenu',
     './views/login',
+    './views/signup',
     './projects',
-    './session',
+    './session'
 ],
 function (exports, require, _) {
 
@@ -24,7 +25,8 @@ function (exports, require, _) {
         '/templates':       require('./views/templates'),
         '/settings':        require('./views/settings'),
         '/login':           require('./views/login'),
-        '/login/:next':     require('./views/login')
+        '/login/:next':     require('./views/login'),
+        '/signup':          require('./views/signup')
     };
 
     exports.init = function () {

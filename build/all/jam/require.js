@@ -18818,6 +18818,169 @@ function (require, $) {
 
 });
 
+define('lib/users',[
+    'exports',
+    'couchr',
+    'underscore'
+],
+function (exports, couchr, _) {
+
+    exports.authDB = function (callback) {
+        couchr.get('/_session', function (err, resp) {
+            if (err) {
+                return callback(err);
+            }
+            return callback(null, resp.info.authentication_db);
+        });
+    };
+
+    exports.create = function (name, password, /*opt*/prop, callback) {
+        if (!callback) {
+            callback = prop;
+            prop = {};
+        }
+        var doc = _.extend({
+            _id: 'org.couchdb.user:' + name,
+            type: 'user',
+            name: name,
+            password: password,
+            roles: []
+        }, prop);
+
+        exports.authDB(function (err, db_name) {
+            if (err) {
+                return callback(err);
+            }
+            var url = '/' + db_name + '/' + encodeURIComponent(doc._id);
+            couchr.put(url, doc, callback);
+        });
+    };
+
+    // TODO: exports.makeAdmin (posts to /_config/admins)
+
+});
+
+define('text!templates/signup.handlebars',[],function () { return '<div class="center-form">\n  <form id="signup-form" class="form-horizontal">\n    <fieldset>\n      <legend>New user</legend>\n      <div class="control-group">\n        <label class="control-label" for="signup_username">Username</label>\n        <div class="controls">\n          <input type="text" class="input-xlarge" id="signup_username">\n          <p class="help-inline"></p>\n        </div>\n      </div>\n      <div class="control-group">\n        <label class="control-label" for="signup_email">Email</label>\n        <div class="controls">\n          <input type="text" class="input-xlarge" id="signup_email">\n          <p class="help-inline"></p>\n        </div>\n      </div>\n      <div class="control-group">\n        <label class="control-label" for="signup_password">Password</label>\n        <div class="controls">\n          <input type="password" class="input-medium" id="signup_password">\n          <p class="help-inline"></p>\n        </div>\n      </div>\n      <div class="form-actions">\n        <button id="signup_submit" type="submit" data-loading-text="Please wait..." class="btn btn-primary">Create my account</button>\n        <a style="position: relative; top: 2px; left: 10px;" href="#/login">Already have an account?</a>\n      </div>\n    </fieldset>\n  </form>\n</div>\n';});
+
+define('lib/views/signup',[
+    'require',
+    'jquery',
+    'async',
+    '../session',
+    '../users',
+    'hbt!../../templates/signup',
+    'hbt!../../templates/navigation'
+],
+function (require, $) {
+
+    var session = require('../session'),
+        users = require('../users'),
+        async = require('async');
+
+
+    function showError(err) {
+        $('#login-form fieldset').prepend(
+          '<div class="alert alert-error">' +
+            '<a class="close" data-dismiss="alert">' +
+              '&times;' +
+            '</a>' +
+            '<strong>Error</strong> ' +
+            (err.message || err.toString()) +
+          '</div>'
+        );
+    }
+
+
+    return function () {
+        var username, password;
+
+        var login_form = $('#login-form');
+        if (login_form.length) {
+            username = $('#login_username', login_form).val();
+            password = $('#login_password', login_form).val();
+        }
+        $('#content').html(
+            require('hbt!../../templates/signup')({})
+        );
+        $('#navigation').html(
+            require('hbt!../../templates/navigation')({})
+        );
+
+        if (username) {
+            $('#signup_username').val(username);
+        }
+        if (password) {
+            $('#signup_password').val(password);
+        }
+
+        $('#signup_username').focus();
+
+        $('#signup-form').submit(function (ev) {
+            ev.preventDefault();
+
+            var email = $('#signup_email').val();
+            var username = $('#signup_username').val();
+            var password = $('#signup_password').val();
+
+            // clear validation/error messages
+            $('.error', this).removeClass('error');
+            $('.help-inline', this).text('');
+            $('.alert', this).remove();
+
+            if (!username) {
+                var cg = $('#signup_username').parents('.control-group');
+                cg.addClass('error');
+                $('.help-inline', cg).text('Required');
+            }
+            if (!email) {
+                var cg = $('#signup_email').parents('.control-group');
+                cg.addClass('error');
+                $('.help-inline', cg).text('Required');
+            }
+            if (!password) {
+                var cg = $('#signup_password').parents('.control-group');
+                cg.addClass('error');
+                $('.help-inline', cg).text('Required');
+            }
+            if (!email || !username || !password) {
+                return;
+            }
+
+            $('#signup_submit').button('loading');
+
+            async.series([
+                session.logout,
+                async.apply(users.create, username, password, {email: email}),
+                async.apply(session.login, username, password)
+            ],
+            function (err) {
+                if (err) {
+                    // TODO: roll-back user creation ?
+
+                    $('#signup_submit').button('reset');
+                    if (err.status === 0) {
+                        showError(new Error(
+                            'Request timed out, please check your connection.'
+                        ));
+                    }
+                    else if (err.status === 409 || err.status === 404) {
+                        showError(new Error('User already exists'));
+                    }
+                    else {
+                        showError(err);
+                    }
+                    return;
+                }
+                window.location = '#/';
+            });
+
+            return false;
+        });
+
+    };
+
+});
+
 define('lib/app',[
     'exports',
     'require',
@@ -18828,8 +18991,9 @@ define('lib/app',[
     './views/settings',
     './views/sessionmenu',
     './views/login',
+    './views/signup',
     './projects',
-    './session',
+    './session'
 ],
 function (exports, require, _) {
 
@@ -18844,7 +19008,8 @@ function (exports, require, _) {
         '/templates':       require('./views/templates'),
         '/settings':        require('./views/settings'),
         '/login':           require('./views/login'),
-        '/login/:next':     require('./views/login')
+        '/login/:next':     require('./views/login'),
+        '/signup':          require('./views/signup')
     };
 
     exports.init = function () {
