@@ -32,7 +32,7 @@
         "jsonp": null,
         "semver" : null,
         "git-info" : null,
-        "dashboard-core" : null,
+        "dashboard-core" : "0.0.2",
         "revalidator" : null,
         "gravatar" : null,
         "flattr" : null
