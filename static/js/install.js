@@ -121,7 +121,10 @@ $(function() {
                     if (err) settingsDoc = {};
                     var settings = _.defaults(settingsDoc, dashboard_settings.defaultSettings);
                     var link = dashboard_links.appUrl(settings, app_install_doc);
-                    $('.success').attr('href', link).show();
+                    $('.after-open').attr('href', link).show();
+
+                    var settings_link = dashboard_links.appSettingsUrl(settings, app_install_doc);
+                    $('.after-settings').attr('href', settings_link).show();
                 })
 
 
