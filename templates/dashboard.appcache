@@ -1,0 +1,28 @@
+CACHE MANIFEST
+#version 2
+#rev {{revs}}
+
+CACHE:
+
+
+static/css/main.css
+dashboard/_design/dashboard/_rewrite/_topbar.css
+dashboard/_design/dashboard/_rewrite/_topbar
+modules.js
+static/js/lib/jquery-ui-1.8.5.custom.min.js
+dashboard/_design/dashboard/_rewrite/static/js/topbar.js
+static/js/lib/jquery.couch.js
+static/js/lib/amplify.min.js
+static/js/lib/director-1.0.8.min.js
+static/js/lib/bootstrap-tooltip.js
+static/js/lib/bootstrap-popover.js
+static/js/lib/bootstrap-modal.js
+static/js/lib/bootstrap-tab.js
+static/js/lib/bootstrap-button.js
+static/js/lib/bootstrap-dropdown.js
+static/js/lib/bootstrap-alert.js
+static/js/lib/moment.min.js
+static/js/common.js
+
+NETWORK:
+*
