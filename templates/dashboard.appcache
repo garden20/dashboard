@@ -12,6 +12,8 @@ modules.js
 static/js/lib/jquery-ui-1.8.5.custom.min.js
 dashboard/_design/dashboard/_rewrite/static/js/topbar.js
 dashboard/_design/dashboard/static/img/garden-18.png
+dashboard/_design/dashboard/_rewrite/_img/dashboard_grey.png
+dashboard/_design/dashboard/_rewrite/_img/dashboard.png
 static/img/garden-18.png
 static/js/lib/jquery.couch.js
 static/js/lib/amplify.min.js
