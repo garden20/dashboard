@@ -1,5 +1,5 @@
 CACHE MANIFEST
-#version 2
+#version 4
 #rev {{revs}}
 
 CACHE:
@@ -11,6 +11,8 @@ dashboard/_design/dashboard/_rewrite/_topbar
 modules.js
 static/js/lib/jquery-ui-1.8.5.custom.min.js
 dashboard/_design/dashboard/_rewrite/static/js/topbar.js
+dashboard/_design/dashboard/static/img/garden-18.png
+static/img/garden-18.png
 static/js/lib/jquery.couch.js
 static/js/lib/amplify.min.js
 static/js/lib/director-1.0.8.min.js
@@ -23,6 +25,17 @@ static/js/lib/bootstrap-dropdown.js
 static/js/lib/bootstrap-alert.js
 static/js/lib/moment.min.js
 static/js/common.js
+static/js/install.js
+static/js/settings.js
+static/js/lib/jquery.dom.form_params.js
+static/js/lib/jquery.form.js
+static/js/lib/chosen.jquery.min.js
+static/img/ajax-loader.gif
+static/img/secondbar_bg.png
+
+{{#each extra_resources}}
+{{.}}
+{{/each}}
 
 NETWORK:
 *
