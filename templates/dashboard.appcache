@@ -16,13 +16,7 @@ static/img/garden-18.png
 static/js/lib/jquery.couch.js
 static/js/lib/amplify.min.js
 static/js/lib/director-1.0.8.min.js
-static/js/lib/bootstrap-tooltip.js
-static/js/lib/bootstrap-popover.js
-static/js/lib/bootstrap-modal.js
-static/js/lib/bootstrap-tab.js
-static/js/lib/bootstrap-button.js
-static/js/lib/bootstrap-dropdown.js
-static/js/lib/bootstrap-alert.js
+static/js/lib/bootstrap.min.js
 static/js/lib/moment.min.js
 static/js/common.js
 static/js/install.js
