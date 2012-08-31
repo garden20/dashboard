@@ -74,8 +74,8 @@ $(function() {
 
     var remote_app_details;
     if (appurl) {
-
-        $('.step-description').text(window.location.protocol + '//' + window.location.host + '/' + $('.container[role="main"]').data('dashboardurl'));
+        var bestName = dashboard_links.friendlyName(window.location.protocol + '//' + window.location.host);
+        $('.step-description').text(bestName);
 
         dashboard_core.getGardenAppDetails(appurl, function(err, results) {
             console.log(err, results);

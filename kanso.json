@@ -35,6 +35,7 @@
         "dashboard-core" : "0.0.2",
         "revalidator" : null,
         "gravatar" : null,
-        "flattr" : null
+        "flattr" : null,
+        "url" : null
     }
 }
