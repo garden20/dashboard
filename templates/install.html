@@ -25,9 +25,14 @@
                       </div>
 
                   {{else}}
-                        <h1>Install Application</h1>
+                        <h1>Install An Application</h1>
+                        <p class="hook">Find fresh apps to install from your local <b>Garden Market</b>!</p>
+                        <ul class="gardens">
+
+                        </ul>
+
                         <form class="well search-form">
-                           <input type="text" class="span6" placeholder="Got an application url?" name="app_url">
+                           <input type="text" class="span6" placeholder="Or, enter an application url..." name="app_url">
                           <button type="submit" class="btn next">Next &raquo;</button>
                         </form>
 
@@ -38,24 +43,15 @@
                       <p>You need to login as an admin to install an application</p>
                       <a href="{{login_link}}" class="btn">Login</a>
                   </div>
+                  <p class="hook">Find fresh apps to install from your local <b>Garden Market</b>!</p>
+                  <ul class="gardens">
+
+                  </ul>
               {{/if}}
 
           </div>
       </div>
   </div>
-  {{#unless app_url}}
-  <div class="span3">
-
-      <div class="row title">
-          <h3>Looking for apps?</h3>
-          Find fresh apps to install from your local <b>Garden Market</b>!
-      </div>
-      <ul class="gardens">
-
-      </ul>
-  </div>
-  {{/unless}}
-
 </div>
 
 
