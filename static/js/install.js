@@ -81,13 +81,17 @@ $(function() {
             console.log(err, results);
             if (err) return errorLoadingInfo();
 
+            console.log(results);
+
+            $('#details_sidebar').html(handlebars.templates['second_bar.html']({meta : results}));
+
             $('#secondbar').show();
             $('.app_icon').attr('src', results.icon_url);
             $('.app_title').text(results.kanso.config.name);
             $('.uploaded_by').text(results.user).attr('href', results.user_url)
             $('.updated .readable').text(datelib.prettify(results.kanso.push_time));
             remote_app_details = results;
-            $('.loading').html(handlebars.templates['install_app_info.html'](remote_app_details, {}));
+            //$('.loading').html(handlebars.templates['install_app_info.html'](remote_app_details, {}));
         })
 
     }

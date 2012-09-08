@@ -1,4 +1,47 @@
+{{#if is_auth}}
+    {{#if app_url}}
+<div class="row">
+  <div class="span4">
+    <div class="market-icon">
+        <a href="{{baseURL}}"><img src="{{baseURL}}static/img/market-logo.png"/></a>
+    </div>
+  </div>
+  <div class="span10">
 
+
+  </div>
+</div>
+<div class="row app_top">
+  <div id="details_sidebar" class="span4">
+
+
+  </div>
+
+  <div class="span8 install_where">
+
+      <h1>2. Confirm And Complete</h1>
+      <div class="wizard_trail first">
+          <h2>Installation Location</h2>
+          <div class="step-info">
+              <div class="icon-holder">
+                  <img src="../static/img/{{installation_location_icon}}" alt="" />
+                  <div class="type">{{installation_location_type}}</div>
+              </div>
+              <div class="step-description">
+                  {{installation_location_description}} szdsadsaas
+              </div>
+          </div>
+      </div>
+
+      <div class="loading" data-appurl="{{app_url}}">
+          Loading installation information...Please wait
+      </div>
+
+  </div>
+</div>
+
+    {{/if}}
+{{/if}}
 
 <div class="row title">
   <div class="main span8">
@@ -6,25 +49,7 @@
       <div id="content" class="main">
           <div class="row install-row">
               {{#if is_auth}}
-                  {{#if app_url}}
-                      <div class="wizard_trail first">
-                          <h2>Installation Location</h2>
-                          <div class="step-info">
-                              <div class="icon-holder">
-                                  <img src="../static/img/{{installation_location_icon}}" alt="" />
-                                  <div class="type">{{installation_location_type}}</div>
-                              </div>
-                              <div class="step-description">
-                                  {{installation_location_description}} szdsadsaas
-                              </div>
-                          </div>
-                      </div>
-
-                      <div class="loading" data-appurl="{{app_url}}">
-                          Loading installation information...Please wait
-                      </div>
-
-                  {{else}}
+                  {{#unless app_url}}
                         <h1>Install An Application</h1>
                         <p class="hook">Find fresh apps to install from your local <b>Garden Market</b>!</p>
                         <ul class="gardens">
@@ -36,7 +61,7 @@
                           <button type="submit" class="btn next">Next &raquo;</button>
                         </form>
 
-                  {{/if}}
+                  {{/unless}}
               {{else}}
                  <h1>Install Application</h1>
                   <div class="alert alert-info">
