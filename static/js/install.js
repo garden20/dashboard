@@ -73,31 +73,21 @@ $(function() {
 
 
     var remote_app_details;
+    var host_options = $('.install_where').data('host_options');
     if (appurl) {
         var bestName = dashboard_links.friendlyName(window.location.protocol + '//' + window.location.host);
         $('.step-description').text(bestName);
 
         dashboard_core.getGardenAppDetails(appurl, function(err, results) {
-            console.log(err, results);
             if (err) return errorLoadingInfo();
-
-            console.log(results);
-
-            $('#details_sidebar').html(handlebars.templates['second_bar.html']({meta : results}));
-
-            $('#secondbar').show();
-            $('.app_icon').attr('src', results.icon_url);
-            $('.app_title').text(results.kanso.config.name);
-            $('.uploaded_by').text(results.user).attr('href', results.user_url)
-            $('.updated .readable').text(datelib.prettify(results.kanso.push_time));
             remote_app_details = results;
-            //$('.loading').html(handlebars.templates['install_app_info.html'](remote_app_details, {}));
+            var hosted = $('#details_sidebar').data('hosted');
+
+            $('#details_sidebar').html(handlebars.templates['second_bar.html']({meta : results, hosted: hosted}));
+            $('.loading').html(handlebars.templates['install_app_info.html'](results, {}));
         })
 
     }
-
-
-
 
     showMarkets();
 
@@ -117,19 +107,20 @@ $(function() {
 
         dashboard_core.best_db_name(remote_app_details.doc_id, function(err, db_name) {
             if (err) return errorInstalling(err);
-            dashboard_core.install_app(remote_app_details, db_name, updateStatus, function(err, app_install_doc) {
+            dashboard_core.install_app(remote_app_details, db_name, updateStatus, host_options, function(err, app_install_doc) {
                 if (err) return errorInstalling(err);
                 updateStatus('Install Complete', '100%', true);
 
-                db.getDoc('settings', function(err, settingsDoc) {
-                    if (err) settingsDoc = {};
-                    var settings = _.defaults(settingsDoc, dashboard_settings.defaultSettings);
-                    var link = dashboard_links.appUrl(settings, app_install_doc);
-                    $('.after-open').attr('href', link).show();
+                var settings = {
+                    host_options : host_options
+                };
 
-                    var settings_link = dashboard_links.appSettingsUrl(settings, app_install_doc);
-                    $('.after-settings').attr('href', settings_link).show();
-                })
+                var link = dashboard_links.appUrl(settings, app_install_doc);
+                $('.after-open').attr('href', link).show();
+
+                var settings_link = dashboard_links.appSettingsUrl(settings, app_install_doc);
+                $('.after-settings').attr('href', settings_link).show();
+
 
 
             });
