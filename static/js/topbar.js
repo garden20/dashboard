@@ -159,6 +159,8 @@ $(function(){
                 $('#dashboard-topbar-session').find('ul li:first').addClass('active');
             }
 
+            $('#dashboard-topbar').trigger('ready');
+
         });
 
     }
