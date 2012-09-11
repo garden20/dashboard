@@ -159,6 +159,7 @@ $(function(){
                 $('#dashboard-topbar-session').find('ul li:first').addClass('active');
             }
 
+            $('#dashboard-topbar').data('ready', true);
             $('#dashboard-topbar').trigger('ready');
 
         });
