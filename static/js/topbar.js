@@ -68,7 +68,18 @@ $(function(){
             $('body').prepend($topbar);
         }
         var path = window.location.pathname;
-        $topbar.load('/dashboard/_design/dashboard/_rewrite/_topbar', function() {
+
+        // only cache bust if there is no cookie
+        var bust = '';
+        var last_cache = readCookie('last-dashboard-cache');
+        if (!last_cache) {
+            var date = new Date().getTime();
+            bust = '?d=' + date;
+            createCookie('last-dashboard-cache', date);
+        } else {
+            bust = '?d=' + last_cache;
+        }
+        $topbar.load('/dashboard/_design/dashboard/_rewrite/_topbar' + bust, function() {
             // highlight the best thing
 
             var dash = $topbar.find('a.home').attr('href');
@@ -188,6 +199,7 @@ $(function(){
          , type: 'DELETE'
          , dataType: 'json'
          , success: function(){
+                eraseCookie('last-dashboard-cache');
                 var isOkToReload = checkLogoutDestination();
                 if (isOkToReload) {
                     window.location.reload();
@@ -220,7 +232,33 @@ $(function(){
         return pass;
     }
 
+    function createCookie(name, value, days) {
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            var expires = "; expires=" + date.toGMTString();
+        }
+        else var expires = "";
 
+
+
+        document.cookie = name + "=" + value + expires + "; path=/";
+    }
+
+    function readCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+
+    function eraseCookie(name) {
+        createCookie(name, "", -1);
+    }
 });
 
 /**

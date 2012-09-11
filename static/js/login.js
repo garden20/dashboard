@@ -16,6 +16,7 @@ $(function(){
                     $('#password').val('');
             } else {
                 amplify.store('user', username);
+                eraseCookie('last-dashboard-cache');
                 var redirect = urlParams['redirect'];
                 if (redirect) {
                     redirect = decodeURIComponent(redirect);
@@ -34,7 +35,20 @@ $(function(){
     if (urlParams['message']) {
         $('.alert-message').show().find('span').text(urlParams['message']);
     }
+    function createCookie(name, value, days) {
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            var expires = "; expires=" + date.toGMTString();
+        }
+        else var expires = "";
 
+
+        document.cookie = name + "=" + value + expires + "; path=/";
+    }
+    function eraseCookie(name) {
+        createCookie(name, "", -1);
+    }
 
 });
 var urlParams = {};
