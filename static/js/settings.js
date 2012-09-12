@@ -226,7 +226,7 @@ $(function(){
             $('.update-board tr.dashboard td.installed-version').html(ourVersion);
 
             $.ajax({
-                url :  "http://garden20.iriscouch.com/garden20/_design/dashboard/_show/configInfo/_design/dashboard?callback=?",
+                url :  "http://garden20.iriscouch.com/dashboard_seed/_design/dashboard/_show/configInfo/_design/dashboard?callback=?",
                 dataType : 'json',
                 jsonp : true,
                 success : function(remote_data) {
@@ -331,7 +331,7 @@ $(function(){
     $('.update-board tr.dashboard .update-run').live('click',function(){
        var btn = $(this);
        btn.button('loading');
-       $.couch.replicate('http://garden20.iriscouch.com/garden20', dashboard_core.dashboard_db_name, {
+       $.couch.replicate('http://garden20.iriscouch.com/dashboard_seed', dashboard_core.dashboard_db_name, {
           success : function() {
               btn
                   .button('complete')
