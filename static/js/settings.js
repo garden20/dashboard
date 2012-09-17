@@ -426,12 +426,12 @@ $(function(){
 
 
 
-    $('#navigation .primary').click(function() {
+    $('#theme .primary').click(function() {
         var btn = $(this);
         btn.button('loading');
         var started = new Date().getTime();
-        var params = $('#navigation form.a').formParams();
-        _.extend(params, $('#navigation form.c').formParams());
+        var params = $('#theme form.a').formParams();
+        _.extend(params, $('#theme form.c').formParams());
 
         var icon_name = $('#brand_img').val().split('\\').pop();
         if (icon_name) {
@@ -448,6 +448,27 @@ $(function(){
 
         $.ajax({
             url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/navigation/settings?' + $.param(params),
+            type: 'PUT',
+            success : function(result, textStatus, xmlHttpRequest) {
+                if (result == 'update complete') {
+                    window.location.reload();
+                }
+                else alert('update failed');
+            },
+            error : function() {
+            }
+        });
+        return false;
+    })
+
+    $('#host-options .primary').click(function() {
+        var btn = $(this);
+        btn.button('loading');
+        var started = new Date().getTime();
+        var params = $('#theme form').formParams();
+
+        $.ajax({
+            url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/host_options/settings?' + $.param(params),
             type: 'PUT',
             success : function(result, textStatus, xmlHttpRequest) {
                 if (result == 'update complete') {
@@ -475,6 +496,7 @@ $(function(){
         });
         return false;
     })
+
 
     function getLinks(callback) {
         console.log('get linkls');
@@ -825,7 +847,8 @@ $(function(){
           showApps();
       },
       '/frontpage'  : showTab,
-      '/navigation' : showTab,
+      '/theme' : showTab,
+      '/host-options' : showTab,
       '/sessions'   : function() {
           showTab();
           showSessions();

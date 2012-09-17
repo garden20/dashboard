@@ -16,9 +16,9 @@
             <li class="active"><a href="#apps" data-toggle="tab">Apps</a></li>
             <li><a href="#links" data-toggle="tab">Links</a></li>
             <li><a href="#ordering" data-toggle="tab">Ordering</a></li>
-            <li><a href="#navigation" data-toggle="tab">Navigation</a></li>
+            <li><a href="#theme" data-toggle="tab">Theme</a></li>
             <li><a href="#frontpage" data-toggle="tab">Front Page</a></li>
-
+            <li><a href="#host-options" data-toggle="tab">Host Options</a></li>
             <li><a href="#sessions" data-toggle="tab">Sessions</a></li>
             <li><a href="#admins" data-toggle="tab">Admins</a></li>
             <li><a href="#groups" data-toggle="tab">Groups</a></li>
@@ -81,44 +81,11 @@
 
 
             </div>
-            <div class="tab-pane" id="navigation">
+            <div class="tab-pane" id="theme">
                 <div class="row">
                     <div class="offset1 span8">
                         <form class="form-horizontal a">
                             <fieldset>
-
-                                <legend>Host Options</legend>
-
-                                <!-- Short URLS -->
-                                <div class="control-group">
-                                    <label class="control-label" for="short_urls">Short URLs</label>
-                                    <div class="controls">
-                                      <label class="checkbox">
-                                          <input type="checkbox" id="short_urls" name="short_urls" {{#if settings.host_options.short_urls}}checked="checked"{{/if}}> Use Short Urls
-                                      </label>
-                                    </div>
-                                </div>
-                                <div class="control-group indent short_urls {{#unless settings.host_options.short_urls}}hidden{{/unless}}" >
-                                    <div class="controls">
-                                      <input type="text" class="span6" id="hostnames" name="hostnames" value="{{settings.host_options.hostnames}}">
-                                      <p class="help-block">A comma seperated list of hostnames to bind to, eg: http://localhost:5984,http://app.com</p>
-                                    </div>
-                                </div>
-                                <div class="control-group indent short_urls {{#unless settings.host_options.short_urls}}hidden{{/unless}}">
-                                    <div class="controls">
-                                        <label class="checkbox">
-                                              <input type="checkbox" name="short_app_urls" {{#if settings.host_options.short_app_urls}}checked="checked"{{/if}}>Short App URLs
-                                        </label>
-                                        <label class="checkbox">
-                                            <input type="checkbox" name="rootDashboard" {{#if settings.host_options.rootDashboard}}checked="checked"{{/if}}>Dashboard On Root
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- End Short URLS -->
-
-
-
 
                                 <legend>Top Nav Bar</legend>
 
@@ -398,6 +365,56 @@
                         </table>
 
                     </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="host-options">
+                <div class="row">
+                    <div class="offset1 span8">
+
+                        <div class="alert">
+                            <p>
+                                <b>Heads Up:</b> Changing the following settings is not advised unless you know what you are doing. See <a href="http://garden20.com/wiki/Host_Options">host options</a>.
+                            </p>
+                        </div>
+
+                        <form class="form-horizontal a">
+                            <fieldset>
+
+                                <!-- Short URLS -->
+                                <div class="control-group">
+                                    <label class="control-label" for="short_urls">Short URLs</label>
+                                    <div class="controls">
+                                      <label class="checkbox">
+                                          <input type="checkbox" id="short_urls" name="short_urls" {{#if settings.host_options.short_urls}}checked="checked"{{/if}}> Use Short Urls
+                                      </label>
+                                    </div>
+                                </div>
+                                <div class="control-group indent short_urls {{#unless settings.host_options.short_urls}}hidden{{/unless}}" >
+                                    <div class="controls">
+                                      <input type="text" class="span6" id="hostnames" name="hostnames" value="{{settings.host_options.hostnames}}">
+                                      <p class="help-block">A comma seperated list of hostnames to bind to, eg: http://localhost:5984,http://app.com</p>
+                                    </div>
+                                </div>
+                                <div class="control-group indent short_urls {{#unless settings.host_options.short_urls}}hidden{{/unless}}">
+                                    <div class="controls">
+                                        <label class="checkbox">
+                                              <input type="checkbox" name="short_app_urls" {{#if settings.host_options.short_app_urls}}checked="checked"{{/if}}>Short App URLs
+                                        </label>
+                                        <label class="checkbox">
+                                            <input type="checkbox" name="rootDashboard" {{#if settings.host_options.rootDashboard}}checked="checked"{{/if}}>Dashboard On Root
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- End Short URLS -->
+
+                                <div class="form-actions">
+                                   <a href="#" class="btn primary">Save changes</a>
+                                   <button type="reset" class="btn">Cancel</button>
+                                 </div>
+                            </fieldset>
+                        </form>
+                     </div>
                 </div>
             </div>
             <div class="tab-pane" id="users">
