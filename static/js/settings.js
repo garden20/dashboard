@@ -228,13 +228,38 @@ $(function(){
     function showSync() {
         dashboard_core.getSyncDocs(function(err, results) {
 
-           console.log(err, results);
            var has_sync = (results.length > 0)
-
+            console.log(results);
            $('#sync').html(handlebars.templates['settings-sync.html']({
                syncs : results,
                has_sync : has_sync
            }));
+
+
+            $('.cancel-existing-sync').on('click', function(){
+                if (confirm("Are you sure you want to cancel this sync?")) {
+                    var $sync_block = $(this).closest('.sync-block');
+                    var sync_id = $(this).data('id');
+                    var sync_doc = _.find(results, function(mapping) { if (mapping._id == sync_id) return true;   });
+                    dashboard_core.cancel_garden_sync(sync_doc, function(err){
+                        if (err) return alert('Could not cancel: ' + err);
+                        $sync_block.remove();
+                    });
+                }
+            });
+            $('button.add-sync').on('click', function(){
+                $(this).hide();
+                $('div.new').show(300);
+            });
+
+            $('.cancel-new-sync').on('click', function(){
+                $('.step1').show();
+                $('.step1 button').button('reset');
+                $('.new .mappings').empty();
+                $('.step2').hide();
+                $('div.new').hide(300);
+                $('button.add-sync').show();
+            });
 
             $('form.new_sync').bind('submit', function(){
                 try {
@@ -261,7 +286,9 @@ $(function(){
                 } catch(e) {}
                 return false;
             })
-
+            dashboard_core.clean_unused_remote_dashboard_dbs(results, function(err){
+                //ignore for now
+            });
 
         });
 

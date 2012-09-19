@@ -1,40 +1,51 @@
 
 {{#each syncs}}
-    <h1>{{name}}</h1>
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Source</th>
-            <th>Dest</th>
-        </tr>
-        </thead>
-        <tbody>
-        {{#each replications}}
+
+    <div class="sync-block" data-id="{{_id}}">
+        <h3>Garden: {{name}}</h3>
+        <table class="table">
+            <thead>
             <tr>
-                <td>
-                    {{doc.source}}
-                </td>
-                <td>
-                    {{doc.target}}
-                </td>
+                <th>Sync</th>
+                <th>Type</th>
+                <th>Status</th>
             </tr>
-        {{/each}}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+            {{#each replications_group}}
+                <tr>
+                    <td>
+                        {{name}}
+                    </td>
+                    <td>
+                        {{sync_type_human}}
+                    </td>
+                    <td>
+                        {{#if status_ok}}
+                            <i class="icon ok"></i>
+                        {{else}}
+                        <i class="icon remove"></i>
+                        {{/if}}
+                    </td>
+                </tr>
+            {{/each}}
+            </tbody>
+        </table>
 
+        <button class="btn danger cancel-existing-sync"  data-id="{{_id}}">Cancel This Sync</button>
 
-
-
+    </div>
 {{/each}}
 
 {{#if  has_sync}}
-<button class="btn">Add Sync</button>
+<button class="btn large success add-sync">Add Garden Sync</button>
 {{/if}}
 
 
 
 
-<div class="new" class="{{#unless has_sync}}hide{{/unless}}">
+<div class="new new-sync {{#if has_sync}}hide{{/if}}">
+    <h3>New Garden Sync</h3>
     <form class="form new_sync">
         <label>Garden</label>
         <input type="text" placeholder="Enter URL" name="url" class="span7"/>
@@ -43,6 +54,7 @@
         <label>Password</label>
         <input type="password" id="pw" />
         <div class="form-actions step1">
+               <a class="cancel-new-sync" href="#">cancel</a>
                <button  class="btn">Next</button>
         </div>
     </form>
@@ -50,6 +62,7 @@
 
     </div>
     <div class="form-actions step2 hide">
+           <a class="cancel-new-sync" href="#">cancel</a>
            <button  class="btn primary">Start Sync</button>
     </div>
 
