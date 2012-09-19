@@ -2,6 +2,9 @@ $(function(){
     var stored_user = amplify.store('user');
     if (stored_user) {
         $('#email').val(stored_user);
+        $('#password').focus();
+    } else {
+        $('#email').focus();
     }
 
     $('#login-btn').click(function() {
