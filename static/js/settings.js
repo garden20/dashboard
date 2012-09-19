@@ -210,6 +210,64 @@ $(function(){
     }
 
 
+    function updateMapping(form, mapping) {
+        console.log(mapping);
+        form.each(function(i, row){
+            var $me = $(this);
+            var i = $me.data('index');
+            console.log(i);
+            var to_sync = ($me.find('.to_sync').val() === 'on');
+            var sync_type = $me.find('.sync_type').val();
+            mapping.mapping[i].enable = to_sync;
+            mapping.mapping[i].type = sync_type;
+        });
+        return mapping;
+    }
+
+
+    function showSync() {
+        dashboard_core.getSyncDocs(function(err, results) {
+
+           console.log(err, results);
+           var has_sync = (results.length > 0)
+
+           $('#sync').html(handlebars.templates['settings-sync.html']({
+               syncs : results,
+               has_sync : has_sync
+           }));
+
+            $('form.new_sync').bind('submit', function(){
+                try {
+                    $('.step1 button').button('loading');
+                    var dashboard_root_url = $('input[name="url"]').val();
+                    dashboard_core.guess_initial_sync_mapping(dashboard_root_url, function(err, mapping){
+                        if (err) return alert('Problem: ' + err);
+                        $('.step1').hide();
+                        console.log(mapping);
+                        $('.new .mappings').html(handlebars.templates['settings-sync-mapping.html'](mapping));
+                        $('.step2').show();
+                        $('.review').on('click', function(){  $('.new table').show();  })
+                        var m = mapping;
+                        $('.step2 button.primary').on('click', function(){
+                            console.log(m);
+                            var mapping = updateMapping($('.sync_row'), m);
+                            m.user = $('#uname').val();
+                            m.pass = $('#pw').val();
+                            dashboard_core.create_sync_mapping(m, function(err, results){
+
+                            });
+                        });
+                    });
+                } catch(e) {}
+                return false;
+            })
+
+
+        });
+
+
+    }
+
 
     function showApps() {
         if ($('#apps table.apps').length > 0) return; // weird bug we are getting called twice. prevent re-render.
@@ -250,6 +308,7 @@ $(function(){
                 };
                 $('.update-board').append(handlebars.templates['settings-app-updates.html'](data, {}));
                 dashboard_core.checkUpdates(data, function(err, appVersions) {
+                    if (!appVersions) return;
                     _.each(appVersions.apps, function(app) {
                         if (app.value.availableVersion) {
                             $('.update-board tr.'+ app.id +' td.available-version').html(app.value.availableVersion);
@@ -845,6 +904,10 @@ $(function(){
       },
       '/apps'   : function(){
           showApps();
+      },
+      '/sync' : function(){
+          showTab();
+          showSync();
       },
       '/frontpage'  : showTab,
       '/theme' : showTab,

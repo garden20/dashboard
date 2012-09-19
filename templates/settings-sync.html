@@ -1,0 +1,57 @@
+
+{{#each syncs}}
+    <h1>{{name}}</h1>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Source</th>
+            <th>Dest</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each replications}}
+            <tr>
+                <td>
+                    {{doc.source}}
+                </td>
+                <td>
+                    {{doc.target}}
+                </td>
+            </tr>
+        {{/each}}
+        </tbody>
+    </table>
+
+
+
+
+{{/each}}
+
+{{#if  has_sync}}
+<button class="btn">Add Sync</button>
+{{/if}}
+
+
+
+
+<div class="new" class="{{#unless has_sync}}hide{{/unless}}">
+    <form class="form new_sync">
+        <label>Garden</label>
+        <input type="text" placeholder="Enter URL" name="url" class="span7"/>
+        <label>Username</label>
+        <input type="text" id="uname" />
+        <label>Password</label>
+        <input type="password" id="pw" />
+        <div class="form-actions step1">
+               <button  class="btn">Next</button>
+        </div>
+    </form>
+    <div class="mappings">
+
+    </div>
+    <div class="form-actions step2 hide">
+           <button  class="btn primary">Start Sync</button>
+    </div>
+
+
+</div>

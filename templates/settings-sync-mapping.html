@@ -1,0 +1,66 @@
+{{#if no_remote_apps}}
+    <div class="alert">
+        <p>
+            No remote apps to map currently.
+        </p>
+    </div>
+{{else}}
+    <b>
+        {{#if new_app_count}}
+          {{new_app_count}} new apps will be created,
+        {{/if}}
+        {{sync_app_count}} apps will be synced.
+    </b>
+    {{#if needs_review}}
+        <h3>Please review the following sync details and adjust.</h3>
+    {{else}}
+        <a href="#" class="review">details</a>
+    {{/if}}
+
+
+<table class="table {{#unless needs_review}}hide{{/unless}}">
+    <thead>
+        <tr>
+            <th>Enable</th>
+            <th>Remote App</th>
+            <th>Local App</th>
+            <th>Sync Type</th>
+        </tr>
+    </thead>
+    <tbody>
+    {{#each mapping}}
+        <tr class="sync_row" data-index="{{order}}">
+            <td>
+                <input type="checkbox" checked="checked" class="to_sync"/>
+            </td>
+            <td>{{from.name}} ({{from.doc_id}})</td>
+            <td>
+                {{#if install}}
+                    To be installed.
+                {{else}}
+                    {{#if options}}
+                        <select class="select_app">
+                            {{#each options}}
+                                <option value="{{id}}"  >{{name}} ({{doc_id}})</option>
+                            {{/each}}
+                        </select>
+                    {{else}}
+                        {{to.name}} ({{to.doc_id}})
+                    {{/if}}
+                {{/if}}
+            </td>
+            <td>
+                <select class="sync_type">
+                    <option selected="selected" value="bi-directional">upload and download</option>
+                    <option  value="pull">download only</option>
+                    <option  value="push">upload only</option>
+                </select>
+
+            </td>
+        </tr>
+    {{/each}}
+    </tbody>
+</table>
+{{/if}}
+
+
