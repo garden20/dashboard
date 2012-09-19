@@ -2,6 +2,7 @@
 {{#each syncs}}
 
     <div class="sync-block" data-id="{{_id}}">
+        <button class="btn danger small cancel-existing-sync"  data-id="{{_id}}">Cancel This Sync</button>
         <b>Garden:</b> <a href="{{name}}">{{name}}</a>
         <table class="table">
             <thead>
@@ -32,7 +33,7 @@
             </tbody>
         </table>
 
-        <button class="btn danger cancel-existing-sync"  data-id="{{_id}}">Cancel This Sync</button>
+
 
     </div>
 {{/each}}
