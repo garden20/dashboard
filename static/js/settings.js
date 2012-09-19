@@ -279,7 +279,8 @@ $(function(){
                             m.user = $('#uname').val();
                             m.pass = $('#pw').val();
                             dashboard_core.create_sync_mapping(m, function(err, results){
-
+                                if (err) return alert('Something went wrong: ' + err);
+                                window.location.reload();
                             });
                         });
                     });

@@ -2,7 +2,7 @@
 {{#each syncs}}
 
     <div class="sync-block" data-id="{{_id}}">
-        <h3>Garden: {{name}}</h3>
+        <b>Garden:</b> <a href="{{name}}">{{name}}</a>
         <table class="table">
             <thead>
             <tr>
@@ -37,9 +37,9 @@
     </div>
 {{/each}}
 
-{{#if  has_sync}}
-<button class="btn large success add-sync">Add Garden Sync</button>
-{{/if}}
+
+<button class="btn large success add-sync  {{#unless has_sync}}hide{{/unless}}">Add Garden Sync</button>
+
 
 
 
