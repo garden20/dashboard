@@ -1,10 +1,29 @@
 $(function(){
-    var stored_user = amplify.store('user');
-    if (stored_user) {
-        $('#email').val(stored_user);
+
+    var urlParams = {};
+    var e,
+        a = /\+/g,  // Regex for replacing addition symbol with a space
+        r = /([^&=]+)=?([^&]*)/g,
+        d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
+        q = window.location.search.substring(1);
+
+    while (e = r.exec(q))
+       urlParams[d(e[1])] = d(e[2]);
+
+
+
+    var user = urlParams['user'];
+    if (user) {
+        $('#email').val(user);
         $('#password').focus();
     } else {
-        $('#email').focus();
+        var stored_user = amplify.store('user');
+        if (stored_user) {
+            $('#email').val(stored_user);
+            $('#password').focus();
+        } else {
+            $('#email').focus();
+        }
     }
 
     $('#login-btn').click(function() {
@@ -54,14 +73,3 @@ $(function(){
     }
 
 });
-var urlParams = {};
-(function () {
-    var e,
-        a = /\+/g,  // Regex for replacing addition symbol with a space
-        r = /([^&=]+)=?([^&]*)/g,
-        d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
-        q = window.location.search.substring(1);
-
-    while (e = r.exec(q))
-       urlParams[d(e[1])] = d(e[2]);
-})();

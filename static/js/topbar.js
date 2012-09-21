@@ -104,8 +104,19 @@ $(function(){
                     }
                     addNotLoggedInHack(link);
                 }
+            });
 
-
+            $('#dashboard-topbar a').each(function(){
+                var $a = $(this);
+                var href = $a.attr('href');
+                if ((path.indexOf(href) == 0) && ($a.data('remote_user_warn')) ){
+                    var remote_user = $a.data('remote_user')
+                    setTimeout(function(){
+                        if(confirm('Warning: The recommended user for this db is '+remote_user+'. Do you want to login as that user?')) {
+                            window.location = $('#dashboard-topbar-session').data('login') + "?redirect=" + encodeURIComponent(window.location) + '&user=' + encodeURIComponent(remote_user);
+                        }
+                    }, 10)
+                }
             });
 
             $('#dashboard-topbar .more-apps').click(function(){

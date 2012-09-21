@@ -18,7 +18,7 @@
 {{/if}}
 {{#unless hide_apps}}
     {{#each apps.apps}}
-        <li><a href="{{link}}"  {{#if db}}data-db="{{db}}"{{/if}} {{#if external}}rel="external"{{/if}}>{{title}}</a></li>
+        <li><a href="{{link}}"  {{#if db}}data-db="{{db}}"{{/if}} {{#if remote_user_warning}}data-remote_user_warn="true" data-remote_user="{{remote_user}}"{{/if}}  {{#if external}}rel="external"{{/if}}>{{title}}</a></li>
     {{/each}}
     {{#if apps.more_apps}}
         <li><a href="#" class="more-apps">More <span class="ddown">&#9660;</span></a></li>
@@ -67,7 +67,7 @@
 <div id="dashboard-more-apps">
     <ul>
     {{#each apps.more_apps}}
-        <li><a href="{{link}}"  {{#if db}}data-db="{{db}}"{{/if}}  {{#if external}}rel="external"{{/if}}>{{title}}</a></li>
+        <li><a href="{{link}}"  {{#if db}}data-db="{{db}}"{{/if}}  {{#if remote_user_warning}}data-remote_user_warn="true" data-remote_user="{{remote_user}}"{{/if}}  {{#if external}}rel="external"{{/if}}>{{title}}</a></li>
     {{/each}}
     </li>
 </div>
