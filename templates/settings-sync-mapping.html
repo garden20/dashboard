@@ -1,24 +1,48 @@
-{{#if no_remote_apps}}
+{{#if initial_sync_mapping.no_remote_apps}}
     <div class="alert">
         <p>
             No remote apps to map currently.
         </p>
     </div>
 {{else}}
-    <b>
-        {{#if new_app_count}}
-          {{new_app_count}} new apps will be created,
+
+    {{#if user_details.remote_username}}
+    <p>
+        {{#if user_details.is_admin_party}}
+            Note:  a user named {{user_details.remote_username}}, with the password above, will be created in this garden.
+            After the sync you will have to login to this garden as {{user_details.remote_username}}.
+        {{else}}
+            {{#if user_details.local_user_exists}}
+              It will be strongly recommended that you use the user {{user_details.remote_username}} when accessing the sync'd apps locally.
+            {{else}}
+                Note, a user named {{user_details.remote_username}} will be created in this garden. It will strongly recommended that you
+                use this user when accessing the sync'd apps locally.
+            {{/if}}
         {{/if}}
-        {{sync_app_count}} apps will be synced.
-    </b>
-    {{#if needs_review}}
+    </p>
+    {{/if}}
+    <p>
+        <b>
+            {{#if initial_sync_mapping.new_app_count}}
+              {{initial_sync_mapping.new_app_count}} new apps will be created,
+            {{/if}}
+            {{initial_sync_mapping.sync_app_count}} apps will be synced.
+        </b>
+    </p>
+
+
+
+
+
+
+    {{#if initial_sync_mapping.needs_review}}
         <h3>Please review the following sync details and adjust.</h3>
     {{else}}
         <a href="#" class="review">details</a>
     {{/if}}
 
 
-<table class="table {{#unless needs_review}}hide{{/unless}}">
+<table class="table {{#unless initial_sync_mapping.needs_review}}hide{{/unless}}">
     <thead>
         <tr>
             <th>Enable</th>
@@ -28,7 +52,7 @@
         </tr>
     </thead>
     <tbody>
-    {{#each mapping}}
+    {{#each initial_sync_mapping.mapping}}
         <tr class="sync_row" data-index="{{order}}">
             <td>
                 <input type="checkbox" checked="checked" class="to_sync"/>

@@ -9,6 +9,7 @@ var semver = require("semver");
 var revalidator = require("revalidator");
 var password = require('lib/password');
 var flattr = require('flattr');
+var async = require('async');
 
 
 $(function(){
@@ -229,7 +230,6 @@ $(function(){
         dashboard_core.getSyncDocs(function(err, results) {
 
            var has_sync = (results.length > 0)
-            console.log(results);
            $('#sync').html(handlebars.templates['settings-sync.html']({
                syncs : results,
                has_sync : has_sync
@@ -263,30 +263,55 @@ $(function(){
 
             $('form.new_sync').bind('submit', function(){
                 try {
-                    $('.step1 button').button('loading');
-                    var dashboard_root_url = $('input[name="url"]').val();
-                    dashboard_core.guess_initial_sync_mapping(dashboard_root_url, function(err, mapping){
-                        if (err) return alert('Problem: ' + err);
-                        $('.step1').hide();
-                        console.log(mapping);
-                        $('.new .mappings').html(handlebars.templates['settings-sync-mapping.html'](mapping));
-                        $('.step2').show();
-                        $('.review').on('click', function(){  $('.new table').show();  })
-                        var m = mapping;
-                        $('.step2 button.primary').on('click', function(){
-                            console.log(m);
-                            var mapping = updateMapping($('.sync_row'), m);
-                            m.user = $('#uname').val();
-                            m.pass = $('#pw').val();
-                            dashboard_core.create_sync_mapping(m, function(err, results){
-                                if (err) return alert('Something went wrong: ' + err);
-                                window.location.reload();
-                            });
-                        });
-                    });
-                } catch(e) {}
+                $('.step1 button').button('loading');
+                var dashboard_root_url = $('input[name="url"]').val();
+                async.parallel({
+                    user_details : function(cb){
+
+                        var username = $('#uname').val();
+                        if (!username || username.trim() === '') return cb(null, { remote_username: false });
+
+
+                        // find out if the user exists, if the garden is in admin party, etc
+                        var req = {
+                            userCtx : JSON.parse(decodeURI($('#dashboard-topbar-session').data('userctx')))
+                        };
+                        var local_user_details = {
+                            remote_username : $('#uname').val(),
+                            is_admin_party : utils.isAdminParty(req)
+                        }
+                        if (local_user_details.is_admin_party) return cb(null, local_user_details)
+                        users.get(username, function(err, doc){
+                            if (err) local_user_details.local_user_exists = false;
+                            else local_user_details.local_user_exists = true;
+                            cb(null, local_user_details);
+                        })
+                    },
+                    initial_sync_mapping : function(cb){
+                        dashboard_core.guess_initial_sync_mapping(dashboard_root_url, cb);
+                    }
+                }, function(err, results){
+                    if (err) return alert('Problem: ' + err);
+                     $('.step1').hide();
+                    console.log(results);
+                     $('.new .mappings').html(handlebars.templates['settings-sync-mapping.html'](results));
+                     $('.step2').show();
+                     $('.review').on('click', function(){  $('.new table').show();  })
+                     var m = results.initial_sync_mapping;
+                     $('.step2 button.primary').on('click', function(){
+                         var mapping = updateMapping($('.sync_row'), m);
+                         m.user = $('#uname').val();
+                         m.pass = $('#pw').val();
+                         var host_options = $('#sync').data('host_options')
+                         dashboard_core.create_sync_mapping(m, host_options, function(err, results){
+                             if (err) return alert('Something went wrong: ' + err);
+                             window.location.reload();
+                         });
+                     });
+                });
+                } catch(e) {console.log(e)}
                 return false;
-            })
+            });
             dashboard_core.clean_unused_remote_dashboard_dbs(results, function(err){
                 //ignore for now
             });
