@@ -15,7 +15,6 @@ var async = require('async');
 $(function(){
 
     function viewApp(id) {
-        console.log('view app');
         $.couch.db(dashboard_db_name).openDoc(id, {
             success: function(doc){
                 doc.installed_text = moment(new Date(doc.installed.date)).calendar();
@@ -212,11 +211,9 @@ $(function(){
 
 
     function updateMapping(form, mapping) {
-        console.log(mapping);
         form.each(function(i, row){
             var $me = $(this);
             var i = $me.data('index');
-            console.log(i);
             var to_sync = ($me.find('.to_sync').val() === 'on');
             var sync_type = $me.find('.sync_type').val();
             mapping.mapping[i].enable = to_sync;
@@ -278,6 +275,7 @@ $(function(){
                         };
                         var local_user_details = {
                             remote_username : $('#uname').val(),
+                            remote_pw : $('#pw').val(),
                             is_admin_party : utils.isAdminParty(req)
                         }
                         if (local_user_details.is_admin_party) return cb(null, local_user_details)
@@ -293,7 +291,6 @@ $(function(){
                 }, function(err, results){
                     if (err) return alert('Problem: ' + err);
                      $('.step1').hide();
-                    console.log(results);
                      $('.new .mappings').html(handlebars.templates['settings-sync-mapping.html'](results));
                      $('.step2').show();
                      $('.review').on('click', function(){  $('.new table').show();  })
@@ -303,9 +300,9 @@ $(function(){
                          m.user = $('#uname').val();
                          m.pass = $('#pw').val();
                          var host_options = $('#sync').data('host_options')
-                         dashboard_core.create_sync_mapping(m, host_options, function(err, results){
+                         dashboard_core.create_sync_mapping(m, host_options, results.user_details, function(err, results){
                              if (err) return alert('Something went wrong: ' + err);
-                             window.location.reload();
+                             //window.location.reload();
                          });
                      });
                 });
@@ -393,7 +390,6 @@ $(function(){
                     onDropdownMenu.push($(entry).data('id'));
                 });
 
-                console.log(showing, onDropdownMenu);
                 dashboard_core.updateNavOrdering(showing, onDropdownMenu, function(err) {
                     if (err) return humane.error(err);
                     humane.info('Save complete');
@@ -611,7 +607,6 @@ $(function(){
 
 
     function getLinks(callback) {
-        console.log('get linkls');
         $.couch.db(dashboard_db_name).view('dashboard/links_only', {
             success: function(response) {
                 callback(null, response.rows);
