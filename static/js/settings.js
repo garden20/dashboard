@@ -581,16 +581,6 @@ $(function(){
             success : function(result, textStatus, xmlHttpRequest) {
                 if (result == 'update complete') {
 
-                    var userBrowserid = 'false';
-                    if (params.login_type == 'browserid') {
-                        userBrowserid = 'true';
-                    }
-                    $.couch.config({
-                        success : function(result) {
-                            resetButtonAfter(btn, started);
-                            window.location.reload();
-                        }
-                    }, 'browserid', 'enabled', userBrowserid );
 
 
 
@@ -662,7 +652,17 @@ $(function(){
                 type: 'PUT',
                 success : function(result, textStatus, xmlHttpRequest) {
                     if (result == 'update complete') {
-                        window.location.reload();
+                        var userBrowserid = 'false';
+                        if (params.login_type == 'browserid') {
+                            userBrowserid = 'true';
+                        }
+                        $.couch.config({
+                            success : function(result) {
+                                window.location.reload();
+                            }
+                        }, 'browserid', 'enabled', userBrowserid );
+
+                        //window.location.reload();
                     }
                     else alert('update failed');
 
@@ -671,6 +671,7 @@ $(function(){
                     alert('update failed');
                 }
             });
+            return false;
         });
 
     }
