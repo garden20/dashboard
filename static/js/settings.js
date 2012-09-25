@@ -573,7 +573,7 @@ $(function(){
         var btn = $(this);
         btn.button('loading');
         var started = new Date().getTime();
-        var params = $('#theme form').formParams();
+        var params = $('#host-options form').formParams();
 
         $.ajax({
             url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/host_options/settings?' + $.param(params),
