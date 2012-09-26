@@ -291,6 +291,14 @@ $(function(){
                 }, function(err, results){
                     if (err) return alert('Problem: ' + err);
                      $('.step1').hide();
+
+                     console.log(results);
+                     if (results.initial_sync_mapping.dashboard_root_url.indexOf('https://') !== 0) {
+                         $('.unsecure_transport_warning').show();
+                     }
+
+
+
                      $('.new .mappings').html(handlebars.templates['settings-sync-mapping.html'](results));
                      $('.step2').show();
                      $('.review').on('click', function(){  $('.new table').show();  })
@@ -302,6 +310,7 @@ $(function(){
                          var mapping = updateMapping($('.sync_row'), m);
                          m.user = $('#uname').val();
                          m.pass = $('#pw').val();
+                         m.dashboard_root_url =   $('input[name="url"]').val(); // give them a chance to change minds
                          var host_options = $('#sync').data('host_options')
                          dashboard_core.create_sync_mapping(m, host_options, results.user_details, function(err, results){
                              if (err) return alert('Something went wrong: ' + err);
