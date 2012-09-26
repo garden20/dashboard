@@ -584,18 +584,34 @@ $(function(){
                 // we need to modify to rewrites for all apps based on the settings
                 async.parallel({
                     apps : dashboard_core.getAllActiveInstallDocs,
-                    settings : dashboard_core.getDashboardSettings
+                    settings : dashboard_core.getDashboardSettings,
+                    links : getLinks,
+                    allDBs : function(cb) {
+                        $.couch.allDbs({
+                            success: function(data) {
+                                cb(null, data);
+                            }
+                        });
+                    }
                 }, function(err, results){
+                    console.log(results);
+                    var link_dbs = dashboard_core.getLinkDBs(results.links);
+
                     async.series([
                         dashboard_core.clearAllVhosts,
                         function remapVhostsForApps(cb) {
                             if (results.settings.host_options.short_urls && results.settings.host_options.short_app_urls){
                                     var mockStatus = function(){}
                                     async.forEach(results.apps, function(app, for_cb){
-                                            dashboard_core.install_app_vhosts(results.settings.host_options, app.doc, mockStatus, for_cb);
+                                        link_dbs = _.without(link_dbs, app.doc.installed.db);
+                                        dashboard_core.install_app_vhosts(results.settings.host_options, app.doc, mockStatus, for_cb);
                                     }, cb);
                             } else cb()
-                        }, function mapDashboardVhosts (cb){
+                        }, function mapOutstandingLinkDBVhosts (cb){
+                            if (results.settings.host_options.short_urls && results.settings.host_options.rootDashboard && link_dbs.length > 0) {
+                                dashboard_core.setLinkedDBVhosts(results.settings.host_options, link_dbs, cb);
+                            } else cb();
+                        }, function mapDashboardVhosts(cb) {
                             if (results.settings.host_options.short_urls && results.settings.host_options.rootDashboard) {
                                 dashboard_core.setRootDashboardVhosts(results.settings.host_options, cb);
                             } else cb();
