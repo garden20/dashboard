@@ -579,17 +579,31 @@ $(function(){
             url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/host_options/settings?' + $.param(params),
             type: 'PUT',
             success : function(result, textStatus, xmlHttpRequest) {
-                if (result == 'update complete') {
+                if (result !== 'update complete') return alert('update failed');
 
-
-
-
-                }
-                else alert('update failed');
-
-            },
-            error : function() {
-
+                // we need to modify to rewrites for all apps based on the settings
+                async.parallel({
+                    apps : dashboard_core.getAllActiveInstallDocs,
+                    settings : dashboard_core.getDashboardSettings
+                }, function(err, results){
+                    async.series([
+                        dashboard_core.clearAllVhosts,
+                        function remapVhostsForApps(cb) {
+                            if (results.settings.host_options.short_urls && results.settings.host_options.short_app_urls){
+                                    var mockStatus = function(){}
+                                    async.forEach(results.apps, function(app, for_cb){
+                                            dashboard_core.install_app_vhosts(results.settings.host_options, app.doc, mockStatus, for_cb);
+                                    }, cb);
+                            } else cb()
+                        }, function mapDashboardVhosts (cb){
+                            if (results.settings.host_options.short_urls && results.settings.host_options.rootDashboard) {
+                                dashboard_core.setRootDashboardVhosts(results.settings.host_options, cb);
+                            } else cb();
+                        }
+                    ], function(err){
+                        window.location.reload();
+                    })
+                })
             }
         });
         return false;
