@@ -296,13 +296,16 @@ $(function(){
                      $('.review').on('click', function(){  $('.new table').show();  })
                      var m = results.initial_sync_mapping;
                      $('.step2 button.primary').on('click', function(){
+                         var btn = $(this);
+                         btn.button('loading');
+
                          var mapping = updateMapping($('.sync_row'), m);
                          m.user = $('#uname').val();
                          m.pass = $('#pw').val();
                          var host_options = $('#sync').data('host_options')
                          dashboard_core.create_sync_mapping(m, host_options, results.user_details, function(err, results){
                              if (err) return alert('Something went wrong: ' + err);
-                             //window.location.reload();
+                             window.location.reload();
                          });
                      });
                 });
