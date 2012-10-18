@@ -5,14 +5,9 @@
  *
  */
 
-/*
- *  Ensure the page has jquery
- */
-if ($ === undefined) {
-    $ = require('jquery');
-}
+(function() {
 
-$(function(){
+var have_jquery = function(){
 
     var baseStyleSheet = "/dashboard/_design/dashboard/_rewrite/_topbar.css";
     var baseJavascript = "/dashboard/_design/dashboard/_rewrite/static/js/topbar.js";
@@ -273,8 +268,60 @@ $(function(){
     function eraseCookie(name) {
         createCookie(name, "", -1);
     }
-});
+}
 
+function load_script(s) {
+    var head = document.getElementsByTagName("head")[0] || document.documentElement;
+    var script = document.createElement("script");
+    if ( s.scriptCharset ) {
+        script.charset = s.scriptCharset;
+    }
+    script.src = s.url;
+
+    // Handle Script loading
+        var done = false;
+
+    // Attach handlers for all browsers
+    script.onload = script.onreadystatechange = function() {
+        if ( !done && (!this.readyState ||
+                this.readyState === "loaded" || this.readyState === "complete") ) {
+            done = true;
+            // Handle memory leak in IE
+            script.onload = script.onreadystatechange = null;
+            if ( head && script.parentNode ) {
+                head.removeChild( script );
+            }
+            if (s.callback) s.callback();
+        }
+    };
+
+    // Use insertBefore instead of appendChild  to circumvent an IE6 bug.
+    // This arises when a base node is used (#2709 and #4378).
+    head.insertBefore( script, head.firstChild );
+}
+
+
+/*
+ *  Ensure the page has jquery
+ */
+if (window.$ === undefined) {
+    if (window.require) {
+        $ = window.require('jquery');
+        $(have_jquery);
+    } else {
+        load_script({
+            url : '/_utils/script/jquery.js',
+            callback : function(){
+                $(have_jquery);
+            }
+        })
+    }
+} else {
+    $(have_jquery);
+}
+
+
+})();
 /**
  * humane.js
  * Humanized Messages for Notifications

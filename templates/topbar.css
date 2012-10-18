@@ -1,3 +1,7 @@
+body {
+    margin: 0;
+}
+
 #dashboard-topbar input:focus,
 #dashboard-topbar textarea:focus,
 #dashboard-topbar isindex:focus,
