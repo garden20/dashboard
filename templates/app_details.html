@@ -12,7 +12,7 @@
         <div class="row title">
                 <img src="{{icon_src}}" style="float: right;"/>
                 <h1 class="edit-title" contenteditable="true">{{dashboard_title}}</h1>
-                <p>{{kanso.config.description}}</p>
+                <p>{{kanso.config.description}}{{couchapp.config.description}}</p>
                 {{#if flattrLink}}
                     <p>{{{flattrLink}}}</p>
                 {{/if}}
@@ -29,7 +29,7 @@
                 <dd><a href="{{src}}">{{src}}</a>
                 
                 <dt>Application Version<dt>
-                <dd>{{kanso.config.version}}</dd>
+                <dd>{{kanso.config.version}}{{couchapp.config.version}}</dd>
 
                 
                 <dt>Database Size</dt>

@@ -441,7 +441,9 @@ $(function(){
                  .button('complete')
                  .addClass('disabled')
                  .attr('disabled', 'disabled');
-                $('.' + id + ' .installed-version').html(app_data.kanso.config.version);
+                var meta = app_data.couchapp || app_data.kanso;
+
+                $('.' + id + ' .installed-version').html(meta.config.version);
             }
         });
 
