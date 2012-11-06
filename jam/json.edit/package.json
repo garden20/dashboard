@@ -1,0 +1,37 @@
+{
+  "name": "json.edit",
+  "description": "schema to form + validation to json that conforms to schema",
+  "author": "Mariano Guerra",
+  "version": "0.0.1",
+  "main": "json.edit.js",
+  "jam": {
+      "dependencies": {
+        "jquery": ">1.4.2",
+        "jquery.lego" : ">=0.0.1"
+      },
+      "include" : [
+        "json.edit.js",
+        "json.schema.js",
+        "nsgen.js",
+        "json.edit.bootstrap.css",
+        "../../css/json.edit.css"
+      ]
+  },
+  "repository": "git://github.com/marianoguerra/json-edit.git",
+  "homepage": "https://github.com/marianoguerra/json-edit",
+  "keywords": [ "json", "html" ],
+  "tags": [ "json", "html" ]
+  ,"maintainers":[
+        {
+            "name":"Ryan Ramage",
+            "web":"https://github.com/ryanramage"
+        }
+    ],
+  "repositories":[
+        {
+            "type":"git",
+            "url":"https://github.com/marianoguerra/json-edit"
+        }
+    ]
+
+}

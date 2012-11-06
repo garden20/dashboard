@@ -1,0 +1,17 @@
+.je-object-fields .je-object-fields {
+
+    margin: 10px 0 20px 2px;
+    border-left: 3px solid #eeeeee;
+    padding-left: 10px;
+
+}
+
+.je-object-fields legend {
+    text-transform: capitalize;
+}
+
+
+.je-field label {
+    text-transform: capitalize;
+}
+

@@ -1,0 +1,43 @@
+<ul class="breadcrumb">
+  <li>
+    <a href="#/apps">Apps</a> <span class="divider">/</span>
+  </li>
+  <li class="active">
+    Application Settings
+  </li>
+</ul>
+
+<div class="well">
+
+
+    <div class="row title">
+        <img src="{{icon_src}}" style="float: right;"/>
+        <h1 class="edit-title">{{dashboard_title}}</h1>
+        <p>{{kanso.config.description}}{{couchapp.config.description}}</p>
+        {{#if flattrLink}}
+            <p>{{{flattrLink}}}</p>
+        {{/if}}
+
+        <p class="small">
+            <b>Version:</b> {{kanso.config.version}}{{couchapp.config.version}}<br/>
+            <b>Installed:</b> {{installed_text}}<br/>
+            <b>From:</b> <a href="{{src}}">{{src}}</a><br/>
+            <b>Database Size:</b> <span id="db-size">calculating...</span><br/>
+        </p>
+
+
+
+    </div>
+</div>
+<div class="offset3">
+    <ul class="nav settings pills">
+       <li class="app_name"><a href="#/apps/{{_id}}">Name</a></li>
+       <li class="app_settings"><a href="#/apps/{{_id}}/settings">App Settings</a></li>
+       <li class="app_access"><a href="#/apps/{{_id}}/access">User Access</a></li>
+       <li class="app_actions"><a href="#/apps/{{_id}}/actions">App Actions</a></li>
+    </ul>
+</div>
+
+<div class="tab_details">
+
+</div>

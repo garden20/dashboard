@@ -1,0 +1,58 @@
+<div class="">
+
+
+    <div class="app_access">
+
+    </div>
+
+
+    <h4>Application Actions</h4>
+    <fieldset class="form-actions">
+      <a id="clone-app-start" href="#clone-app" data-toggle="modal" class="btn" title="Clone this application as another instance on your dashboard.">Clone</a>
+      <button  id="compact-final" class="btn " title="Clean up old data, reducing the database size">Compact</button>
+      <a href="#delete-app" data-toggle="modal"  class="btn danger" title="Delete this application">Delete</a>
+    </fieldset>
+
+
+    <div class="progress info striped active activity-info"  style="display: none;">
+      <div class="bar" style="width: 10%;"></div>
+    </div>
+
+    <div id="delete-app" class="modal fade" style="display: none;">
+        <div class="modal-header">
+            <h3>Delete App</h3>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete this application?</p>
+        </div>
+        <div class="modal-footer">
+            <button id="delete-final" class="btn primary warning">Delete</button>
+            <button class="btn cancel">Cancel</button>
+        </div>
+    </div>
+
+
+    <div id="clone-app" class="modal fade" style="display: none;">
+        <div class="modal-header">
+            <h3>Clone App</h3>
+        </div>
+        <div class="modal-body">
+            <p>Create another instance of this app on your dashboard.</p>
+            <form>
+                <label>Name</label>
+                <input type="text" id="newAppName" />
+                <label>Copy Data</label>
+                <input type="checkbox" id="copyData">
+            </form>
+
+
+
+        </div>
+        <div class="modal-footer">
+            <button id="clone-final" class="btn primary">Clone</button>
+            <button class="btn cancel">Cancel</button>
+        </div>
+    </div>
+
+
+</div>

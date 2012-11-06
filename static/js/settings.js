@@ -14,7 +14,16 @@ var async = require('async');
 
 $(function(){
 
-    function viewApp(id) {
+    function getNiceDBSize(db, callback) {
+        $.couch.db(db).info({
+           success: function(data) {
+               var nice_size = dashboard_core.formatSize(data.disk_size);
+               callback(null, nice_size);
+           }
+       })
+    }
+
+    function viewAppBase(id, callback) {
         $.couch.db(dashboard_db_name).openDoc(id, {
             success: function(doc){
                 doc.installed_text = moment(new Date(doc.installed.date)).calendar();
@@ -24,120 +33,181 @@ $(function(){
                     doc.flattrLink = flattr.generateFlatterLinkHtml(flattrDetails);
                 }
 
-               $('#apps').html(handlebars.templates['app_details.html'](doc, {}));
+               $('#apps').html(handlebars.templates['app_details_base.html'](doc, {}));
+               $('.settings.nav-pills').removeClass('active');
                $('.flattr_link').tooltip({placement: 'bottom'});
-               $('.form-actions .btn').tooltip({placement: 'bottom'});
 
-               var showDBSize = function() {
-                   $.couch.db(doc.installed.db).info({
-                      success: function(data) {
-                          var nice_size = dashboard_core.formatSize(data.disk_size);
-                         $('#db-size').text(nice_size);
-                      }
-                  })
-               };
-
-               showDBSize();
-
-               $('.edit-title').blur(function() {
-
-                   doc.dashboard_title = $(this).text();
-                   $.couch.db(dashboard_db_name).saveDoc(doc, {
-                      success: function(results) {
-
-                      }
-                   });
-               })
-
-
-
-
-               $('#delete-final').click(function() {
-                   $(this).parent().parent().modal('hide');
-
-                   $.couch.db(doc.installed.db).drop({
-                       success: function() {
-                           $.couch.db(dashboard_db_name).removeDoc(doc,  {
-                               success : function() {
-                                   // go to the dashboard.
-                                  router.setRoute('/apps');
-                                  // reload page to reload the topbar
-                                  window.location.reload();
-                               }
-                           });
-                       }
-                   })
+               getNiceDBSize(doc.installed.db, function(err, nice_size){
+                   $('#db-size').text(nice_size);
                });
-
-
-               function updateStatus(msg, percent, complete) {
-                   $('.activity-info .bar').css('width', percent);
-                   if (complete) {
-                       $('.activity-info .progress').removeClass('active');
-                   }
-               }
-
-
-               $('#compact-final').click(function(){
-                   $('.activity-info').show();
-                   updateStatus('Compacting', '50%', true);
-                   $.couch.db(doc.installed.db).compact({
-                      success : function(){
-                          updateStatus('Done Compact', '100%', true);
-                          setTimeout(function() {
-                              $('.activity-info').hide();
-                              showDBSize();
-
-                          }, 3000);
-
-                      }
-                   });
-               });
-
-
-               $('#clone-app-start').click(function(){
-                   $('#newAppName').val(doc.dashboard_title);
-               });
-
-
-
-
-               dashboard_core.getDBSecurity(doc.installed.db, function(err, security){
-                   if (err) return console.log(err);
-
-                   if (!security.members || !security.members.roles || security.members.roles.length == 0 ) {
-                       security.access_type_public = true;
-                   } else {
-                       var actual = { roles: security.members.roles };
-                       var admin  = { roles: ['_admin'] };
-                       if (_.isEqual(actual, admin)) {
-                           security.access_type_admins = true;
-                       } else {
-                           security.access_type_groups = true;
-                       }
-                   }
-                   security.members.roles = _.without(security.members.roles, "_admin");
-                   var cleaned_roles = [];
-                   _.each(security.members.roles, function(role) {
-                       if (role.indexOf('group.') === 0 ) {
-                           cleaned_roles.push(role.substring(6));
-                       }
-                   });
-                   security.members.roles = cleaned_roles;
-
-
-
-                   $('.app_access').html(handlebars.templates['app_access.html'](security, {}));
-                   if (security.access_type_groups) {
-                       renderAppGroupTable(doc.installed.db);
-                   }
-                   configureRadioSelection(doc.installed.db);
-
-               });
-
-
-
+               callback(null, doc);
             }
+        });
+    }
+
+    function viewAppAccess(id) {
+        viewAppBase(id, function(err, doc) {
+            $('.app_access').addClass('active');
+            dashboard_core.getDBSecurity(doc.installed.db, function(err, security){
+                if (err) return console.log(err);
+
+                if (!security.members || !security.members.roles || security.members.roles.length == 0 ) {
+                    security.access_type_public = true;
+                } else {
+                    var actual = { roles: security.members.roles };
+                    var admin  = { roles: ['_admin'] };
+                    if (_.isEqual(actual, admin)) {
+                        security.access_type_admins = true;
+                    } else {
+                        security.access_type_groups = true;
+                    }
+                }
+                security.members.roles = _.without(security.members.roles, "_admin");
+                var cleaned_roles = [];
+                _.each(security.members.roles, function(role) {
+                    if (role.indexOf('group.') === 0 ) {
+                        cleaned_roles.push(role.substring(6));
+                    }
+                });
+                security.members.roles = cleaned_roles;
+
+
+
+                $('.tab_details').html(handlebars.templates['app_access.html'](security, {}));
+                if (security.access_type_groups) {
+                    renderAppGroupTable(doc.installed.db);
+                }
+                configureRadioSelection(doc.installed.db);
+
+            });
+        });
+    }
+
+    function viewAppActions(id) {
+        viewAppBase(id, function(err, doc) {
+            $('.app_actions').addClass('active');
+            $('.tab_details').html(handlebars.templates['app_details_actions.html']({}));
+            function updateStatus(msg, percent, complete) {
+                $('.activity-info .bar').css('width', percent);
+                if (complete) {
+                    $('.activity-info .progress').removeClass('active');
+                }
+            }
+
+
+            $('#compact-final').click(function(){
+                $('.activity-info').show();
+                updateStatus('Compacting', '50%', true);
+                $.couch.db(doc.installed.db).compact({
+                   success : function(){
+                       updateStatus('Done Compact', '100%', true);
+                       setTimeout(function() {
+                           $('.activity-info').hide();
+                           getNiceDBSize(doc.installed.db, function(err, nice_size){
+                               $('#db-size').text(nice_size);
+                           });
+
+                       }, 3000);
+
+                   }
+                });
+            });
+
+
+            $('#clone-app-start').click(function(){
+                $('#newAppName').val(doc.dashboard_title);
+            });
+            $('#delete-final').click(function() {
+                $(this).parent().parent().modal('hide');
+
+                $.couch.db(doc.installed.db).drop({
+                    success: function() {
+                        $.couch.db(dashboard_db_name).removeDoc(doc,  {
+                            success : function() {
+                                // go to the dashboard.
+                               router.setRoute('/apps');
+                               // reload page to reload the topbar
+                               window.location.reload();
+                            }
+                        });
+                    }
+                })
+            });
+        });
+    }
+
+
+    function viewAppSettings(id) {
+        var editor, ddoc;
+
+        viewAppBase(id, function(err, doc) {
+           $('.app_settings').addClass('active');
+           $('.tab_details').html(handlebars.templates['app_details_settings.html'](doc, {}));
+
+           var meta = doc.couchapp || doc.kanso;
+           if (meta.config.settings_schema) {
+
+               var doc_path = '_couch/' + doc.installed.db + '/_design/' + doc.doc_id;
+               $.getJSON(doc_path, function(ddoc_data) {
+                   ddoc = ddoc_data;
+                   if (ddoc.app_settings) {
+                       meta.config.settings_schema.default = ddoc.app_settings;
+                   }
+                   editor = JsonEdit('app_settings_schema', meta.config.settings_schema);
+               });
+
+
+
+
+
+           } else {
+                $('#app_settings_schema').html('<h2>No settings to configure</h2>')
+                $('.form-actions').hide();
+           }
+           $('form').on('submit', function(){
+               var btn = $('button.save');
+               btn.button('saving');
+               var err_alert = $('.alert');
+               err_alert.hide(10);
+
+               var form = editor.collect();
+               if (!form.result.ok) {
+
+                   err_alert.show(200)
+                       .find('button.close')
+                       .on('click', function () { err_alert.hide(); })
+                   err_alert.find('h4')
+                        .text(form.result.msg);
+                   return false;
+               }
+               ddoc.app_settings = form.data;
+               $.couch.db(doc.installed.db).saveDoc(ddoc, {
+                  success : function() {
+                      btn.button('reset');
+                      humane.info('Save Complete');
+                  }
+               });
+               return false;
+           });
+        });
+    }
+
+    function viewApp(id) {
+        viewAppBase(id, function(err, doc) {
+           $('.app_name').addClass('active');
+           $('.tab_details').html(handlebars.templates['app_details.html'](doc, {}));
+           $('form').on('submit', function() {
+               var btn = $('button.save');
+               btn.button('saving');
+               doc.dashboard_title = $('#menu_name').val();
+               $.couch.db(dashboard_db_name).saveDoc(doc, {
+                  success: function(results) {
+                      btn.button('reset');
+                      humane.info('Save Complete');
+                  }
+               });
+               return false;
+           });
         });
     }
 
@@ -994,6 +1064,15 @@ $(function(){
 
       '/apps/:db' : function(app_id) {
           viewApp(app_id);
+      },
+      '/apps/:db/settings' : function(app_id) {
+            viewAppSettings(app_id);
+      },
+      '/apps/:db/access' : function(app_id) {
+            viewAppAccess(app_id);
+      },
+      '/apps/:db/actions' : function(app_id) {
+              viewAppActions(app_id);
       },
       '/apps'   : function(){
           showApps();

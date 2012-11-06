@@ -1,0 +1,29 @@
+{
+  "name": "jquery.lego",
+  "description": "generate HTML using CSS-like selectors ",
+  "author": "Mariano Guerra",
+  "version": "0.0.1",
+  "main": "jquery.lego.js",
+  "jam": {
+      "dependencies": {
+        "jquery": ">1.4.2"
+      }
+  },
+  "repository": "git://github.com/marianoguerra/legojs.git",
+  "homepage": "https://github.com/marianoguerra/legojs",
+  "keywords": [ "json", "html" ],
+  "tags": [ "json", "html" ]
+  ,"maintainers":[
+        {
+            "name":"Ryan Ramage",
+            "web":"https://github.com/ryanramage"
+        }
+    ],
+  "repositories":[
+        {
+            "type":"git",
+            "url":"https://github.com/marianoguerra/legojs"
+        }
+    ]
+
+}
