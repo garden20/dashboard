@@ -23,37 +23,13 @@
   <div class="control-group group-table" {{#unless access_type_groups}}style="display: none;"{{/unless}}>
       <label></label>
       <div class="controls">
-          <table class="table condensed">
-              <thead>
-                <tr>
-                    <th>Group</th>
-                    <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                    {{#each members.roles}}
-                    <tr>
-                        <td>{{.}}</td>
-                        <td><button class="btn remove_role_from_app" data-role="{{.}}">Remove</button> </td>
-                    </tr>
-                    {{/each}}
-              </tbody>
-          </table>
-          <div class="group-access-add-row">
-              <select name="group_access" id="group_access" multiple data-placeholder="Enter a group name">
-
-
-             </select>
-             <button id="add-groups-to-app-final" class="btn">Add Groups</button>
-          </div>
-
+              <select name="group_access" id="group_access" multiple data-placeholder="Enter a group name"></select>
       </div>
   </div>
 
 
-  <div class="form-actions" style="display: none;">
-    <button type="submit" class="btn primary">Save changes</button>
-    <button type="reset" class="btn">Cancel</button>
+  <div class="form-actions">
+    <button type="submit" class="btn primary save">Save changes</button>
   </div>
 </fieldset>
 </form>
