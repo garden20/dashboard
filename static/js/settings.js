@@ -28,6 +28,7 @@ $(function(){
             success: function(doc){
                 doc.installed_text = moment(new Date(doc.installed.date)).calendar();
                 doc.icon_src = dashboard_core.bestIcon96(doc);
+                doc.display_name = dashboard_core.display_name(doc);
                 if (flattr.hasFlattr(doc)) {
                     var flattrDetails = flattr.getFlattrDetailsFromInstallDoc(doc);
                     doc.flattrLink = flattr.generateFlatterLinkHtml(flattrDetails);
