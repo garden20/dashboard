@@ -3,20 +3,19 @@ node_js:
    - 0.6
 
 
-env: DB=couchdb
+services:
+  - couchdb
 
 before_script:
-  - curl -X PUT localhost:5984/myapp_test
+  - curl -X PUT localhost:5984/dashboard
   - npm install kanso -g
   - npm install nodeunit -g
 
 
-script: "kanso install; kanso push http://localhost:5984/myapp_test"
+script: "kanso install; kanso push http://localhost:5984/dashboard"
 
 after_script:
   # setup and run tests
-  - sh -e /etc/init.d/xvfb start
-  - "export DISPLAY=:99.0; test/run_headless_tests.sh http://localhost:5984/myapp_test"
   # deploy to a qa server
   - kanso push http://travis:XX0Y13CNL8M@reupholster.iriscouch.com/dashboard
 
@@ -24,4 +23,3 @@ after_script:
 notifications:
   email:
     - ryan.ramage@gmail.com
-    - caolan.mcmahon@gmail.com
