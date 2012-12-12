@@ -17,6 +17,9 @@ script: "kanso install; kanso push http://localhost:5984/dashboard"
 after_script:
   # setup and run tests
   # deploy to a qa server
+  - mkdir temp
+  - sudo cp /var/lib/couchdb/1.2.0/dashboard.couch ./temp/dashboard.couch
+  - sudo chown travis ./temp/dashboard.couch
   - kanso push http://travis:XX0Y13CNL8M@reupholster.iriscouch.com/dashboard
 
 
