@@ -1,4 +1,4 @@
-[![Build Status](https://secure.travis-ci.org/kanso/dashboard.png)](http://travis-ci.org/kanso/dashboard)
+[![Build Status](https://secure.travis-ci.org/garden20/dashboard.png)](http://travis-ci.org/garden20/dashboard)
 
 # Dashboard
 
