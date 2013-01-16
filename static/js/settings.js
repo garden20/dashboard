@@ -172,10 +172,17 @@ $(function(){
                var doc_path = '_couch/' + doc.installed.db + '/_design/' + doc.doc_id;
                $.getJSON(doc_path, function(ddoc_data) {
                    ddoc = ddoc_data;
-                   if (ddoc.app_settings) {
-                       meta.config.settings_schema.default = ddoc.app_settings;
+                   // allow editing the ddoc schema directly to help devs!
+                   var schema_to_use = meta.config.settings_schema;
+                   var ddoc_meta = ddoc.kanso || ddoc.couchapp;
+                   if (ddoc_meta && ddoc_meta.config && ddoc_meta.config.settings_schema) {
+                      schema_to_use = ddoc_meta.config.settings_schema;
                    }
-                   editor = JsonEdit('app_settings_schema', meta.config.settings_schema);
+
+                   if (ddoc.app_settings) {
+                       schema_to_use.default = ddoc.app_settings;
+                   }
+                   editor = JsonEdit('app_settings_schema', schema_to_use);
                });
 
 
