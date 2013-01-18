@@ -52,8 +52,9 @@ $(function(){
             dashboard_core.getDBSecurity(doc.installed.db, function(err, security){
                 if (err) return console.log(err);
 
-                if (!security.members || !security.members.roles || security.members.roles.length == 0 ) {
+                if (!security.members || !security.members.roles || security.members.roles.length === 0 ) {
                     security.access_type_public = true;
+                    security.members = security.members || {names:[],roles:[]};
                 } else {
                     var actual = { roles: security.members.roles };
                     var admin  = { roles: ['_admin'] };
