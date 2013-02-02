@@ -474,30 +474,34 @@
     </div>
     <div class="modal-body">
         <form>
+          <div class="control-group">
             <label>User email address</label>
             <input type="text" id="user-email" />
+          </div>
 
-            {{#if settings.host_options.login_type_local}}
-             <label>Password</label>
-             <input type="password" id="user-password" class="password" />
-             <button class="btn small generate-password">Generate Password</button>
+            {{#if settings.sessions.login_type_local}}
+            <div class="control-group">
+              <label>Password</label>
+              <input type="password" id="user-password" class="password" />
+              <button class="btn small generate-password">Generate Password</button>
+            </div>
             {{/if}}
 
-            <label>Name</label>
-            <input type="text" id="user-name" />
+            <div class="control-group">
+              <label>Name</label>
+              <input type="text" id="user-name" />
+            </div>
 
-
-            <label>Groups</label>
-            <select id="new-user-roles" multiple  data-placeholder="Enter a group name">
-
-            </select>
-
+            <div class="control-group">
+              <label>Groups</label>
+              <select id="new-user-roles" multiple  data-placeholder="Enter a group name"></select>
+            </div>
 
         </form>
     </div>
     <div class="modal-footer">
 
-        <a href="mailto:someone@example.com?subject=This%20is%20the%20subject&body=This%20is%20the%20body" target="_blank" id="add-user-final-email" class="btn primary">Add, send email</a>
+        <a href="mailto:someone@example.com?subject=This%20is%20the%20subject&body=This%20is%20the%20body" id="add-user-final-email" class="btn primary">Add, send email</a>
         <button id="add-user-final" class="btn">Add, don't email</button>
 
         <button class="btn cancel">Cancel</button>

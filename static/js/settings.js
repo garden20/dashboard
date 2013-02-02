@@ -246,6 +246,9 @@ $(function(){
         configureRolesSelection('#group_access', cleaned_roles);
     }
 
+    function clearRolesSelection(select) {
+       $(select).val('').trigger("liszt:updated");
+    };
     function configureRolesSelection(select, roles_selected) {
 
         if (!roles_selected) roles_selected = {};
@@ -899,10 +902,12 @@ $(function(){
        var me = $(this);
        var name = $(this).data('name');
 
-       users.delete(name, function(err) {
-           if (err) return alert('could not delete.' + err);
-           me.closest('tr').remove();
-       });
+       if (confirm('Delete user '+name+'?')) {
+           users.delete(name, function(err) {
+               if (err) return alert('could not delete.' + err);
+               me.closest('tr').remove();
+           });
+       }
 
     });
 
@@ -924,7 +929,7 @@ $(function(){
     });
 
     $('.generate-password').live('click', function(){
-        var pass = password();
+        var pass = password(6,false);
         $('.password').val(pass).trigger('change');
         return false;
     });
@@ -941,21 +946,59 @@ $(function(){
             fullname : $('#user-name').val()
         }
 
-        users.create($('#user-email').val(), password, properties, function(err) {
-            if (err) return console.log(err);
+        var onCreate = function(err, data) {
+            if (err) return console.error(err);
+            var just_name = data.id.substring(17),
+                groups = _.map(roles, function(role){ return role.replace('group.') });
             $('#add-user-dialog').modal('hide');
-            // so much cheating
-            window.location.reload(); // fixme
-        });
+            resetUserForm();
+            $('.users-list').append(
+                handlebars.templates['users.html'](
+                    [{
+                        id: data.id,
+                        just_name: just_name,
+                        groups: groups
+                    }]
+                )
+            );
+        }
+
+        users.create($('#user-email').val(), password, properties, onCreate);
     }
 
+    function resetUserForm() {
+        $('#add-user-dialog').find('form')
+            .find("input[type=text], textarea").val("");
+        clearRolesSelection('#new-user-roles');
+    }
+
+    function validateUserForm() {
+        var password = $('#user-password').val(),
+            email = $('#user-email').val();
+        if (password && email)
+            return true;
+        if (!password)
+            $('#user-password').parents('.control-group').addClass('error');
+        else
+            $('#user-password').parents('.control-group').removeClass('error');
+        if (!email)
+            $('#user-email').parents('.control-group').addClass('error');
+        else
+            $('#user-email').parents('.control-group').removeClass('error');
+    }
 
     $('#add-user-final').live('click', function(){
-        addUser();
+        if (validateUserForm())
+            addUser();
+        else
+            return false;
     });
 
     $('#add-user-final-email').live('click', function(){
-        addUser();
+        if (validateUserForm())
+            addUser();
+        else
+            return false;
     });
 
     $('#user-email, #user-password, #user-name').live('change', function(){
@@ -990,13 +1033,14 @@ $(function(){
             _id = _id.substring(17);
         }
 
-
-        users.delete(_id, function(err){
-            if (err) return humane.error(err);
-            me.closest('tr').remove();
-            humane.info('user deleted');
-        });
-        return false;
+       if (confirm('Delete user '+_id+'?')) {
+            users.delete(_id, function(err){
+                if (err) return humane.error(err);
+                me.closest('tr').remove();
+                humane.info('user deleted');
+            });
+       }
+       return false;
     });
 
 
@@ -1061,6 +1105,12 @@ $(function(){
         router.setRoute('/' + tab);
 //        window.location.hash = '/' + tab;
     })
+
+    // remove error classes when controls are focused
+    $('.control-group').children().on('focus', function(ev) {
+        $(this).parents('.control-group').removeClass('error');
+    });
+
     function showTab(id) {
         $('#' + id).tab('show');
     }
