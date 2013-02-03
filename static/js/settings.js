@@ -755,6 +755,10 @@ $(function(){
 
     function showSessions() {
 
+        var isAdmin = false;
+        session.info(function(err, data) {
+            isAdmin = dashboard_core.isAdmin(data);
+        });
 
         $('input[name=type]').on('click', function(){
             var selected = $('input[name=type]:checked').val();
@@ -771,7 +775,7 @@ $(function(){
         $('#sessions .primary').click(function(){
             var btn = $(this);
             btn.button('saving');
-            var params = $('#sessions form').formParams();
+            var params = $('#sessions form.settings').formParams();
             $.ajax({
                 url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/sessions/settings?' + $.param(params),
                 type: 'PUT',
@@ -797,6 +801,29 @@ $(function(){
                 }
             });
             return false;
+        });
+
+        $('#sessions form[name=configs] [name=require_valid_user]').click(function(ev) {
+            var field = $(this),
+                params = field.closest('form').formParams(),
+                val = params.require_valid_user !== 'on' ? '"false"' : '"true"';
+
+            $.ajax({
+                url: '/_config/couch_httpd_auth/require_valid_user',
+                type: 'PUT',
+                data: val,
+                success : function(result, textStatus, xmlHttpRequest) {
+                    if (textStatus !== 'success') {
+                        //console.error('update failed',arguments);
+                        return alert('update failed.');
+                    }
+                    humane.info('Saved!');
+                },
+                error: function(err) {
+                    //console.error('update failed',arguments);
+                    alert('update failed: '+err.responseText);
+                }
+            });
         });
 
     }

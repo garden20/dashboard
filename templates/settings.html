@@ -246,7 +246,7 @@
             <div class="tab-pane" id="sessions">
                 <div class="row">
                     <div class="offset1 span8">
-                        <form class="form-horizontal">
+                        <form class="form-horizontal" name="settings">
                             <fieldset>
                                 <legend>Session Options</legend>
                                 <!-- Frontpage -->
@@ -315,12 +315,27 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-actions">
+
+                                <!--div class="form-actions">
                                    <a href="#" class="btn primary">Save changes</a>
                                    <button type="reset" class="btn">Cancel</button>
-                                 </div>
+                                 </div-->
                             </fieldset>
                         </form>
+                        {{#if isAdmin}}
+                        <form class="form-horizontal" name="configs">
+                          <fieldset>
+                            <div class="control-group">
+                              <label class="control-label" for="require_valid_user">Require Valid User</label>
+                              <div class="controls">
+                                <label class="checkbox">
+                                  <input type="checkbox" name="require_valid_user" {{#if configs.require_valid_user}}checked="checked"{{/if}}> Require HTTP Auth on all database requests
+                                </label>
+                              </div>
+                            </div>
+                          </fieldset>
+                        </form>
+                        {{/if}}
                     </div>
                 </div>
             </div>
