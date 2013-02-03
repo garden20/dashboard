@@ -254,7 +254,7 @@
                                     <label class="control-label" for="redirect_frontpage_on_anon">FrontPage</label>
                                     <div class="controls">
                                       <label class="checkbox">
-                                          <input type="checkbox" name="redirect_frontpage_on_anon" {{#if settings.host_options.redirect_frontpage_on_anon}}checked="checked"{{/if}}> Redirect to login page if not logged in
+                                          <input type="checkbox" name="redirect_frontpage_on_anon" {{#if settings.sessions.internal.redirect_frontpage_on_anon}}checked="checked"{{/if}}> Redirect to login page if not logged in
                                       </label>
                                     </div>
                                 </div>
@@ -319,24 +319,23 @@
                                        <button type="reset" class="btn">Cancel</button>
                                      </div>
                                 </div>
-
-                            </fieldset>
-                        </form>
                         {{#if isAdmin}}
-                        <form class="form-horizontal" name="configs">
-                          <fieldset>
                             <div class="control-group">
                               <label class="control-label" for="require_valid_user">Require Valid User</label>
                               <div class="controls">
                                 <label class="checkbox">
-                                  <input type="checkbox" name="require_valid_user" {{#if configs.require_valid_user}}checked="checked"{{/if}}> Require HTTP Auth on all database requests
+                                  <input type="checkbox" name="require_valid_user" {{#if settings.sessions.require_valid_user_on}}checked="checked"{{/if}}> Require HTTP Auth on all database requests
                                 </label>
                               </div>
                             </div>
-                          </fieldset>
-                        </form>
                         {{/if}}
-                    </div>
+                            <div class="form-actions">
+                               <a href="#" class="btn primary">Save</a>
+                               <button type="reset" class="btn">Cancel</button>
+                             </div>
+                          </fieldset>
+                      </form>
+                  </div>
                 </div>
             </div>
             <div class="tab-pane" id="admins">

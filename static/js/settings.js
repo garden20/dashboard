@@ -689,7 +689,6 @@ $(function(){
                         });
                     }
                 }, function(err, results){
-                    console.log(results);
                     var link_dbs = dashboard_core.getLinkDBs(results.links);
 
                     async.series([
@@ -753,6 +752,76 @@ $(function(){
         });
     }
 
+    /**
+     *  Expects radio button group to be in a form, one of the input fields
+     *  should have a class of `default` to determine which is checked if value
+     *  argument is not used.
+     *
+     *  @param {Jquery} $radios - group of radio buttons
+     *  @param {String} value - (optional) value attribute value of radio input
+     *  to be checked
+     *
+     * */
+    function setRadioButtons($radios, value) {
+        var $form = $radios.closest('form'),
+            name = $radios.attr('name');
+        $form.find('[name='+name+']').each(function() {
+            var $el = $(this);
+            if (value && $el.attr('value') === value)
+                return $el.prop('checked', true);
+            else if (value && $el.attr('value') === value)
+                return $el.prop('checked', false);
+            if ($el.hasClass('default'))
+                $el.prop('checked', true);
+            else
+                $el.prop('checked', false);
+        });
+    };
+
+    // update sessions property in settings doc
+    function updateSessions(params, callback) {
+        $.ajax({
+            url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/sessions/settings?' + $.param(params),
+            type: 'PUT',
+            success : function(result, textStatus, xmlHttpRequest) {
+                if (result !== 'update complete')
+                    return callback('Update Failed');
+                callback();
+            },
+            error : function() {
+                return callback('Update Failed');
+            }
+        });
+    }
+
+    function updateCouchDBConfigs(data, callback) {
+        var series = [];
+        if (data.userBrowserid) {
+            series.push(function(cb) {
+                $.couch.config({
+                    success: function() { cb() },
+                    error: function() {
+                        cb('Update Failed');
+                    }
+                }, 'browserid', 'enabled', data.userBrowserid)
+            });
+        }
+        if (data.require_valid_user) {
+            series.push(function(cb) {
+                $.couch.config({
+                    success: function() { cb() },
+                    error: function() {
+                        cb('Update Failed');
+                    }
+                }, 'couch_httpd_auth', 'require_valid_user', data.require_valid_user);
+            });
+        }
+        async.series(series, function(err, results) {
+            if (err) return callback(err);
+            callback(null, results);
+        });
+    };
+
     function showSessions() {
 
         var isAdmin = false;
@@ -771,80 +840,38 @@ $(function(){
             }
         });
 
-        function setRadios($radios, value) {
-            // if value is not passed in (falsey) then check the radio that has
-            // class "default"
-            var $form = $radios.closest('form'),
-                name = $radios.attr('name');
-            $form.find('[name='+name+']').each(function() {
-                var $el = $(this);
-                if (value && $el.attr('value') === value)
-                    return $el.prop('checked', true);
-                else if (value && $el.attr('value') === value)
-                    return $el.prop('checked', false);
-                if ($el.hasClass('default'))
-                    $el.prop('checked', true);
-                else
-                    $el.prop('checked', false);
-            });
-        };
-
         $('#sessions [type=reset]').click(function(ev) {
             ev.preventDefault();
             $('.internal_session_method').show(300);
             $('.other_session_method').hide(300);
-            setRadios($('#sessions [name=type]'));
+            setRadioButtons($('#sessions [name=type]'));
         });
 
 
-        $('#sessions form[name=settings] [name]').click(function() {
-            var field = $(this);
-            var params = field.closest('form').formParams();
-            // don't handle type field
-            if (field.attr('name') === 'type') return;
-            $.ajax({
-                url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/sessions/settings?' + $.param(params),
-                type: 'PUT',
-                success : function(result, textStatus, xmlHttpRequest) {
-                    if (result == 'update complete') {
-                        var userBrowserid = 'false';
-                        if (params.login_type == 'browserid') {
-                            userBrowserid = 'true';
-                        }
-                        $.couch.config({
-                            success : function(result) {
-                                humane.info('Save Complete');
-                            }
-                        }, 'browserid', 'enabled', userBrowserid );
-                    }
-                    else alert('update failed');
-                },
-                error : function() {
-                    alert('update failed');
-                }
-            });
-        });
-
-        $('#sessions form[name=configs] [name=require_valid_user]').click(function(ev) {
-            var field = $(this),
-                params = field.closest('form').formParams(),
-                val = params.require_valid_user !== 'on' ? '"false"' : '"true"';
-
-            $.ajax({
-                url: '/_config/couch_httpd_auth/require_valid_user',
-                type: 'PUT',
-                data: val,
-                success : function(result, textStatus, xmlHttpRequest) {
-                    if (textStatus !== 'success') {
-                        //console.error('update failed',arguments);
-                        return alert('update failed.');
-                    }
-                    humane.info('Save Complete');
-                },
-                error: function(err) {
-                    //console.error('update failed',arguments);
-                    alert('update failed: '+err.responseText);
-                }
+        $('#sessions form[name=settings] .btn.primary').click(function(ev) {
+            ev.preventDefault();
+            var btn = $(this),
+                params = btn.closest('form').formParams();
+            btn.attr('disabled','disabled');
+            // special hanlding on some fields
+            if (params.type === 'internal') {
+                delete params.login_url;
+                delete params.login_url_next;
+                delete params.profile_url;
+                delete params.signup_url;
+            }
+            var configData = {
+                userBrowserid: params.login_type == 'browserid' ? 'true' : 'false',
+                require_valid_user: params.require_valid_user == 'on' ? 'true' : 'false'
+            };
+            function done(err) {
+                btn.removeAttr('disabled');
+                if (err) return humane.error(err);
+                humane.info('Save Complete');
+            }
+            updateSessions(params, function(err) {
+                if (err) return done(err);
+                updateCouchDBConfigs(configData, done);
             });
         });
 
