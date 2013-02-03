@@ -772,10 +772,9 @@ $(function(){
             }
         });
 
-        $('#sessions .primary').click(function(){
-            var btn = $(this);
-            btn.button('saving');
-            var params = $('#sessions form.settings').formParams();
+        $('#sessions form[name=settings] [name]').click(function() {
+            var field = $(this);
+            var params = field.closest('form').formParams();
             $.ajax({
                 url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/sessions/settings?' + $.param(params),
                 type: 'PUT',
@@ -787,20 +786,16 @@ $(function(){
                         }
                         $.couch.config({
                             success : function(result) {
-                                window.location.reload();
+                                humane.info('Saved!');
                             }
                         }, 'browserid', 'enabled', userBrowserid );
-
-                        //window.location.reload();
                     }
                     else alert('update failed');
-
                 },
                 error : function() {
                     alert('update failed');
                 }
             });
-            return false;
         });
 
         $('#sessions form[name=configs] [name=require_valid_user]').click(function(ev) {
