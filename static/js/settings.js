@@ -485,7 +485,7 @@ $(function(){
 
                 dashboard_core.updateNavOrdering(showing, onDropdownMenu, function(err) {
                     if (err) return humane.error(err);
-                    humane.info('Save complete');
+                    humane.info('Save Complete');
                 });
             });
         $( "#sortable1, #sortable2" ).empty().sortable({
@@ -766,15 +766,42 @@ $(function(){
                 $('.internal_session_method').show(300);
                 $('.other_session_method').hide(300);
             } else {
-
                 $('.internal_session_method').hide(300);
                 $('.other_session_method').show(300);
             }
         });
 
+        function setRadios($radios, value) {
+            // if value is not passed in (falsey) then check the radio that has
+            // class "default"
+            var $form = $radios.closest('form'),
+                name = $radios.attr('name');
+            $form.find('[name='+name+']').each(function() {
+                var $el = $(this);
+                if (value && $el.attr('value') === value)
+                    return $el.prop('checked', true);
+                else if (value && $el.attr('value') === value)
+                    return $el.prop('checked', false);
+                if ($el.hasClass('default'))
+                    $el.prop('checked', true);
+                else
+                    $el.prop('checked', false);
+            });
+        };
+
+        $('#sessions [type=reset]').click(function(ev) {
+            ev.preventDefault();
+            $('.internal_session_method').show(300);
+            $('.other_session_method').hide(300);
+            setRadios($('#sessions [name=type]'));
+        });
+
+
         $('#sessions form[name=settings] [name]').click(function() {
             var field = $(this);
             var params = field.closest('form').formParams();
+            // don't handle type field
+            if (field.attr('name') === 'type') return;
             $.ajax({
                 url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/sessions/settings?' + $.param(params),
                 type: 'PUT',
@@ -786,7 +813,7 @@ $(function(){
                         }
                         $.couch.config({
                             success : function(result) {
-                                humane.info('Saved!');
+                                humane.info('Save Complete');
                             }
                         }, 'browserid', 'enabled', userBrowserid );
                     }
@@ -812,7 +839,7 @@ $(function(){
                         //console.error('update failed',arguments);
                         return alert('update failed.');
                     }
-                    humane.info('Saved!');
+                    humane.info('Save Complete');
                 },
                 error: function(err) {
                     //console.error('update failed',arguments);

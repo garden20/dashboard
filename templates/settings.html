@@ -254,7 +254,7 @@
                                     <label class="control-label" for="redirect_frontpage_on_anon">FrontPage</label>
                                     <div class="controls">
                                       <label class="checkbox">
-                                          <input type="checkbox" name="redirect_frontpage_on_anon" {{#if settings.host_options.redirect_frontpage_on_anon}}checked="checked"{{/if}}> Redirect to login page if not logged in.
+                                          <input type="checkbox" name="redirect_frontpage_on_anon" {{#if settings.host_options.redirect_frontpage_on_anon}}checked="checked"{{/if}}> Redirect to login page if not logged in
                                       </label>
                                     </div>
                                 </div>
@@ -264,7 +264,7 @@
                                    <label class="control-label" for="session_type">Session Handler</label>
                                    <div class="controls">
                                      <label class="radio">
-                                           <input id="session_type_internal" type="radio" name="type" value="internal" {{#if settings.sessions.type_internal}}checked="checked"{{/if}}>
+                                           <input id="session_type_internal" class="default" type="radio" name="type" value="internal" {{#if settings.sessions.type_internal}}checked="checked"{{/if}}>
                                            Default (built-in)
                                      </label>
                                      <label class="radio">
@@ -281,7 +281,7 @@
                                     <div class="controls">
                                       <label class="radio">
                                             <input type="radio" name="login_type" value="local" {{#if settings.sessions.login_type_local}}checked="checked"{{/if}}>
-                                            Local Login.
+                                            Local Login
                                       </label>
                                       <label class="radio">
                                           <input type="radio" name="login_type" value="browserid" {{#if settings.sessions.login_type_browserid}}checked="checked"{{/if}}>
@@ -314,12 +314,12 @@
                                             <input type="text" class="span6"  name="profile_url"  value="{{settings.sessions.other.profile_url}}">
                                         </div>
                                     </div>
+                                    <div class="form-actions">
+                                       <a href="#" class="btn primary">Save changes</a>
+                                       <button type="reset" class="btn">Cancel</button>
+                                     </div>
                                 </div>
 
-                                <!--div class="form-actions">
-                                   <a href="#" class="btn primary">Save changes</a>
-                                   <button type="reset" class="btn">Cancel</button>
-                                 </div-->
                             </fieldset>
                         </form>
                         {{#if isAdmin}}
