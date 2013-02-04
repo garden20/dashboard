@@ -863,58 +863,58 @@ $(function(){
         callback();
     }
 
+    $('input[name=type]').on('click', function(){
+        var selected = $('input[name=type]:checked').val();
+        if (selected == 'internal') {
+            $('.internal_session_method').show(300);
+            $('.other_session_method').hide(300);
+        } else {
+            $('.internal_session_method').hide(300);
+            $('.other_session_method').show(300);
+        }
+    });
+
+    $('#sessions [type=reset]').click(function(ev) {
+        ev.preventDefault();
+        $('.internal_session_method').show(300);
+        $('.other_session_method').hide(300);
+        setRadioButtons($('#sessions [name=type]'));
+    });
+
+
+    $('#sessions form[name=settings] .btn.primary').click(function(ev) {
+        ev.preventDefault();
+        var btn = $(this),
+            form = $(this).closest('form'),
+            params = form.formParams();
+        btn.attr('disabled','disabled');
+        // special hanlding on some fields
+        if (params.type === 'internal') {
+            delete params.login_url;
+            delete params.login_url_next;
+            delete params.profile_url;
+            delete params.signup_url;
+        }
+        function done(err) {
+            btn.removeAttr('disabled');
+            if (err) return alert(err);
+            humane.info('Save Complete');
+            form.find('.control-group').removeClass('error');
+        }
+        validateSessionsForm(function(err) {
+            if (err) return done(err);
+            updateSessions(params, function(err) {
+                if (err) return done(err);
+                updateDBConfigs(params, done);
+            });
+        });
+    });
+
     function showSessions() {
 
         var isAdmin = false;
         session.info(function(err, data) {
             isAdmin = dashboard_core.isAdmin(data);
-        });
-
-        $('input[name=type]').on('click', function(){
-            var selected = $('input[name=type]:checked').val();
-            if (selected == 'internal') {
-                $('.internal_session_method').show(300);
-                $('.other_session_method').hide(300);
-            } else {
-                $('.internal_session_method').hide(300);
-                $('.other_session_method').show(300);
-            }
-        });
-
-        $('#sessions [type=reset]').click(function(ev) {
-            ev.preventDefault();
-            $('.internal_session_method').show(300);
-            $('.other_session_method').hide(300);
-            setRadioButtons($('#sessions [name=type]'));
-        });
-
-
-        $('#sessions form[name=settings] .btn.primary').click(function(ev) {
-            ev.preventDefault();
-            var btn = $(this),
-                form = $(this).closest('form'),
-                params = form.formParams();
-            btn.attr('disabled','disabled');
-            // special hanlding on some fields
-            if (params.type === 'internal') {
-                delete params.login_url;
-                delete params.login_url_next;
-                delete params.profile_url;
-                delete params.signup_url;
-            }
-            function done(err) {
-                btn.removeAttr('disabled');
-                if (err) return alert(err);
-                humane.info('Save Complete');
-                form.find('.control-group').removeClass('error');
-            }
-            validateSessionsForm(function(err) {
-                if (err) return done(err);
-                updateSessions(params, function(err) {
-                    if (err) return done(err);
-                    updateDBConfigs(params, done);
-                });
-            });
         });
 
     }
