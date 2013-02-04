@@ -484,7 +484,7 @@ $(function(){
                 });
 
                 dashboard_core.updateNavOrdering(showing, onDropdownMenu, function(err) {
-                    if (err) return humane.error(err);
+                    if (err) return alert(err);
                     humane.info('Save Complete');
                 });
             });
@@ -794,33 +794,74 @@ $(function(){
         });
     }
 
-    function updateCouchDBConfigs(data, callback) {
-        var series = [];
-        if (data.userBrowserid) {
-            series.push(function(cb) {
-                $.couch.config({
-                    success: function() { cb() },
-                    error: function() {
-                        cb('Update Failed');
-                    }
-                }, 'browserid', 'enabled', data.userBrowserid)
+    function updateDBConfigValue(options, callback) {
+        if (!options || !options.section || !options.property || !options.value)
+            return callback('Missing parameters.');
+        $.couch.config({
+            success: function() { callback() },
+            error: function(xhr, status, error) {
+                callback(error);
+            }
+        }, options.section, options.property, options.value);
+    };
+
+    function updateDBConfigs(params, callback) {
+
+        var list = [];
+
+        if (!params)
+            return callback('Missing parameters.');
+
+        list.push(function(cb) {
+            var opts = {
+                section:'browserid',
+                property:'enabled',
+                value: params.login_type == 'browserid' ? 'true' : 'false'
+            };
+            updateDBConfigValue(opts, cb);
+        });
+        list.push(function(cb) {
+            var opts = {
+                section:'couch_httpd_auth',
+                property:'require_valid_user',
+                value: params.require_valid_user == 'on' ? 'true' : 'false'
+            };
+            updateDBConfigValue(opts, cb);
+        });
+        list.push(function(cb) {
+            var opts = {
+                section:'couch_httpd_auth',
+                property:'allow_persistent_cookies',
+                value: params.session_persist == 'on' ? 'true' : 'false'
+            };
+            updateDBConfigValue(opts, cb);
+        });
+        if (params.session_timeout) {
+            list.push(function(cb) {
+                var opts = {
+                    section:'couch_httpd_auth',
+                    property:'timeout',
+                    value: params.session_timeout
+                };
+                updateDBConfigValue(opts, cb);
             });
         }
-        if (data.require_valid_user) {
-            series.push(function(cb) {
-                $.couch.config({
-                    success: function() { cb() },
-                    error: function() {
-                        cb('Update Failed');
-                    }
-                }, 'couch_httpd_auth', 'require_valid_user', data.require_valid_user);
-            });
-        }
-        async.series(series, function(err, results) {
+        async.parallel(list, function(err, results) {
             if (err) return callback(err);
             callback(null, results);
         });
     };
+
+    function validateSessionsForm(callback) {
+        // todo
+        var $timeout = $('#sessions [name=session_timeout]'),
+            timeout_val = parseInt($timeout.val(), 10);
+        if (timeout_val < 300) {
+            $timeout.parents('.control-group').addClass('error');
+            return callback('Timeout value should be 300 or greater.');
+        }
+        callback();
+    }
 
     function showSessions() {
 
@@ -851,7 +892,8 @@ $(function(){
         $('#sessions form[name=settings] .btn.primary').click(function(ev) {
             ev.preventDefault();
             var btn = $(this),
-                params = btn.closest('form').formParams();
+                form = $(this).closest('form'),
+                params = form.formParams();
             btn.attr('disabled','disabled');
             // special hanlding on some fields
             if (params.type === 'internal') {
@@ -860,18 +902,18 @@ $(function(){
                 delete params.profile_url;
                 delete params.signup_url;
             }
-            var configData = {
-                userBrowserid: params.login_type == 'browserid' ? 'true' : 'false',
-                require_valid_user: params.require_valid_user == 'on' ? 'true' : 'false'
-            };
             function done(err) {
                 btn.removeAttr('disabled');
-                if (err) return humane.error(err);
+                if (err) return alert(err);
                 humane.info('Save Complete');
+                form.find('.control-group').removeClass('error');
             }
-            updateSessions(params, function(err) {
+            validateSessionsForm(function(err) {
                 if (err) return done(err);
-                updateCouchDBConfigs(configData, done);
+                updateSessions(params, function(err) {
+                    if (err) return done(err);
+                    updateDBConfigs(params, done);
+                });
             });
         });
 
@@ -1111,7 +1153,7 @@ $(function(){
 
        if (confirm('Delete user '+_id+'?')) {
             users.delete(_id, function(err){
-                if (err) return humane.error(err);
+                if (err) return alert(err);
                 me.closest('tr').remove();
                 humane.info('user deleted');
             });

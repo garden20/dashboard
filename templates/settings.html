@@ -324,6 +324,18 @@
                                 </label>
                               </div>
                             </div>
+                            <div class="control-group">
+                              <label class="control-label" for="session_persist">Enable Persistent Sessions</label>
+                              <div class="controls">
+                                <input type="checkbox" name="session_persist" {{#if settings.sessions.session_persist}}checked="checked"{{/if}}>
+                              </div>
+                            </div>
+                            <div class="control-group" style="clear:both">
+                              <label class="control-label" for="session_timeout">Session Timeout</label>
+                              <div class="controls">
+                                <input class="span1" type="text" name="session_timeout" value="{{settings.sessions.session_timeout}}" maxlength="6"> <span class="help-block">seconds</span>
+                              </div>
+                            </div>
                         {{/if}}
                             <div class="form-actions">
                                <a href="#" class="btn primary">Save</a>
