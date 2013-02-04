@@ -314,10 +314,6 @@
                                             <input type="text" class="span6"  name="profile_url"  value="{{settings.sessions.other.profile_url}}">
                                         </div>
                                     </div>
-                                    <div class="form-actions">
-                                       <a href="#" class="btn primary">Save changes</a>
-                                       <button type="reset" class="btn">Cancel</button>
-                                     </div>
                                 </div>
                         {{#if isAdmin}}
                             <div class="control-group">
@@ -496,7 +492,7 @@
             {{#if settings.sessions.login_type_local}}
             <div class="control-group">
               <label>Password</label>
-              <input type="password" id="user-password" class="password" />
+              <input type="text" id="user-password" class="password" />
               <button class="btn small generate-password">Generate Password</button>
             </div>
             {{/if}}
