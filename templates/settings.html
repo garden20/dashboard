@@ -246,7 +246,7 @@
             <div class="tab-pane" id="sessions">
                 <div class="row">
                     <div class="offset1 span8">
-                        <form class="form-horizontal">
+                        <form class="form-horizontal" name="settings">
                             <fieldset>
                                 <legend>Session Options</legend>
                                 <!-- Frontpage -->
@@ -254,7 +254,7 @@
                                     <label class="control-label" for="redirect_frontpage_on_anon">FrontPage</label>
                                     <div class="controls">
                                       <label class="checkbox">
-                                          <input type="checkbox" name="redirect_frontpage_on_anon" {{#if settings.host_options.redirect_frontpage_on_anon}}checked="checked"{{/if}}> Redirect to login page if not logged in.
+                                          <input type="checkbox" name="redirect_frontpage_on_anon" {{#if settings.sessions.internal.redirect_frontpage_on_anon}}checked="checked"{{/if}}> Redirect to login page if not logged in
                                       </label>
                                     </div>
                                 </div>
@@ -264,7 +264,7 @@
                                    <label class="control-label" for="session_type">Session Handler</label>
                                    <div class="controls">
                                      <label class="radio">
-                                           <input id="session_type_internal" type="radio" name="type" value="internal" {{#if settings.sessions.type_internal}}checked="checked"{{/if}}>
+                                           <input id="session_type_internal" class="default" type="radio" name="type" value="internal" {{#if settings.sessions.type_internal}}checked="checked"{{/if}}>
                                            Default (built-in)
                                      </label>
                                      <label class="radio">
@@ -281,7 +281,7 @@
                                     <div class="controls">
                                       <label class="radio">
                                             <input type="radio" name="login_type" value="local" {{#if settings.sessions.login_type_local}}checked="checked"{{/if}}>
-                                            Local Login.
+                                            Local Login
                                       </label>
                                       <label class="radio">
                                           <input type="radio" name="login_type" value="browserid" {{#if settings.sessions.login_type_browserid}}checked="checked"{{/if}}>
@@ -315,13 +315,35 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-actions">
-                                   <a href="#" class="btn primary">Save changes</a>
-                                   <button type="reset" class="btn">Cancel</button>
-                                 </div>
-                            </fieldset>
-                        </form>
-                    </div>
+                        {{#if isAdmin}}
+                            <div class="control-group">
+                              <label class="control-label" for="require_valid_user">Require Valid User</label>
+                              <div class="controls">
+                                <label class="checkbox">
+                                  <input type="checkbox" name="require_valid_user" {{#if settings.sessions.require_valid_user_on}}checked="checked"{{/if}}> Require HTTP Auth on all database requests
+                                </label>
+                              </div>
+                            </div>
+                            <div class="control-group">
+                              <label class="control-label" for="session_persist">Enable Persistent Sessions</label>
+                              <div class="controls">
+                                <input type="checkbox" name="session_persist" {{#if settings.sessions.session_persist}}checked="checked"{{/if}}>
+                              </div>
+                            </div>
+                            <div class="control-group" style="clear:both">
+                              <label class="control-label" for="session_timeout">Session Timeout</label>
+                              <div class="controls">
+                                <input class="span1" type="text" name="session_timeout" value="{{settings.sessions.session_timeout}}" maxlength="6"> <span class="help-block">seconds</span>
+                              </div>
+                            </div>
+                        {{/if}}
+                            <div class="form-actions">
+                               <a href="#" class="btn primary">Save</a>
+                               <button type="reset" class="btn">Cancel</button>
+                             </div>
+                          </fieldset>
+                      </form>
+                  </div>
                 </div>
             </div>
             <div class="tab-pane" id="admins">
@@ -456,10 +478,15 @@
     <div class="modal-body">
         <p>Admins can install apps, and maintain users.</p>
         <form>
-            <label>Name</label>
-            <input type="text" id="admin-name" />
-            <label>Password</label>
-            <input type="password" id="admin-password" />
+            <div class="control-group">
+              <label>Name</label>
+              <input type="text" id="admin-name" class="required"/>
+            </div>
+            <div class="control-group">
+              <label>Password</label>
+              <input type="text" id="admin-password" class="password required" />
+              <button class="btn small generate-password">Generate Password</button>
+            </div>
         </form>
     </div>
     <div class="modal-footer">
@@ -474,30 +501,34 @@
     </div>
     <div class="modal-body">
         <form>
+          <div class="control-group">
             <label>User email address</label>
             <input type="text" id="user-email" />
+          </div>
 
-            {{#if settings.host_options.login_type_local}}
-             <label>Password</label>
-             <input type="password" id="user-password" class="password" />
-             <button class="btn small generate-password">Generate Password</button>
+            {{#if settings.sessions.login_type_local}}
+            <div class="control-group">
+              <label>Password</label>
+              <input type="text" id="user-password" class="password" />
+              <button class="btn small generate-password">Generate Password</button>
+            </div>
             {{/if}}
 
-            <label>Name</label>
-            <input type="text" id="user-name" />
+            <div class="control-group">
+              <label>Name</label>
+              <input type="text" id="user-name" />
+            </div>
 
-
-            <label>Groups</label>
-            <select id="new-user-roles" multiple  data-placeholder="Enter a group name">
-
-            </select>
-
+            <div class="control-group">
+              <label>Groups</label>
+              <select id="new-user-roles" multiple  data-placeholder="Enter a group name"></select>
+            </div>
 
         </form>
     </div>
     <div class="modal-footer">
 
-        <a href="mailto:someone@example.com?subject=This%20is%20the%20subject&body=This%20is%20the%20body" target="_blank" id="add-user-final-email" class="btn primary">Add, send email</a>
+        <a href="mailto:someone@example.com?subject=This%20is%20the%20subject&body=This%20is%20the%20body" id="add-user-final-email" class="btn primary">Add, send email</a>
         <button id="add-user-final" class="btn">Add, don't email</button>
 
         <button class="btn cancel">Cancel</button>

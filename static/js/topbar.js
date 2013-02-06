@@ -203,8 +203,12 @@ var have_jquery = function(){
         }
     }
 
-    function logout() {
-        $.ajax({ url : '/dashboard/_design/dashboard/_rewrite/_couch/_session'
+    function logout(ev) {
+        var proto = window.location.protocol,
+            host = window.location.host,
+            path = '/dashboard/_design/dashboard/_rewrite/_couch/_session',
+            url = proto + '//' + '_:_@' + host + path;
+        $.ajax({ url : url
          , type: 'DELETE'
          , dataType: 'json'
          , success: function(){
@@ -218,9 +222,9 @@ var have_jquery = function(){
 
 
             }
-         , error  : function() {
-                alert('erro loging out.');
-            }
+         , error: function(xhr, status, error) {
+                alert('Error logging out: ' + error);
+           }
          });
         return false;
     }
