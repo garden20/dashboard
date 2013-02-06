@@ -478,10 +478,15 @@
     <div class="modal-body">
         <p>Admins can install apps, and maintain users.</p>
         <form>
-            <label>Name</label>
-            <input type="text" id="admin-name" />
-            <label>Password</label>
-            <input type="password" id="admin-password" />
+            <div class="control-group">
+              <label>Name</label>
+              <input type="text" id="admin-name" class="required"/>
+            </div>
+            <div class="control-group">
+              <label>Password</label>
+              <input type="text" id="admin-password" class="password required" />
+              <button class="btn small generate-password">Generate Password</button>
+            </div>
         </form>
     </div>
     <div class="modal-footer">

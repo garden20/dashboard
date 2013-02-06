@@ -1029,21 +1029,29 @@ $(function(){
 
     });
 
-    $('#add-admin-final').live('click', function(){
-        var username = $('#admin-name').val();
-        var password = $('#admin-password').val();
-        $('#add-admin-dialog').modal('hide');
-        users.create(username, password,{roles : ['_admin']}, function(err) {
-            if(err) return alert('Cant create admin');
-            // admin created
-            var data = {
-                admins : [username]
-            };
-            $('.admin-list').append(handlebars.templates['admins.html'](data, {}));
-            $('#admin-name').val('');
-            $('#admin-password').val('');
+    // reset field values on modal cancel
+    $('#add-admin-dialog .cancel').on('click', function() {
+        resetAdminUserForm();
+    });
 
-        })
+    $('#add-admin-final').live('click', function(){
+        var form = $(this).closest('.modal').find('form'),
+            username = $('#admin-name').val(),
+            password = $('#admin-password').val();
+        if (validateForm(form)) {
+            $('#add-admin-dialog').modal('hide');
+            users.create(username, password,{roles : ['_admin']}, function(err) {
+                if(err) return alert('Cant create admin');
+                // admin created
+                var data = {
+                    admins : [username]
+                };
+                $('.admin-list').append(handlebars.templates['admins.html'](data, {}));
+                resetAdminUserForm();
+            })
+        } else {
+            return false;
+        }
     });
 
     $('.generate-password').live('click', function(){
@@ -1084,10 +1092,28 @@ $(function(){
         users.create($('#user-email').val(), password, properties, onCreate);
     }
 
+    function resetAdminUserForm() {
+        $('#add-admin-dialog').find('form')
+            .find("input[type=text], textarea").val("");
+    }
+
     function resetUserForm() {
         $('#add-user-dialog').find('form')
             .find("input[type=text], textarea").val("");
         clearRolesSelection('#new-user-roles');
+    }
+
+    function validateForm($form) {
+        var $required = $form.find('.required'),
+            valid = true;
+        $required.each(function(i, el) {
+            var $el = $(el);
+            if ($el.val())
+                return $el.closest('.control-group').removeClass('error');
+            $el.closest('.control-group').addClass('error');
+            valid = false;
+        });
+        return valid;
     }
 
     function validateUserForm() {
