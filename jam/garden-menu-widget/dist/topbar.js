@@ -1,6 +1,6 @@
 /*Garden Topbar*/
 
-var mlt='g',ml=null; if (typeof exports === 'object') {ml=exports;exports=null;mlt='r'} else if (typeof define === 'function' && define.amd) {ml=define;define=null;mlt='a'} 
+var mlt='g',ml=null; if (typeof exports === 'object') {ml=exports;exports=undefined;mlt='r'} else if (typeof define === 'function' && define.amd) {ml=define;define=undefined;mlt='a'} 
 
 /**
  * Adapted for use in the browser and packaged for Kanso by Caolan McMahon.
@@ -10196,7 +10196,8 @@ return __p;
 
 '#dashboard-topbar ul>li.active>a.active' : {
     'border-top': '2px solid #95B774 !important',
-    'color': '#FFF'
+    'color': '#FFF',
+    'padding-top': '1px !important'
 },
 
 '#dashboard-topbar-offline-icon' : {
