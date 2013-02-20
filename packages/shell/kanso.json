@@ -1,0 +1,10 @@
+{
+    "name" : "shell",
+    "version" : "0.0.1",
+    "categories" : ["build-tools"],
+    "description" : "Perform shell commands during a push.",
+    "url": "https://github.com/kanso/shell",
+    "preprocessors": {
+        "compile": "shell"
+    }
+}

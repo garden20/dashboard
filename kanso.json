@@ -14,6 +14,7 @@
         "all_partials": true,
         "templates": "templates"
     },
+    "shell" : "cp jam/garden-menu-widget/dist/topbar.js static/js/topbar.js",
     "dependencies": {
         "attachments": null,
         "modules": null,
@@ -36,6 +37,7 @@
         "revalidator" : null,
         "gravatar" : null,
         "flattr" : null,
-        "url" : null
+        "url" : null,
+         "shell" : null
     }
 }

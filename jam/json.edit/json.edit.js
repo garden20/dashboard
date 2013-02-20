@@ -1,4 +1,4 @@
-/*global window define alert*/
+/*global window define alert JSON document*/
 (function (root, factory) {
     "use strict";
     if (typeof define === 'function' && define.amd) {
@@ -7,16 +7,16 @@
             // Also create a global in case some scripts
             // that are loaded still are looking for
             // a global even when an AMD loader is in use.
-            return (root.JsonEdit = factory($, legojs, JsonSchema, NsGen, JSON));
+            return (root.JsonEdit = factory($, legojs, JsonSchema, NsGen));
         });
     } else {
         // Browser globals
-        root.JsonEdit = factory(root.jQuery, root.legojs, root.JsonSchema, root.NsGen, root.JSON);
+        root.JsonEdit = factory(root.jQuery, root.legojs, root.JsonSchema, root.NsGen);
     }
-}(this, function ($, legojs, JsonSchema, NsGen, JSON) {
+}(this, function ($, legojs, JsonSchema, NsGen) {
     "use strict";
-    var cons, jopts, priv = {}, ns, prefix,
-        defaults;
+    var cons, jopts, ns, prefix, defaults,
+        priv = {}, escaper = document.createElement("textarea");
 
     defaults = {
         displayError: function (msg) {
@@ -264,19 +264,31 @@
         };
     };
 
+    cons.escape = function (text) {
+        if (escaper.innerText !== undefined) {
+            escaper.innerText = text;
+        } else {
+            escaper.innerHTML = text;
+        }
+
+        return escaper.innerHTML;
+    };
+
     cons.defaults = defaults;
     priv.collectObject = function (id, opts) {
         var
             // if can be already a jquery object if called from collectObject
             cont = (typeof id === "string") ? $("#" + id) : id,
             order = priv.getKeys(opts.properties, opts.order),
+            defaults = opts["default"] || {},
             result = priv.collectResult(true), data = {},
 
             apropsSel, aprops;
 
         $.each(order, function (i, key) {
             var
-                value,
+                value, newSchema,
+
                 schema = opts.properties[key],
                 required = $.inArray(key, schema.required) !== -1,
                 selector = "." + priv.genFieldClasses(key, schema, ".", required),
@@ -293,8 +305,17 @@
                     });
 
             } else {
-                value = priv.collectField(key, field, schema);
+                // if the object above has a default then override the item
+                // default with it
+                if (defaults[key] !== undefined) {
+                    newSchema = $.extend({}, schema, {"default": defaults[key]});
+                } else {
+                    newSchema = schema;
+                }
+
+                value = priv.collectField(key, field, newSchema);
             }
+
 
             if (!value.result.ok) {
                 result.ok = false;
@@ -345,6 +366,8 @@
         this.reason = reason;
         this.args = args;
     };
+
+    cons.makeResult = JsonSchema._makeResult;
 
     priv.label = function (label, idFor) {
         return {
@@ -778,8 +801,16 @@
     };
 
     defaults.collectors.array = function (name, field, schema) {
-        var itemSchema = schema.items || {}, errors = [], isRoot = true,
-            ok = true, msg = "ok", data = [], result, arrayResult, castResult;
+        var
+            result, arrayResult, castResult,
+
+            defaults = schema["default"] || [],
+            itemSchema = schema.items || {},
+            errors = [],
+            isRoot = true,
+            ok = true,
+            msg = "ok",
+            data = [];
 
         if (schema.items && schema.items["enum"]) {
             data = field
@@ -804,7 +835,17 @@
 
         } else {
             field.find(ns.$cls("array-item")).each(function (i, node) {
-                var itemResult = priv.collectField(name, $(node), itemSchema);
+                var newSchema, itemResult;
+
+                // if the array above has a default then override the item
+                // default with it
+                if (defaults[i] !== undefined) {
+                    newSchema = $.extend({}, itemSchema, {"default": defaults[i]});
+                } else {
+                    newSchema = itemSchema;
+                }
+
+                itemResult = priv.collectField(name, $(node), newSchema);
 
                 if (!itemResult.result.ok) {
                     msg = "one or more errors in array items";
@@ -1010,16 +1051,26 @@
             type = opts.type || getType(opts),
             input = priv.input(fid, type, inputId, opts, required, util),
             result,
-            labelText = opts.title || fid;
+            $childs,
+            labelText = opts.title || fid,
+            label = priv.label(labelText, inputId);
+
+        if (opts.type === 'boolean') {
+            label.label.$childs = [input, label.label.$childs];
+            label.label["class"] = "checkbox";
+            $childs = [label];
+        } else {
+            $childs = [
+                label,
+                input
+            ];
+        }
 
         result = {
             "div": {
                 "id": id,
                 "class": priv.genFieldClasses(fid, opts, " ", required),
-                "$childs": [
-                    priv.label(labelText, inputId),
-                    input
-                ]
+                "$childs": $childs
             }
         };
 

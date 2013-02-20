@@ -1,0 +1,13 @@
+{
+  "name": "garden-default-settings",
+  "description": "Map/reduce functions used in the garden",
+  "tags": ["garden", "couchdb", "couchapp"],
+  "version": "0.0.1",
+  "author": "Ryan Ramage",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/garden20/garden-views.git"
+  },
+  "bugs": "https://github.com/garden20/garden-views/issues",
+  "main": "garden-default-settings.js"
+}

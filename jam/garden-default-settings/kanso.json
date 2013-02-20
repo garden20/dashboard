@@ -1,0 +1,9 @@
+{
+    "name": "garden-default-settings",
+    "version": "0.0.1",
+    "description": "Map/reduce functions used in the garden",
+    "modules": "garden-default-settings.js",
+    "dependencies": {
+        "modules": null
+    }
+}

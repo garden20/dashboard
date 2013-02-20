@@ -1,0 +1,31 @@
+{
+  "name": "garden-menu",
+  "description": "base of a garden menu",
+  "tags": ["garden", "couchdb", "couchapp"],
+  "version": "0.0.1",
+  "author": "Ryan Ramage",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/garden20/garden-dashboard-core.git"
+  },
+  "bugs": "https://github.com/garden20/garden-dashboard-core/issues",
+  "main": "garden-menu.js",
+  "dependencies": {
+    "underscore": "1.4.3",
+    "garden-dashboard-core": "0.0.1",
+    "garden-default-setting" : "0.0.1"
+  },
+  "jam" : {
+    "dependencies" : {
+      "underscore": "1.3.3-jam.1",
+      "garden-dashboard-core": "0.0.1",
+      "garden-default-settings" : "0.0.1",
+      "url" : "0.6.7-kanso.1"
+    }
+  },
+  "devDependencies": {
+    "grunt-mocha-test": "0.0.1",
+    "requiremock": "1.3.3",
+    "qunitjs": "1.11.0"
+  }
+}
