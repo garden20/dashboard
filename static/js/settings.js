@@ -246,6 +246,9 @@ $(function(){
         configureRolesSelection('#group_access', cleaned_roles);
     }
 
+    function clearRolesSelection(select) {
+       $(select).val('').trigger("liszt:updated");
+    };
     function configureRolesSelection(select, roles_selected) {
 
         if (!roles_selected) roles_selected = {};
@@ -481,8 +484,8 @@ $(function(){
                 });
 
                 dashboard_core.updateNavOrdering(showing, onDropdownMenu, function(err) {
-                    if (err) return humane.error(err);
-                    humane.info('Save complete');
+                    if (err) return alert(err);
+                    humane.info('Save Complete');
                 });
             });
         $( "#sortable1, #sortable2" ).empty().sortable({
@@ -686,7 +689,6 @@ $(function(){
                         });
                     }
                 }, function(err, results){
-                    console.log(results);
                     var link_dbs = dashboard_core.getLinkDBs(results.links);
 
                     async.series([
@@ -750,50 +752,169 @@ $(function(){
         });
     }
 
-    function showSessions() {
+    /**
+     *  Expects radio button group to be in a form, one of the input fields
+     *  should have a class of `default` to determine which is checked if value
+     *  argument is not used.
+     *
+     *  @param {Jquery} $radios - group of radio buttons
+     *  @param {String} value - (optional) value attribute value of radio input
+     *  to be checked
+     *
+     * */
+    function setRadioButtons($radios, value) {
+        var $form = $radios.closest('form'),
+            name = $radios.attr('name');
+        $form.find('[name='+name+']').each(function() {
+            var $el = $(this);
+            if (value && $el.attr('value') === value)
+                return $el.prop('checked', true);
+            else if (value && $el.attr('value') === value)
+                return $el.prop('checked', false);
+            if ($el.hasClass('default'))
+                $el.prop('checked', true);
+            else
+                $el.prop('checked', false);
+        });
+    };
 
-
-        $('input[name=type]').on('click', function(){
-            var selected = $('input[name=type]:checked').val();
-            if (selected == 'internal') {
-                $('.internal_session_method').show(300);
-                $('.other_session_method').hide(300);
-            } else {
-
-                $('.internal_session_method').hide(300);
-                $('.other_session_method').show(300);
+    // update sessions property in settings doc
+    function updateSessions(params, callback) {
+        $.ajax({
+            url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/sessions/settings?' + $.param(params),
+            type: 'PUT',
+            success : function(result, textStatus, xmlHttpRequest) {
+                if (result !== 'update complete')
+                    return callback('Update Failed');
+                callback();
+            },
+            error : function() {
+                return callback('Update Failed');
             }
         });
+    }
 
-        $('#sessions .primary').click(function(){
-            var btn = $(this);
-            btn.button('saving');
-            var params = $('#sessions form').formParams();
-            $.ajax({
-                url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/sessions/settings?' + $.param(params),
-                type: 'PUT',
-                success : function(result, textStatus, xmlHttpRequest) {
-                    if (result == 'update complete') {
-                        var userBrowserid = 'false';
-                        if (params.login_type == 'browserid') {
-                            userBrowserid = 'true';
-                        }
-                        $.couch.config({
-                            success : function(result) {
-                                window.location.reload();
-                            }
-                        }, 'browserid', 'enabled', userBrowserid );
+    function updateDBConfigValue(options, callback) {
+        if (!options || !options.section || !options.property || !options.value)
+            return callback('Missing parameters.');
+        $.couch.config({
+            success: function() { callback() },
+            error: function(xhr, status, error) {
+                callback(error);
+            }
+        }, options.section, options.property, options.value);
+    };
 
-                        //window.location.reload();
-                    }
-                    else alert('update failed');
+    function updateDBConfigs(params, callback) {
 
-                },
-                error : function() {
-                    alert('update failed');
-                }
+        var list = [];
+
+        if (!params)
+            return callback('Missing parameters.');
+
+        list.push(function(cb) {
+            var opts = {
+                section:'browserid',
+                property:'enabled',
+                value: params.login_type == 'browserid' ? 'true' : 'false'
+            };
+            updateDBConfigValue(opts, cb);
+        });
+        list.push(function(cb) {
+            var opts = {
+                section:'couch_httpd_auth',
+                property:'require_valid_user',
+                value: params.require_valid_user == 'on' ? 'true' : 'false'
+            };
+            updateDBConfigValue(opts, cb);
+        });
+        list.push(function(cb) {
+            var opts = {
+                section:'couch_httpd_auth',
+                property:'allow_persistent_cookies',
+                value: params.session_persist == 'on' ? 'true' : 'false'
+            };
+            updateDBConfigValue(opts, cb);
+        });
+        if (params.session_timeout) {
+            list.push(function(cb) {
+                var opts = {
+                    section:'couch_httpd_auth',
+                    property:'timeout',
+                    value: params.session_timeout
+                };
+                updateDBConfigValue(opts, cb);
             });
-            return false;
+        }
+        async.parallel(list, function(err, results) {
+            if (err) return callback(err);
+            callback(null, results);
+        });
+    };
+
+    function validateSessionsForm(callback) {
+        // todo
+        var $timeout = $('#sessions [name=session_timeout]'),
+            timeout_val = parseInt($timeout.val(), 10);
+        if (timeout_val < 300) {
+            $timeout.parents('.control-group').addClass('error');
+            return callback('Timeout value should be 300 or greater.');
+        }
+        callback();
+    }
+
+    $('input[name=type]').on('click', function(){
+        var selected = $('input[name=type]:checked').val();
+        if (selected == 'internal') {
+            $('.internal_session_method').show(300);
+            $('.other_session_method').hide(300);
+        } else {
+            $('.internal_session_method').hide(300);
+            $('.other_session_method').show(300);
+        }
+    });
+
+    $('#sessions [type=reset]').click(function(ev) {
+        ev.preventDefault();
+        $('.internal_session_method').show(300);
+        $('.other_session_method').hide(300);
+        setRadioButtons($('#sessions [name=type]'));
+    });
+
+
+    $('#sessions form[name=settings] .btn.primary').click(function(ev) {
+        ev.preventDefault();
+        var btn = $(this),
+            form = $(this).closest('form'),
+            params = form.formParams();
+        btn.attr('disabled','disabled');
+        // special hanlding on some fields
+        if (params.type === 'internal') {
+            delete params.login_url;
+            delete params.login_url_next;
+            delete params.profile_url;
+            delete params.signup_url;
+        }
+        function done(err) {
+            btn.removeAttr('disabled');
+            if (err) return alert(err);
+            humane.info('Save Complete');
+            form.find('.control-group').removeClass('error');
+        }
+        validateSessionsForm(function(err) {
+            if (err) return done(err);
+            updateSessions(params, function(err) {
+                if (err) return done(err);
+                updateDBConfigs(params, done);
+            });
+        });
+    });
+
+    function showSessions() {
+
+        var isAdmin = false;
+        session.info(function(err, data) {
+            isAdmin = dashboard_core.isAdmin(data);
         });
 
     }
@@ -899,32 +1020,42 @@ $(function(){
        var me = $(this);
        var name = $(this).data('name');
 
-       users.delete(name, function(err) {
-           if (err) return alert('could not delete.' + err);
-           me.closest('tr').remove();
-       });
+       if (confirm('Delete user '+name+'?')) {
+           users.delete(name, function(err) {
+               if (err) return alert('could not delete.' + err);
+               me.closest('tr').remove();
+           });
+       }
 
+    });
+
+    // reset field values on modal cancel
+    $('#add-admin-dialog .cancel').on('click', function() {
+        resetAdminUserForm();
     });
 
     $('#add-admin-final').live('click', function(){
-        var username = $('#admin-name').val();
-        var password = $('#admin-password').val();
-        $('#add-admin-dialog').modal('hide');
-        users.create(username, password,{roles : ['_admin']}, function(err) {
-            if(err) return alert('Cant create admin');
-            // admin created
-            var data = {
-                admins : [username]
-            };
-            $('.admin-list').append(handlebars.templates['admins.html'](data, {}));
-            $('#admin-name').val('');
-            $('#admin-password').val('');
-
-        })
+        var form = $(this).closest('.modal').find('form'),
+            username = $('#admin-name').val(),
+            password = $('#admin-password').val();
+        if (validateForm(form)) {
+            $('#add-admin-dialog').modal('hide');
+            users.create(username, password,{roles : ['_admin']}, function(err) {
+                if(err) return alert('Cant create admin');
+                // admin created
+                var data = {
+                    admins : [username]
+                };
+                $('.admin-list').append(handlebars.templates['admins.html'](data, {}));
+                resetAdminUserForm();
+            })
+        } else {
+            return false;
+        }
     });
 
     $('.generate-password').live('click', function(){
-        var pass = password();
+        var pass = password(6,false);
         $('.password').val(pass).trigger('change');
         return false;
     });
@@ -941,21 +1072,77 @@ $(function(){
             fullname : $('#user-name').val()
         }
 
-        users.create($('#user-email').val(), password, properties, function(err) {
-            if (err) return console.log(err);
+        var onCreate = function(err, data) {
+            if (err) return console.error(err);
+            var just_name = data.id.substring(17),
+                groups = _.map(roles, function(role){ return role.replace('group.') });
             $('#add-user-dialog').modal('hide');
-            // so much cheating
-            window.location.reload(); // fixme
-        });
+            resetUserForm();
+            $('.users-list').append(
+                handlebars.templates['users.html'](
+                    [{
+                        id: data.id,
+                        just_name: just_name,
+                        groups: groups
+                    }]
+                )
+            );
+        }
+
+        users.create($('#user-email').val(), password, properties, onCreate);
     }
 
+    function resetAdminUserForm() {
+        $('#add-admin-dialog').find('form')
+            .find("input[type=text], textarea").val("");
+    }
+
+    function resetUserForm() {
+        $('#add-user-dialog').find('form')
+            .find("input[type=text], textarea").val("");
+        clearRolesSelection('#new-user-roles');
+    }
+
+    function validateForm($form) {
+        var $required = $form.find('.required'),
+            valid = true;
+        $required.each(function(i, el) {
+            var $el = $(el);
+            if ($el.val())
+                return $el.closest('.control-group').removeClass('error');
+            $el.closest('.control-group').addClass('error');
+            valid = false;
+        });
+        return valid;
+    }
+
+    function validateUserForm() {
+        var password = $('#user-password').val(),
+            email = $('#user-email').val();
+        if (password && email)
+            return true;
+        if (!password)
+            $('#user-password').parents('.control-group').addClass('error');
+        else
+            $('#user-password').parents('.control-group').removeClass('error');
+        if (!email)
+            $('#user-email').parents('.control-group').addClass('error');
+        else
+            $('#user-email').parents('.control-group').removeClass('error');
+    }
 
     $('#add-user-final').live('click', function(){
-        addUser();
+        if (validateUserForm())
+            addUser();
+        else
+            return false;
     });
 
     $('#add-user-final-email').live('click', function(){
-        addUser();
+        if (validateUserForm())
+            addUser();
+        else
+            return false;
     });
 
     $('#user-email, #user-password, #user-name').live('change', function(){
@@ -990,13 +1177,14 @@ $(function(){
             _id = _id.substring(17);
         }
 
-
-        users.delete(_id, function(err){
-            if (err) return humane.error(err);
-            me.closest('tr').remove();
-            humane.info('user deleted');
-        });
-        return false;
+       if (confirm('Delete user '+_id+'?')) {
+            users.delete(_id, function(err){
+                if (err) return alert(err);
+                me.closest('tr').remove();
+                humane.info('user deleted');
+            });
+       }
+       return false;
     });
 
 
@@ -1061,6 +1249,12 @@ $(function(){
         router.setRoute('/' + tab);
 //        window.location.hash = '/' + tab;
     })
+
+    // remove error classes when controls are focused
+    $('.control-group').children().on('focus', function(ev) {
+        $(this).parents('.control-group').removeClass('error');
+    });
+
     function showTab(id) {
         $('#' + id).tab('show');
     }
