@@ -1,0 +1,22 @@
+{
+  "name": "gardener-status",
+  "version": "0.0.0",
+  "description": "A simple ui widget that shows the status of gardener modules",
+  "main": "gardener-status.js",
+  "dependencies": {
+      "ractive-couch": ">=0.0.0",
+      "pico-couch-ddoc":  ">=0.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/garden/gardener-status"
+  },
+  "keywords": [
+    "gardener"
+  ],
+  "author": "Ryan Ramage",
+  "license": "BSD"
+}

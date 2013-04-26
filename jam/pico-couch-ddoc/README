@@ -1,0 +1,50 @@
+Pico Couch DDoc
+----------------
+Small Couch Design docs. This is used for making really small design docs. It is not a full fledged couchapp engine.
+
+Works in browser, nodejs, amd, commonjs, couchapps, and cors-couchapps.
+
+Install
+--------
+
+Jam/requirejs
+
+    jam install pico-couch-ddoc
+
+    define(['pico-couch-ddoc'], function(pico_couch_ddoc){
+        // use it
+    });
+
+Or npm/commonjs
+
+    npm install pico-couch-ddoc
+
+    var pico_couch_ddoc = require('pico-couch-ddoc');
+    // use it
+
+Or global javascript
+
+    <script type="text/javascript" src="pico_couch_ddoc.js"></script>
+    // use it
+
+
+Example
+-------
+
+```
+var view =  {
+    map: function(doc) {
+        if (doc.type !== 'gardener_progress') return;
+        emit([doc.path, doc.module, doc.time], doc.percent );
+    },
+    reduce: '_sum'
+};
+
+pico_couch_ddoc.view('http://localhost:5984/db',  'progress',  view, function(err){
+    if (err) showError(err, elem_id);
+    // the db has a ddoc named, '_design/progress' with a view named progress
+});
+
+
+```
+

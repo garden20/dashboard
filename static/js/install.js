@@ -62,7 +62,7 @@ $(function() {
         });
     }
 
-    
+
 
     function errorLoadingInfo() {
         $('.loading').html(handlebars.templates['install_app_error.html']({}, {}));
@@ -124,6 +124,10 @@ $(function() {
                 var settings_link = dashboard_links.appSettingsUrl(settings, app_install_doc);
                 $('.after-settings').attr('href', settings_link).show();
 
+
+                // add gardener status
+                var ddoc = '/' + app_install_doc.installed.db + '/_design/' + app_install_doc.doc_id;
+                GardenerStatus('/dashboard', ddoc, 'gardener');
 
 
             });

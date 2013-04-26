@@ -1,0 +1,23 @@
+{
+    "name": "ractive-couch",
+    "version": "0.0.2",
+    "description": "easy couchdb data binding with mustache syntax",
+    "main": "ractive-couch.js",
+    "dependencies": {
+        "couchr": ">=0.0.12",
+        "ractive": ">=0.2.0"
+    },
+    "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "http://github.com/ryanramage/ractive-couch"
+    },
+    "keywords": [
+        "couchdb"
+    ],
+    "author": "Ryan Ramage",
+    "license": "BSD",
+    "readmeFilename": "README.md"
+}
