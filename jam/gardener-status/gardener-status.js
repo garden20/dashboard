@@ -31,6 +31,7 @@
                     group: true,
                     group_level: 2
                 },
+                no_change_filter: true,
                 is_same: is_same,
                 map_change: map_change
             });
@@ -52,8 +53,11 @@
     }
 
     function is_same(row, change) {
-        if (row.key[0] === change.doc.path && row.key[1] === change.doc.module) return true;
+        try {
+            if (row.key[0] === change.doc.path && row.key[1] === change.doc.module) return true;
+        } catch(e) {}
         return false;
+
     }
 
 

@@ -148,10 +148,11 @@ function RactiveCouchView(db_url, view_name, options) {
 
     // changes feed1, for inserts, updates
     var view_url = [db_url, '/', view_long_name].join('/');
-    var feed_options = {
-            filter: '_view',
-            view: view_short_name
-        };
+    var feed_options = {};
+    if (!options.no_change_filter) {
+            feed_options.filter = '_view';
+            feed_options.view = view_short_name;
+    }
 
     if (options.include_docs) feed_options.include_docs = true;
     var feed = couchr.changes(db_url, feed_options);
