@@ -996,7 +996,7 @@ $(function(){
                _.each(users, function(user) {
                     if (_.contains(admins, user.id)) return;
                    user.just_name = user.id.substring(17);
-                    user.groups = [];
+                   user.groups = [];
                    _.each(user.doc.roles, function(role) {
                         if (role.indexOf('group.') === 0 ) {
                             user.groups.push(role.substring(6));
@@ -1075,7 +1075,7 @@ $(function(){
         var onCreate = function(err, data) {
             if (err) return console.error(err);
             var just_name = data.id.substring(17),
-                groups = _.map(roles, function(role){ return role.replace('group.') });
+                groups = _.map(roles, function(role){ return role.replace('group.', '') });
             $('#add-user-dialog').modal('hide');
             resetUserForm();
             $('.users-list').append(
