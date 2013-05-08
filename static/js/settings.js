@@ -980,6 +980,11 @@ $(function(){
     }
 
 
+    function showUserGroups(user) {
+      console.log(user);
+    }
+
+
     function showUsers() {
 
         $('#add-user-dialog').on('shown', function(){
@@ -1002,6 +1007,8 @@ $(function(){
                             user.groups.push(role.substring(6));
                         }
                    });
+
+                   user.safe_id = encodeURIComponent(user.id);
                    users_pure.push(user);
                });
                $('.users-list').html(handlebars.templates['users.html'](users_pure, {}));
@@ -1309,6 +1316,10 @@ $(function(){
       '/users'   : function() {
             showTab();
             showUsers();
+      },
+      '/user-groups/*'   : function(user) {
+            $('.nav.tabs a[href=#users').tab('show') ;
+            showUserGroups(user);
       }
     };
 

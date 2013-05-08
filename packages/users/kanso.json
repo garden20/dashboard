@@ -1,6 +1,6 @@
 {
     "name": "users",
-    "version": "0.0.10",
+    "version": "0.0.13",
     "categories": ["couchdb"],
     "description": "Functions for querying, creating, updating and deleting user documents",
     "modules": "users.js",
@@ -8,6 +8,7 @@
         "modules": null,
         "underscore": ">=1.1.5",
         "sha1": ">=2.1.0",
-        "db": ">=0.0.8"
+        "db": ">=0.0.8",
+        "session":">=0.1.0"
     }
 }
