@@ -130,6 +130,10 @@ var have_jquery = function(){
                 return false;
             });
 
+            $('#dashboard-more-apps a').each(function(){
+                var link = $(this);
+                addNotLoggedInHack(link);
+            });
 
             $('#dashboard-topbar .username').click(function() {
                 $('#dashboard-profile').toggle();
@@ -192,7 +196,7 @@ var have_jquery = function(){
                      }
                      , error  : function() {
                          pass = false;
-                        humane.error('Access Denied.');
+                         humane.error('Access Denied.');
                      }
 
                  });
