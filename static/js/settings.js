@@ -504,6 +504,7 @@ $(function(){
                      $('#sortable1').append('<li class="ui-state-default" data-id="'+ row.id + '">' + row.key[2] + '</li>');
                  }
             });
+            $('.loading-ordering').hide();
         });
 
 
