@@ -186,7 +186,6 @@ var have_jquery = function(){
                 var pass;
                 $.ajax({ url : '/dashboard/_design/dashboard/_rewrite/_couch/' + db
                      , type: 'HEAD'
-                     , dataType: 'json'
                      , async: false
                      , success: function(data){
                             pass = true;
