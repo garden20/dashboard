@@ -227,6 +227,10 @@ body {
     color: {{top_nav_bar.link_color}};
 }
 
+#dashboard-topbar #dashboard-topbar-session  a.username.no-gravatar {
+    top: 3px;
+}
+
 #dashboard-topbar #dashboard-topbar-session  a.username:hover {
     color: {{top_nav_bar.active_link_color}};
     text-decoration: none;
