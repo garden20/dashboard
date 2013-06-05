@@ -447,22 +447,35 @@
             </div>
             <div class="tab-pane" id="users">
                <div class="row ">
-                   <div class=" span5">
-                       <button href="#add-user-dialog" data-toggle="modal" class="btn small success">Add User</button>
+                   <div class=" span9">
 
-                       <table class="table">
-                         <thead>
-                           <tr>
-                             <th>Username</th>
-                             <th>Groups</th>
-                             <th class="action">Actions</th>
-                           </tr>
-                         </thead>
-                         <tbody class="users-list">
+                       <div class="user-list">
+                         <button href="#add-user-dialog" data-toggle="modal" class="btn small success">Add User</button>
 
-                         </tbody>
-                       </table>
+                         <table class="table">
+                           <thead>
+                             <tr>
+                               <th>Username</th>
+                               <th>Groups</th>
+                               <th class="action">Actions</th>
+                             </tr>
+                           </thead>
+                           <tbody class="users-list">
 
+                           </tbody>
+                         </table>
+                       </div>
+                       <div class="user-details hide">
+                          <ul class="breadcrumb">
+                            <li>
+                              <a href="#/users">Users</a> <span class="divider">/</span>
+                            </li>
+                            <li class="active">
+                              User Details
+                            </li>
+                          </ul>
+                          <div id="user_editor"></div>
+                       </div>
                    </div>
                </div>
            </div>

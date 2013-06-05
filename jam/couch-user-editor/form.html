@@ -1,0 +1,80 @@
+ <div class="form">
+
+    <h1>{{user.name}}</h1>
+    <fieldset>
+
+
+      <label>Email</label>
+      <input type="text" value="{{user.email}}" class="email"/>
+
+
+      {{#options.show_groups}}
+      <div class="groupWrap">
+        <h3>Groups</h3>
+        <ul class="groups">
+          {{#groups:num}}
+             <li>{{.}} <a style="cursor: pointer;"  data-index="{{num}}" proxy-click="remove-group">×</a></li>
+          {{/groups}}
+        </ul>
+
+        {{#available_groups.length}}
+          <div class="control-group addGroupWrap">
+            <select class="addGroup" style="margin-bottom: 0;">
+              {{#available_groups}}
+                <option value="{{.}}">{{.}}</option>
+              {{/available_groups}}
+            </select>
+            <button class="btn" proxy-click="add-group">Add Group</button>
+          </div>
+        {{/available_groups.length}}
+      </div>
+      {{/options.show_groups}}
+
+
+
+
+      <div class="appdata">
+        <h3>App Specific Settings</h3>
+        {{#options.appdata}}
+        <div class="section">
+          <h4>{{title}} <small>on {{db}}</small></h4>
+
+          {{#roles.length}}
+            <h4>Roles</h4>
+            <ul>
+            {{#roles}}
+              <li>
+                <input type='checkbox' checked='{{done}}'  proxy-click="toggle-app-role" data-role="{{name}}"/> {{name}}
+              </li>
+            {{/roles}}
+            </ul>
+          {{/roles.length}}
+
+          <div id="{{id}}">
+          </div>
+        </div>
+        {{/options.appdata}}
+      </div>
+
+
+
+
+      <div class="otherRolesWrap">
+        <h3>All Roles</h3>
+        <ul class="roles">
+          {{#roles:num}}
+             <li>{{.}} <a style="cursor: pointer;"  data-index="{{num}}" proxy-click="remove-role">×</a></li>
+          {{/roles}}
+        </ul>
+        <div class="control-group addRolesWrap">
+          <input type="text" class="addRole" style="margin-bottom: 0;"/>
+          <button class="btn" proxy-click="add-role">Add Role</button>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="form-actions">
+        <button class="btn btn-primary" proxy-click="save">Save</button>
+        <span style="display: none; color=green" class="success">Saved!</span>
+    </fieldset>
+</div>

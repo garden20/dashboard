@@ -981,12 +981,47 @@ $(function(){
     }
 
 
-    function showUserGroups(user) {
-      console.log(user);
+    function showUserDetails(user) {
+      console.log('show user', user);
+      $('.user-list').hide();
+      $('.user-details').show();
+
+
+      async.parallel({
+        groups: function(cb) {
+          getRoles(function(data){
+            var groups = _.map(data, function(row){ return row.key; })
+            cb(null, groups);
+          });
+        },
+        appdata: function(cb) {
+          couchr.get('_ddoc/_view/user_data', function(err, resp){
+            var appdata = _.map(resp.rows, function(row){
+               var val = row.value;
+               val.id = row.id;
+               return val;
+            });
+            cb(null, appdata);
+          });
+        }
+
+      }, function(err, data){
+        new couchdb_user_editor('./_couch', user, '#user_editor', {
+          show_groups: true,
+          groups: data.groups,
+          appdata: data.appdata
+        });
+      });
+
+
+
     }
 
 
     function showUsers() {
+
+        $('.user-list').show();
+        $('.user-details').hide();
 
         $('#add-user-dialog').on('shown', function(){
            // populate the roles
@@ -1318,9 +1353,9 @@ $(function(){
             showTab();
             showUsers();
       },
-      '/user-groups/*'   : function(user) {
+      '/user-details/*'   : function(user) {
             $('.nav.tabs a[href=#users').tab('show') ;
-            showUserGroups(user);
+            showUserDetails(user);
       }
     };
 

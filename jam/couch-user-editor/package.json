@@ -1,0 +1,25 @@
+{
+  "name": "couch-user-editor",
+  "version": "0.0.0",
+  "description": "Reusable widget to edit couchdb users.",
+  "main": "couchapp-settings.js",
+  "dependencies": {
+    "ractive": null,
+    "jquery": null,
+    "couchr": null,
+    "text": null,
+    "json.edit": null
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/garden20/couch-user-editor.git"
+  },
+  "keywords": [
+    "garden",
+    "couchapp",
+    "couchdb"
+  ],
+  "author": "Ryan Ramage",
+  "license": "BSD",
+  "readmeFilename": "README.md"
+}
