@@ -1,0 +1,20 @@
+<h2>Hi {{username}}!</h2>
+
+<p>
+You wanted to go to <a href="{{redirect}}" id="redirect_location">{{redirect}}</a>
+</p>
+
+<div class="redirecting_msg">
+    Please wait while you are redirected...
+</div>
+
+<div class="fail_access hide">
+    <b>But you don't seem have access to that link.</b>
+    <div>
+        {{#if username}}
+
+        {{else}}
+            <a href="{{login_link}}" class="btn">Login</a>
+        {{/if}}
+    </div>
+</div>

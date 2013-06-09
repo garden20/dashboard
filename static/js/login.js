@@ -42,7 +42,7 @@ $(function(){
                 var redirect = urlParams['redirect'];
                 if (redirect) {
                     redirect = decodeURIComponent(redirect);
-                    window.location = redirect;
+                    window.location = './go?location=' + redirect;
                 } else {
                     var dashboard_url = $('form').attr('action');
                     //lame but, we can only get admin names for this.
