@@ -650,6 +650,7 @@ $(function(){
 
         }
 
+        console.log(params);
 
         $.ajax({
             url :  '_db/_design/'+ dashboard_core.dashboard_ddoc_name +'/_update/navigation/settings?' + $.param(params),

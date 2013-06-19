@@ -117,6 +117,15 @@
                                 </div>
 
                                 <div class="control-group">
+                                    <label class="control-label" for="hide_home_link"></label>
+                                    <div class="controls">
+                                        <label class="checkbox">
+                                          <input type="checkbox" id="hide_home_link" name="hide_home_link" {{#if settings.top_nav_bar.hide_home_link}}checked="checked"{{/if}}> Home Link Hidden
+                                      </label>
+                                    </div>
+                                </div>
+
+                                <div class="control-group">
                                     <label class="control-label" for="show_brand">Brand</label>
                                     <div class="controls">
                                         <label class="checkbox">
@@ -124,6 +133,7 @@
                                       </label>
                                     </div>
                                 </div>
+
 
                             </fieldset>
                         </form>

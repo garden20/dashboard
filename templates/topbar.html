@@ -8,14 +8,21 @@
         <img class="home home-icon-custom" src="{{dashboard_url}}_db/settings/{{settings.top_nav_bar.icon_name}}" />
     {{/if}}
 {{else}}
-    <a href="{{home_url}}" class="home home-icon"  title="Home" ></a>
+    {{#unless settings.top_nav_bar.hide_home_link}}
+        <a href="{{home_url}}" class="home home-icon"  title="Home" ></a>
+    {{/unless}}
+
 {{/if}}
 
 <ul class="kanso-nav">
 
 {{#if settings.top_nav_bar.show_brand}}
-    <li class="home"><a class="home" href="{{home_url}}" rel="external">Home</a></li>
+    {{#unless settings.top_nav_bar.hide_home_link}}
+        <li class="home"><a class="home" href="{{home_url}}" rel="external">Home</a></li>
+    {{/unless}}
 {{/if}}
+
+
 {{#unless hide_apps}}
     {{#each apps.apps}}
         <li><a href="{{link}}"  {{#if db}}data-db="{{db}}"{{/if}} {{#if remote_user_warning}}data-remote_user_warn="true" data-remote_user="{{remote_user}}"{{/if}}  {{#if external}}rel="external"{{/if}}>{{title}}</a></li>
