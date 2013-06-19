@@ -230,6 +230,7 @@ $(function(){
                var btn = $('button.save');
                btn.button('saving');
                doc.dashboard_title = $('#menu_name').val();
+               doc.hide_on_topbar  = $('#hide_on_topbar').is(':checked');
                $.couch.db(dashboard_db_name).saveDoc(doc, {
                   success: function(results) {
                       btn.button('reset');

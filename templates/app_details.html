@@ -3,8 +3,13 @@
     <div class="offset1 span8 ">
         <form class="form">
             <fieldset>
-                <legend>Display Name</legend>
+                <legend>Display</legend>
+
+                <label>Name</label>
                 <input type="text" id="menu_name"  value="{{dashboard_title}}"/>
+
+                <label>Hide From Topbar</label>
+                <input type="checkbox" id="hide_on_topbar" {{#if hide_on_topbar}}checked="checked"{{/if}} />
             </fieldset>
 
             <fieldset class="form-actions">
