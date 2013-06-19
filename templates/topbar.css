@@ -150,6 +150,13 @@ body {
     float: left;
 }
 
+#dashboard-topbar>ul.dim>li {
+    opacity: 1;
+    -webkit-transition: opacity 0.75s;
+    -moz-transition: opacity 0.75s;
+    -o-transition: opacity 0.75s;
+}
+
 #dashboard-topbar>ul>li>a {
     display: block;
     border-top: 2px solid {{top_nav_bar.bg_color}};

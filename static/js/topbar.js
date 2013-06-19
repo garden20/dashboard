@@ -169,6 +169,19 @@ var have_jquery = function(){
                 $('#dashboard-topbar-session').find('ul li:first').addClass('active');
             }
 
+            $('#dashboard-topbar ul.dim').mouseover(function(){
+                $(this).find('li').css('opacity', '1');
+            }).mouseout(function(){
+                $(this).find('li').css('opacity', '0.5');
+            })
+
+            setTimeout(function(){
+                $('#dashboard-topbar ul.dim li').css('opacity', '0.5');
+            }, 3000);
+
+
+
+
             $('#dashboard-topbar').data('ready', true);
             $('#dashboard-topbar').trigger('ready');
 
