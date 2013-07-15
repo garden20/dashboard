@@ -201,6 +201,10 @@ $(function(){
                err_alert.hide(10);
 
                var form = editor.collect();
+
+               // clear msg div on each form submission
+               err_alert.find('.msg').html('');
+
                if (!form.result.ok) {
 
                    err_alert.show(200)
@@ -208,6 +212,11 @@ $(function(){
                        .on('click', function () { err_alert.hide(); })
                    err_alert.find('h4')
                         .text(form.result.msg);
+                   err_alert.find('.msg').append('<ul/>').append(
+                       _.map(form.result.data, function(obj, key) {
+                           return '<li>'+key+': '+obj.msg+'</li>';
+                       }).join('')
+                   );
                    return false;
                }
                ddoc.app_settings = form.data;
