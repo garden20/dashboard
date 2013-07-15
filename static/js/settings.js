@@ -186,7 +186,7 @@ $(function(){
                    editor = JsonEdit('app_settings_schema', schema_to_use);
 
                    // make html more boostrap compatible
-                   $('.je-field').addClass('control-group');
+                   $('#app_settings_schema .je-field').addClass('control-group');
                });
 
            } else {
@@ -194,7 +194,9 @@ $(function(){
                 $('.form-actions').hide();
            }
 
-           $('form').on('submit', function(){
+           function onFormSubmit(ev) {
+               ev.preventDefault();
+
                var btn = $('button.save');
                btn.button('saving');
                var err_alert = $('.alert');
@@ -229,8 +231,9 @@ $(function(){
                        }
                    });
 
-                   return false;
+                   return;
                }
+
                ddoc.app_settings = form.data;
                $.couch.db(doc.installed.db).saveDoc(ddoc, {
                   success : function() {
@@ -241,9 +244,11 @@ $(function(){
                       console.error('couchdb error', status, error, reason);
                       alert('Error ' + status + ' ' + reason);
                   }
-               });
-               return false;
-           });
+                });
+
+            };
+
+            $('form').on('submit', onFormSubmit);
         });
     }
 
