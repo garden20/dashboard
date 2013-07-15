@@ -202,21 +202,33 @@ $(function(){
 
                var form = editor.collect();
 
-               // clear msg div on each form submission
+               // clear errors on each form submission
                err_alert.find('.msg').html('');
+               $('.je-field').removeClass('control-group error');
 
                if (!form.result.ok) {
 
                    err_alert.show(200)
                        .find('button.close')
                        .on('click', function () { err_alert.hide(); })
+
                    err_alert.find('h4')
                         .text(form.result.msg);
+
+                   // append detailed errors msgs to div
                    err_alert.find('.msg').append('<ul/>').append(
                        _.map(form.result.data, function(obj, key) {
-                           return '<li>'+key+': '+obj.msg+'</li>';
+                           return '<li>' + key + ': ' + obj.msg +'</li>';
                        }).join('')
                    );
+
+                   // highlight fields with errors
+                   _.each(form.result.data, function(obj, key) {
+                       if (!obj.ok) {
+                           $('[name=' + key + ']').parent().addClass('control-group error');
+                       }
+                   });
+
                    return false;
                }
                ddoc.app_settings = form.data;
@@ -224,6 +236,10 @@ $(function(){
                   success : function() {
                       btn.button('reset');
                       humane.info('Save Complete');
+                  },
+                  error: function(status, error, reason) {
+                      console.error('couchdb error', status, error, reason);
+                      alert('Error ' + status + ' ' + reason);
                   }
                });
                return false;
