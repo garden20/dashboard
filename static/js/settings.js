@@ -184,16 +184,16 @@ $(function(){
                        schema_to_use.default = ddoc.app_settings;
                    }
                    editor = JsonEdit('app_settings_schema', schema_to_use);
+
+                   // make html more boostrap compatible
+                   $('.je-field').addClass('control-group');
                });
-
-
-
-
 
            } else {
                 $('#app_settings_schema').html('<h2>No settings to configure</h2>')
                 $('.form-actions').hide();
            }
+
            $('form').on('submit', function(){
                var btn = $('button.save');
                btn.button('saving');
@@ -204,7 +204,7 @@ $(function(){
 
                // clear errors on each form submission
                err_alert.find('.msg').html('');
-               $('.je-field').removeClass('control-group error');
+               $('.je-field').removeClass('error');
 
                if (!form.result.ok) {
 
@@ -225,7 +225,7 @@ $(function(){
                    // highlight fields with errors
                    _.each(form.result.data, function(obj, key) {
                        if (!obj.ok) {
-                           $('[name=' + key + ']').parent().addClass('control-group error');
+                           $('[name=' + key + ']').parent().addClass('error');
                        }
                    });
 
