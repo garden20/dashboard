@@ -224,6 +224,10 @@ $(function(){
                   success : function() {
                       btn.button('reset');
                       humane.info('Save Complete');
+                  },
+                  error: function(status, error, reason) {
+                      console.error('couchdb error', status, error, reason);
+                      alert('Error ' + status + ' ' + reason);
                   }
                });
                return false;
