@@ -17,9 +17,17 @@ $(function() {
     function showMarkets() {
         dashboard_core.getMarkets(function(err, data) {
             var dash_url = window.location.protocol + '//' + window.location.host + '/' + $('.container[role="main"]').data('dashboardurl');
-            data = _.map(data, function(market){
-                market.url = market.url + '?dashboard=' + dash_url;
-                return market;
+            data = _.reduce(data, function(memo, market) {
+                if (memo[market.url]) {
+                    if (memo[market.url].indexOf('http') === 0) {
+                        memo[market.url] = market.name;
+                    }
+                } else memo[market.url] = market.name;
+                return memo;
+            },  {}   );
+            data = _.map(data, function(market, url){
+                url = url + '?dashboard=' + dash_url;
+                return {name: market, url: url};
             });
 
             $('ul.gardens').html(handlebars.templates['garden_details.html'](data, {}));
