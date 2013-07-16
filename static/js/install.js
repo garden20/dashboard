@@ -83,8 +83,10 @@ $(function() {
             remote_app_details = results;
             var hosted = $('#details_sidebar').data('hosted');
 
-            var display_name = dashboard_core.display_name(results);
+            console.log(results);
 
+            var display_name = dashboard_core.display_name(results);
+            results.display_name = display_name;
 
             $('#details_sidebar').html(handlebars.templates['second_bar.html']({meta : results, hosted: hosted, display_name: display_name}));
             $('.loading').html(handlebars.templates['install_app_info.html'](results, {}));
