@@ -91,7 +91,6 @@ $(function() {
             remote_app_details = results;
             var hosted = $('#details_sidebar').data('hosted');
 
-            console.log(results);
 
             var display_name = dashboard_core.display_name(results);
             results.display_name = display_name;
