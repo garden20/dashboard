@@ -184,41 +184,71 @@ $(function(){
                        schema_to_use.default = ddoc.app_settings;
                    }
                    editor = JsonEdit('app_settings_schema', schema_to_use);
+
+                   // make html more boostrap compatible
+                   $('#app_settings_schema .je-field').addClass('control-group');
                });
-
-
-
-
 
            } else {
                 $('#app_settings_schema').html('<h2>No settings to configure</h2>')
                 $('.form-actions').hide();
            }
-           $('form').on('submit', function(){
+
+           function onFormSubmit(ev) {
+               ev.preventDefault();
+
                var btn = $('button.save');
                btn.button('saving');
                var err_alert = $('.alert');
                err_alert.hide(10);
 
                var form = editor.collect();
+
+               // clear errors on each form submission
+               err_alert.find('.msg').html('');
+               $('.je-field').removeClass('error');
+
                if (!form.result.ok) {
 
                    err_alert.show(200)
                        .find('button.close')
                        .on('click', function () { err_alert.hide(); })
+
                    err_alert.find('h4')
                         .text(form.result.msg);
-                   return false;
+
+                   // append detailed errors msgs to div
+                   err_alert.find('.msg').append('<ul/>').append(
+                       _.map(form.result.data, function(obj, key) {
+                           return '<li>' + key + ': ' + obj.msg +'</li>';
+                       }).join('')
+                   );
+
+                   // highlight fields with errors
+                   _.each(form.result.data, function(obj, key) {
+                       if (!obj.ok) {
+                           $('#app_settings_schema [name=' + key + ']').parent().addClass('error');
+                       }
+                   });
+
+                   return;
                }
+
                ddoc.app_settings = form.data;
                $.couch.db(doc.installed.db).saveDoc(ddoc, {
                   success : function() {
                       btn.button('reset');
                       humane.info('Save Complete');
+                  },
+                  error: function(status, error, reason) {
+                      console.error('couchdb error', status, error, reason);
+                      alert('Error ' + status + ' ' + reason);
                   }
-               });
-               return false;
-           });
+                });
+
+            };
+
+            $('form').on('submit', onFormSubmit);
         });
     }
 
