@@ -187,6 +187,25 @@ $(function(){
 
                    // make html more boostrap compatible
                    $('#app_settings_schema .je-field').addClass('control-group');
+
+                   // move title/field description to div for better UX
+                   $('#app_settings_schema .je-field').each(function(idx, el) {
+                       var $input = $(el).children('input'),
+                           text;
+                       // top level .je-field element has no input child
+                       if ($input.length === 0) {
+                           return;
+                       }
+                       text = $input.attr('title');
+                       // no description property on json schema, skip
+                       if (!text) {
+                           return;
+                       }
+                       $input.parent().append(
+                           '<div class="help-block">' +  text + '</div>'
+                       );
+                       $input.removeAttr('title');
+                   });
                });
 
            } else {
