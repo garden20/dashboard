@@ -378,6 +378,7 @@
     }
 
     function makeButton(label, onClick, data) {
+        data = data || {type: "button"};
         return makeClickable("button", label, onClick, data);
     }
 
