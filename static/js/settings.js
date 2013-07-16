@@ -227,7 +227,7 @@ $(function(){
                    // highlight fields with errors
                    _.each(form.result.data, function(obj, key) {
                        if (!obj.ok) {
-                           $('[name=' + key + ']').parent().addClass('error');
+                           $('#app_settings_schema [name=' + key + ']').parent().addClass('error');
                        }
                    });
 
