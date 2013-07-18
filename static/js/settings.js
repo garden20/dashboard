@@ -1145,8 +1145,26 @@ $(function(){
                $('.users-list').html(handlebars.templates['users.html'](users_pure, {}));
                $('.help').tooltip({placement: 'bottom'});
 
+               $('#uploadUsers').on('click', function(){
+                  $('#fileUploaderUsers').click();
+               });
 
+               $('#fileUploaderUsers').on('change', function() {
+                  if (this.files.length === 0) return;
+                  var reader = new FileReader();
+                  reader.onloadend = function(ev) {
 
+                       var json = JSON.parse(ev.target.result);
+                       async.forEach(json, function(user, cb){
+                          couchr.put('/_users/' + user._id, user, cb);
+                       }, function(err){
+                           if (err) return alert('Error loading: ' + err);
+                           alert('Load complete');
+                           window.location.reload();
+                       });
+                  };
+                  reader.readAsText(this.files[0]);
+                });
 
            });
         });
