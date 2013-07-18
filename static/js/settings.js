@@ -184,6 +184,55 @@ $(function(){
                        schema_to_use.default = ddoc.app_settings;
                    }
                    editor = JsonEdit('app_settings_schema', schema_to_use);
+                   cleanUpJsonEdit();
+
+                   $('a.backup').on('click', function(){
+
+                      var a = $(this)[0];
+                      var URL = window.webkitURL || window.URL;
+                      var BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
+                      var file = new Blob([JSON.stringify(ddoc.app_settings)], {"type": "application\/json"});
+
+                      a.href = URL.createObjectURL(file);
+                      a.download = doc.doc_id + '.json';
+                   });
+
+                   $('button.restore').on('click', function(){
+                        $('#fileUploader').click();
+                   });
+                   $('#fileUploader').on('change', function() {
+
+                      if (this.files.length === 0) return;
+
+                      var reader = new FileReader();
+                      reader.onloadend = function(ev) {
+                         try {
+                           var json = JSON.parse(ev.target.result);
+                           schema_to_use.default = json;
+                           $('.je-field').remove();
+                           editor = JsonEdit('app_settings_schema', schema_to_use);
+                           cleanUpJsonEdit();
+                           alert('Restored values are now showing. Click "Save" when satisfied.');
+                         } catch(e) {
+                            alert('Could not restore from file provided.');
+                         }
+                      }
+                      reader.readAsText(this.files[0]);
+
+
+
+                    });
+
+
+               });
+
+           } else {
+                $('#app_settings_schema').html('<h2>No settings to configure</h2>')
+                $('.form-actions').hide();
+           }
+
+
+           function cleanUpJsonEdit() {
 
                    // make html more boostrap compatible
                    $('#app_settings_schema .je-field').addClass('control-group');
@@ -206,12 +255,8 @@ $(function(){
                        );
                        $input.removeAttr('title');
                    });
-               });
-
-           } else {
-                $('#app_settings_schema').html('<h2>No settings to configure</h2>')
-                $('.form-actions').hide();
            }
+
 
            function onFormSubmit(ev) {
                ev.preventDefault();
@@ -266,7 +311,6 @@ $(function(){
                 });
 
             };
-
             $('form').on('submit', onFormSubmit);
         });
     }
