@@ -123,20 +123,32 @@ $(function() {
                 if (err) return errorInstalling(err);
                 updateStatus('Install Complete', '100%', true);
 
-                var settings = {
-                    host_options : host_options
-                };
-
-                var link = dashboard_links.appUrl(settings, app_install_doc);
-                $('.after-open').attr('href', link).show();
-
-                var settings_link = dashboard_links.appSettingsUrl(settings, app_install_doc);
-                $('.after-settings').attr('href', settings_link).show();
 
 
-                // add gardener status
-                var ddoc = '/' + app_install_doc.installed.db + '/_design/' + app_install_doc.doc_id;
-                GardenerStatus('/dashboard', ddoc, 'gardener');
+
+                function afterInstall() {
+
+                    var settings = {
+                        host_options : host_options
+                    };
+
+                    var link = dashboard_links.appUrl(settings, app_install_doc);
+                    $('.after-open').attr('href', link).show();
+
+                    var settings_link = dashboard_links.appSettingsUrl(settings, app_install_doc);
+                    $('.after-settings').attr('href', settings_link).show();
+
+
+                    // add gardener status
+                    var ddoc = '/' + app_install_doc.installed.db + '/_design/' + app_install_doc.doc_id;
+                    GardenerStatus('/dashboard', ddoc, 'gardener');
+                }
+
+                // check if a seed_db step has been requested
+                if (remote_app_details.kanso && remote_app_details.kanso.config && remote_app_details.kanso.config.seed_db) {
+
+                }
+                else afterInstall();
 
 
             });
