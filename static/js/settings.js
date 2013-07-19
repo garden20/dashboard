@@ -188,7 +188,7 @@ $(function(){
 
                    $('a.backup').on('click', function(){
 
-		     if (!doc.app_settings) return alert('Please save app settings first');
+                   if (!ddoc.app_settings) return alert('Please save app settings first');
 
                       var a = $(this)[0];
                       var URL = window.webkitURL || window.URL;
