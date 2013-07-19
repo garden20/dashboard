@@ -1158,12 +1158,25 @@ $(function(){
                   var reader = new FileReader();
                   reader.onloadend = function(ev) {
 
-                       var json = JSON.parse(ev.target.result);
+                       var json = JSON.parse(ev.target.result),
+                           successes = 0, errors = [];
                        async.forEach(json, function(user, cb){
-                          couchr.put('/_users/' + user._id, user, cb);
+                          couchr.put('/_users/' + user._id, user, function(err) {
+                              if (err) {
+                                 errors.push(user.name);
+                              } else successes++;
+                              cb(null);
+                          });
                        }, function(err){
                            if (err) return alert('Error loading: ' + err);
-                           alert('Load complete');
+                           var msg = 'Load complete. ' + successes + ' users loaded. ';
+                           if (errors.length > 0) {
+                              msg += 'The following users did not load: ';
+                              for (var i = errors.length - 1; i >= 0; i--) {
+                                msg = msg + errors[i] + ', ';
+                              };
+                           }
+                           alert(msg);
                            window.location.reload();
                        });
                   };
