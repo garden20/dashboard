@@ -214,7 +214,7 @@ $(function(){
                            $('.je-field').remove();
                            editor = JsonEdit('app_settings_schema', schema_to_use);
                            cleanUpJsonEdit();
-                           alert('Restored values are now showing. Click "Save" when satisfied.');
+                           alert('Restored values loaded. Click "Save" to complete restore.');
                          } catch(e) {
                             alert('Could not restore from file provided.');
                          }
