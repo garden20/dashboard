@@ -195,8 +195,10 @@ $(function(){
                       var BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
                       var file = new Blob([JSON.stringify(ddoc.app_settings, null, 4)], {"type": "application\/json"});
 
+                      var timestamp = moment().format('YYYY-MM-DD-HHmmss');
+                      a.download = doc.doc_id + '_' + timestamp + '_settings.json';
                       a.href = URL.createObjectURL(file);
-                      a.download = doc.doc_id + '.json';
+
                    });
 
                    $('button.restore').on('click', function(){
