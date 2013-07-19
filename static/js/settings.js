@@ -1159,21 +1159,21 @@ $(function(){
                   reader.onloadend = function(ev) {
 
                        var json = JSON.parse(ev.target.result),
-                           successes = 0, errors = [];
+                           load_count = 0, error_users = [];
                        async.forEach(json, function(user, cb){
                           couchr.put('/_users/' + user._id, user, function(err) {
                               if (err) {
-                                 errors.push(user.name);
-                              } else successes++;
+                                 error_users.push(user.name);
+                              } else load_count++;
                               cb(null);
                           });
                        }, function(err){
                            if (err) return alert('Error loading: ' + err);
-                           var msg = 'Load complete. ' + successes + ' users loaded. ';
-                           if (errors.length > 0) {
+                           var msg = 'Load complete. ' + load_count + ' users loaded. ';
+                           if (error_users.length > 0) {
                               msg += 'The following users did not load: ';
-                              for (var i = errors.length - 1; i >= 0; i--) {
-                                msg = msg + errors[i] + ', ';
+                              for (var i = error_users.length - 1; i >= 0; i--) {
+                                msg = msg + error_users[i] + ', ';
                               };
                            }
                            alert(msg);
