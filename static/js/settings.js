@@ -193,7 +193,7 @@ $(function(){
                       var a = $(this)[0];
                       var URL = window.webkitURL || window.URL;
                       var BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
-                      var file = new Blob([JSON.stringify(ddoc.app_settings)], {"type": "application\/json"});
+                      var file = new Blob([JSON.stringify(ddoc.app_settings, null, 4)], {"type": "application\/json"});
 
                       a.href = URL.createObjectURL(file);
                       a.download = doc.doc_id + '.json';
