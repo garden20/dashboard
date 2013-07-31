@@ -2,6 +2,12 @@
 <html  {{#unless dont_cache}}manifest="dashboard.appcache"{{/unless}}>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script>
+      // ensure trailing slash on _rewrite path
+      if (!/\/$/.test(window.location.pathname)) {
+        window.location = window.location.pathname + '/' + location.hash;
+      }
+    </script>
     <link rel="stylesheet" type="text/css" href="{{baseURL}}static/css/main.css" />
     <link rel="stylesheet" type="text/css" href="/dashboard/_design/dashboard/_rewrite/_topbar.css" />
     {{#each styles}}
