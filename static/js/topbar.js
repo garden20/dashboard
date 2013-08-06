@@ -181,7 +181,7 @@ var have_jquery = function(){
 
 
 
-
+            $('#dashboard-topbar').attr('data-ready', true);
             $('#dashboard-topbar').data('ready', true);
             $('#dashboard-topbar').trigger('ready');
 
