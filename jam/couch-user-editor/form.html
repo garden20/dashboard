@@ -32,10 +32,10 @@
 
 
 
-
-      <div class="appdata">
+      {{#options.appdata}}
+      <div class="appdata" data-dbname="{{db}}" data-ddoc="{{ddoc}}" >
         <h3>App Specific Settings</h3>
-        {{#options.appdata}}
+
         <div class="section">
           <h4>{{title}} <small>on {{db}}</small></h4>
 
@@ -53,9 +53,8 @@
           <div id="{{id}}">
           </div>
         </div>
-        {{/options.appdata}}
       </div>
-
+      {{/options.appdata}}
 
 
 

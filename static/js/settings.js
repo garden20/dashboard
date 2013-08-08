@@ -1081,7 +1081,7 @@ $(function(){
 
 
     function showUserDetails(user) {
-      console.log('show user', user);
+      user = 'org.couchdb.user:' + user;
       $('.user-list').hide();
       $('.user-details').show();
 
@@ -1143,7 +1143,7 @@ $(function(){
                         }
                    });
 
-                   user.safe_id = encodeURIComponent(user.id);
+                   user.safe_id = encodeURIComponent(user.just_name);
                    users_pure.push(user);
                });
                $('.users-list').html(handlebars.templates['users.html'](users_pure, {}));
@@ -1428,8 +1428,8 @@ $(function(){
         $(this).parents('.control-group').removeClass('error');
     });
 
-    function showTab(id) {
-        $('#' + id).tab('show');
+    function showTabByID(id) {
+        $('.nav.tabs a[href=#' + id + ']').tab('show');
     }
     function showTab() {
         var url = document.location.toString();
@@ -1483,9 +1483,9 @@ $(function(){
             showTab();
             showUsers();
       },
-      '/user-details/*'   : function(user) {
-            $('.nav.tabs a[href=#users').tab('show') ;
-            showUserDetails(user);
+      '/users/*'   : function(user) {
+          showTabByID('users');
+          showUserDetails(user);
       }
     };
 

@@ -229,10 +229,16 @@
         options.appdata.forEach(function(data){
 
             if (data.user_data.schema) {
+
                 var path = user;
                 if (data.user_data.db_prefix) path = user[data.db];
 
                 data.user_data.schema ['default'] = path;
+
+                // add some things available on the dom (YUK!!!)
+                $('#' + data.id).data('db', data.db);
+
+
                 data.editor = JsonEdit(data.id, data.user_data.schema);
             }
         });

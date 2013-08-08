@@ -15,3 +15,8 @@
     text-transform: capitalize;
 }
 
+.je-field.je-array-items {
+    margin: 10px 0 20px 2px;
+    border-left: 3px solid #eeeeee;
+    padding-left: 10px;
+}

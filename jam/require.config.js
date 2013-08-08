@@ -51,13 +51,27 @@ var jam = {
             "main": "ractive-couch.js"
         },
         {
+            "name": "select2",
+            "location": "jam/select2",
+            "main": "select2.js"
+        },
+        {
             "name": "text",
             "location": "jam/text",
             "main": "text.js"
+        },
+        {
+            "name": "underscore",
+            "location": "jam/underscore",
+            "main": "underscore.js"
         }
     ],
     "version": "0.2.17",
-    "shim": {}
+    "shim": {
+        "underscore": {
+            "exports": "_"
+        }
+    }
 };
 
 if (typeof require !== "undefined" && require.config) {
@@ -114,12 +128,26 @@ if (typeof require !== "undefined" && require.config) {
             "main": "ractive-couch.js"
         },
         {
+            "name": "select2",
+            "location": "jam/select2",
+            "main": "select2.js"
+        },
+        {
             "name": "text",
             "location": "jam/text",
             "main": "text.js"
+        },
+        {
+            "name": "underscore",
+            "location": "jam/underscore",
+            "main": "underscore.js"
         }
     ],
-    "shim": {}
+    "shim": {
+        "underscore": {
+            "exports": "_"
+        }
+    }
 });
 }
 else {
@@ -176,12 +204,26 @@ else {
             "main": "ractive-couch.js"
         },
         {
+            "name": "select2",
+            "location": "jam/select2",
+            "main": "select2.js"
+        },
+        {
             "name": "text",
             "location": "jam/text",
             "main": "text.js"
+        },
+        {
+            "name": "underscore",
+            "location": "jam/underscore",
+            "main": "underscore.js"
         }
     ],
-    "shim": {}
+    "shim": {
+        "underscore": {
+            "exports": "_"
+        }
+    }
 };
 }
 
