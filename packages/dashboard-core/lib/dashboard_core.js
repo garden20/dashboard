@@ -135,8 +135,9 @@ function app_replicate(src, target, doc_id, callback) {
             success : function() {
                 return callback(null);
             },
-            error : function() {
-                return callback('error replicating');
+            error : function(xhr, txtStatus, err) {
+                console.error('error replicating', arguments);
+                return callback('error replicating ' + txtStatus);
             }
         }, {
        create_target:true,
