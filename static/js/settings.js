@@ -1227,9 +1227,22 @@ $(function(){
         }
     });
 
+    // revert password field to password type if generated password is changed
+    $('#user-password').live('keyup', function(){
+        var $this = $(this);
+
+        if ($this.attr('type') === 'text' && $this.val() !== $this.data('generated-password')) {
+            // will not work with IE < 9
+            $this.prop('type', 'password');
+        }
+    });
+
     $('.generate-password').live('click', function(){
         var pass = password(6,false);
-        $('.password').val(pass).trigger('change');
+
+        // setting type will not work with IE < 9
+        $('#user-password').val(pass).data('generated-password', pass).prop('type', 'text').trigger('change');
+
         return false;
     });
 
