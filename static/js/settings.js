@@ -1228,7 +1228,7 @@ $(function(){
     });
 
     // revert password field to password type if generated password is changed
-    $('#user-password').live('keyup', function(){
+    $('.password').live('keyup', function(){
         var $this = $(this);
 
         if ($this.attr('type') === 'text' && $this.val() !== $this.data('generated-password')) {
@@ -1241,7 +1241,7 @@ $(function(){
         var pass = password(6,false);
 
         // setting type will not work with IE < 9
-        $('#user-password').val(pass).data('generated-password', pass).prop('type', 'text').trigger('change');
+        $('.password').val(pass).data('generated-password', pass).prop('type', 'text').trigger('change');
 
         return false;
     });
