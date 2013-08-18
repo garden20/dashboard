@@ -237,6 +237,8 @@ $(function(){
 
 
            function cleanUpJsonEdit() {
+                   // hide spinner
+                   $('#app_settings_schema .spinner').hide();
 
                    // make html more boostrap compatible
                    $('#app_settings_schema .je-field').addClass('control-group');
