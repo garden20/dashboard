@@ -18,7 +18,12 @@ after_script:
   - sudo ls /var/lib/couchdb
   - sudo cp /var/lib/couchdb/1.3.0/dashboard.couch ./static/dashboard.couch
   - sudo chown travis ./static/dashboard.couch
+  - wget https://gist.github.com/mandric/4beda54677555c8c46f9/raw/87d15084722da3e3ea8d54ae85f36afe0d88e2e6/markets.json
+  - kanso upload markets.json http://localhost:5984/dashboard
+  - sudo cp /var/lib/couchdb/1.3.0/dashboard.couch ./static/dashboard-medic.couch
+  - sudo chown travis ./static/dashboard-medic.couch
   - kanso push http://travis:XX0Y13CNL8M@reupholster.iriscouch.com/dashboard
+
 
 notifications:
   email:
