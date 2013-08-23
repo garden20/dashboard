@@ -3,7 +3,7 @@
     "use strict";
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(['jquery', 'jquery.lego', './json.schema', './nsgen'], function ($, legojs, JsonSchema, NsGen) {
+        define(['jquery', 'jquery.lego', 'json.schema', 'nsgen'], function ($, legojs, JsonSchema, NsGen) {
             // Also create a global in case some scripts
             // that are loaded still are looking for
             // a global even when an AMD loader is in use.
@@ -1052,12 +1052,11 @@
             input = priv.input(fid, type, inputId, opts, required, util),
             result,
             $childs,
-            labelText = opts.title || fid,
-            label = priv.label(labelText, inputId);
+            label = priv.label(opts.title, inputId);
 
         if (opts.type === 'boolean') {
             label.label.$childs = [input, label.label.$childs];
-            label.label["class"] = "checkbox";
+            label.label.class = "checkbox";
             $childs = [label];
         } else {
             $childs = [
