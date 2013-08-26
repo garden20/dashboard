@@ -25,7 +25,8 @@
 
     formatHints.array = formatHints.array || {};
 
-    formatHints.array.summarylist = function (name, type, id, opts, required, priv, util) {
+    formatHints.array.summarylist = function (name, type, id, opts, required,
+                                              priv, util) {
         var
             modulePath = module.uri,
             moduleBasePath = modulePath.slice(0, modulePath.lastIndexOf("/") + 1),
@@ -37,6 +38,7 @@
             $cont,
             $list,
             $buttons,
+            $emptyMsg,
             editImgPath   = moduleBasePath + "img/edit.png",
             removeImgPath = moduleBasePath + "img/remove.png",
             workingImgPath = moduleBasePath + "img/loading.gif",
@@ -44,6 +46,7 @@
             addButton,
             widgetChilds;
 
+        id = (typeof id === "string") ? id + "-sl" : id.attr("id") + "-sl";
         Dust.loadSource(template);
 
         if (typeof opts.minItems !== "number") {
@@ -93,13 +96,15 @@
                 newData = result.data;
 
             if (result.result.ok) {
-                onEditSucceeded(newData);
-                editor.remove();
+                onEditSucceeded(newData, function () {
+                    editor.remove();
 
-                if (showItemsAfterCollect) {
-                    $list.show();
-                    $buttons.show();
-                }
+                    if (showItemsAfterCollect) {
+                        $list.show();
+                        $buttons.show();
+                        $emptyMsg.show();
+                    }
+                });
             } else {
                 errors = priv.getErrors(result.result);
                 JsonEdit.defaults.displayError(errors.join("\n"));
@@ -131,6 +136,7 @@
 
             $list.hide();
             $buttons.hide();
+            $emptyMsg.hide();
             $cont.prepend($.lego(cont));
         }
 
@@ -138,6 +144,7 @@
             $cont.children(".summary-item-editor").remove();
             $list.show();
             $buttons.show();
+            $emptyMsg.show();
         }
 
         function setWorking(isWorking) {
@@ -165,7 +172,7 @@
             function onEditOkClick(id) {
                 var showListAfterCollect = conf.onEdit === undefined;
 
-                collectEditItem(schema, true, showListAfterCollect, function (newData) {
+                collectEditItem(schema, true, showListAfterCollect, function (newData, closeForm) {
                     var
                         storedData = $("#" + id).data("data"),
                         mergedData = $.extend({}, storedData, newData);
@@ -198,6 +205,7 @@
                         }
 
                         setWorking(false);
+                        closeForm();
                     }
 
                     if (conf.onEdit) {
@@ -305,7 +313,7 @@
             function onEditOkClick() {
                 var showListAfterCollect = conf.onAdd === undefined;
 
-                collectEditItem(schema, false, showListAfterCollect, function (newData) {
+                collectEditItem(schema, false, showListAfterCollect, function (newData, closeForm) {
                     function defaultHandler(add, userNewData) {
                         var
                             dataToSet;
@@ -325,6 +333,7 @@
                         }
 
                         setWorking(false);
+                        closeForm();
                     }
 
                     if (conf.onAdd) {
@@ -344,6 +353,7 @@
             $cont = $("#" + id);
             $list = $("#" + id + "-list");
             $buttons = $cont.children(".summary-action-buttons");
+            $emptyMsg = $cont.children(".summary-empty-msg");
 
             for (i = 0; i < defaultValues.length; i += 1) {
                 addItem(defaultValues[i], opts.items);
@@ -359,8 +369,9 @@
         }];
 
         if (conf.allowAdd !== false) {
-            addButton = button("add", function () {
+            addButton = button("Add", function () {
                 onAddClick(opts.items);
+                util.events.rendered.fire();
             });
 
             widgetChilds.unshift({
@@ -385,7 +396,7 @@
         return {
             "div": {
                 "id": id,
-                "class": priv.genFieldClasses(name, opts, " ", required),
+                "class": "je-hint-summarrylist-cont je-custom-cont",
                 "$childs": widgetChilds
             }
         };
