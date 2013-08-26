@@ -45,7 +45,7 @@
                 priv.isEmptyConfig(val)) {
                 style = "display: none";
             } else if (firstVisible === null) {
-                firstVisible = id;
+                firstVisible = index;
             }
 
             return {
@@ -68,12 +68,12 @@
         }
 
         util.events.rendered.handleOnce(function () {
-            var container = (typeof id === "string") ? $("#" + id) : id;
+            var container = (typeof id === "string") ? $("#" + id + "-inner") : id;
 
             container.tabs();
 
             if (firstVisible !== null) {
-                container.tabs("select", firstVisible);
+                container.tabs("option", "active", firstVisible);
             }
         });
 
