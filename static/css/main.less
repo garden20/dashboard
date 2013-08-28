@@ -1,4 +1,5 @@
 @import "packages/bootstrap/bootstrap/lib/bootstrap.less";
+@import "font-awesome/font-awesome.less";
 @import "jam/json.edit/json.edit.bootstrap.less";
 @import "secondbar.less";
 @import "wizard_trail.less";
@@ -474,18 +475,15 @@ p.small {
 
 /* inline boolean fields/checkboxes on settings editor */
 #app_settings_schema {
-
-  .je-boolean {
-    label {
-      float: left;
-      margin-right: 10px;
+  .spinner {
+    text-align: center;
+    padding: 1em 0 2em;
+    i {
+      font-size: 3em;
     }
   }
-
   .je-field .help-block {
     margin-top: 0;
     margin-bottom: 15px;
   }
-
 }
-

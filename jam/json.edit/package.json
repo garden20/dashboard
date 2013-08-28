@@ -2,7 +2,7 @@
   "name": "json.edit",
   "description": "schema to form + validation to json that conforms to schema",
   "author": "Mariano Guerra",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "json.edit.js",
   "jam": {
       "dependencies": {
