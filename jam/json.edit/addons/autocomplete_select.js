@@ -26,9 +26,9 @@
         interpolate : /\{\{(.+?)\}\}/g
     };
 
-    formatHints.string.autocomplete = function (name, type, id, opts, required, priv, util) {
+    formatHints.string.autocompleteSelect2 = function (name, type, id, opts, required, priv, util) {
 
-        var options = opts["je:autocomplete"] || {};
+        var options = opts["je:autocompleteSelect2"] || {};
         var defaultValue = opts["default"] || ""
         var dataUrlTemplate, availableValues;
 
