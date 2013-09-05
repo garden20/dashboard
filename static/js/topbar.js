@@ -74,7 +74,8 @@ var have_jquery = function(){
         } else {
             bust = '?d=' + last_cache;
         }
-        $topbar.load('/dashboard/_design/dashboard/_rewrite/_topbar' + bust, function() {
+        $.get('/dashboard/_design/dashboard/_rewrite/_topbar' + bust, function(html) {
+            $topbar.html(html);
             // highlight the best thing
 
             var dash = $topbar.find('a.home').attr('href');
