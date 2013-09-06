@@ -65,7 +65,7 @@ var have_jquery = function(){
         var path = window.location.pathname;
         // only cache bust if there is no cookie
         var last_cache = readCookie('last-dashboard-cache'),
-            bust = '?d=' + last_cache;
+            bust = '?d=' + new Date().getTime();
 
         $.get('/dashboard/_design/dashboard/_rewrite/_topbar' + bust, function(html, a, b) {
             $topbar.html(html);
