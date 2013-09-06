@@ -63,18 +63,11 @@ var have_jquery = function(){
             $('body').prepend($topbar);
         }
         var path = window.location.pathname;
-
         // only cache bust if there is no cookie
-        var bust = '';
-        var last_cache = readCookie('last-dashboard-cache');
-        if (!last_cache) {
-            var date = new Date().getTime();
-            bust = '?d=' + date;
-            createCookie('last-dashboard-cache', date);
-        } else {
+        var last_cache = readCookie('last-dashboard-cache'),
             bust = '?d=' + last_cache;
-        }
-        $.get('/dashboard/_design/dashboard/_rewrite/_topbar' + bust, function(html) {
+
+        $.get('/dashboard/_design/dashboard/_rewrite/_topbar' + bust, function(html, a, b) {
             $topbar.html(html);
             // highlight the best thing
 
