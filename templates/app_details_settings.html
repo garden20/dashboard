@@ -1,6 +1,6 @@
 <div class="row">
-    <div class="offset1 span8 ">
-        <form class="form">
+    <div class="offset1 span10">
+        <form class="form app-settings">
             <fieldset>
               <div id="app_settings_schema" class="appdata" data-dbname="{{installed.db}}" data-ddoc="{{doc_id}}">
                 <div class="spinner">
@@ -16,9 +16,9 @@
 
             <fieldset class="form-actions">
                 <button class="btn save primary">Save</button>
-                <div class="right">
-                    <a class="btn backup">Backup</a>
-                    <button class="btn restore">Restore</button>
+                <div class="secondary-actions">
+                    <a class="btn small backup">Backup</a>
+                    <button class="btn small restore">Restore</button>
                     <div style='height: 0px;width: 0px; overflow:hidden;'>
                         <input  id="fileUploader" type="file" accept="application/json">
                     </div>
