@@ -288,18 +288,38 @@ $(function(){
                         .text(form.result.msg);
 
                    // append detailed errors msgs to div
-                   err_alert.find('.msg').append('<ul/>').append(
-                       _.map(form.result.data, function(obj, key) {
-                           return '<li>' + key + ': ' + obj.msg +'</li>';
-                       }).join('')
-                   );
+                   var $err_list = err_alert.find('.msg').append('<ul/>');
+
+                   console.error('failed validation', form.result);
 
                    // highlight fields with errors
-                   _.each(form.result.data, function(obj, key) {
-                       if (!obj.ok) {
-                           $('#app_settings_schema [name=' + key + ']').parent().addClass('error');
+                   var selector = '';
+                   function highlightErrors(obj, key) {
+                       if (!obj) return;
+                       if (!selector) {
+                           selector = '.je-' + key;
                        }
-                   });
+                       if (obj.ok === false && obj.isRoot === true) {
+                           if (_.isArray(obj.data)) {
+                               selector +=  ' .je-' + key;
+                           } else {
+                               $(selector + ' .je-' + key).addClass('error');
+                           }
+                           if (obj.msg) {
+                               $err_list.append(
+                                   '<li>' + key + ': ' + obj.msg +'</li>'
+                               );
+                           }
+                       }
+                       if (_.isArray(obj)) {
+                           _.each(obj[1], highlightErrors);
+                       } else if (_.isObject(obj) && !obj.isRoot) {
+                           _.each(obj, highlightErrors);
+                       } else if (_.isArray(obj.data)) {
+                           _.each(obj.data[0], highlightErrors);
+                       }
+                   };
+                   _.each(form.result.data, highlightErrors);
 
                    return;
                }
