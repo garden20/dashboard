@@ -201,10 +201,11 @@ $(function(){
 
                    });
 
-                   $('button.restore').on('click', function(){
+                   $('button.restore').on('click', function(ev){
+                        ev.preventDefault();
                         $('#fileUploader').click();
                    });
-                   $('#fileUploader').on('change', function() {
+                   $('#fileUploader').on('change', function(ev) {
 
                       if (this.files.length === 0) return;
 
@@ -337,7 +338,7 @@ $(function(){
                 });
 
             };
-            $('form').on('submit', onFormSubmit);
+            $('form.app-settings').on('submit', onFormSubmit);
         });
     }
 
