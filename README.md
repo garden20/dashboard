@@ -13,4 +13,9 @@ The name also pays tribute to the [Garden](https://couchapp.org/page/garden) pro
 
 Learn more on the [wiki](https://github.com/kanso/garden/wiki).
 
+## Deploy
+
+```
+kanso push --minify https://garden20.iriscouch.com/dashboard_seed
+```
 
