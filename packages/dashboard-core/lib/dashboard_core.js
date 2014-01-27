@@ -57,14 +57,13 @@ exports.install_app = function(remote_app_details, new_db_name, update_status_fu
         }
 
     ], function(err, install_doc) {
-        update_status_function('Install Complete', '100%', true);
         callback(err, install_doc);
     });
 
 }
 
 function install_app_security(install_doc, db_name, update_status_function, callback) {
-    update_status_function('Setting security', '90%', true);
+    update_status_function('Setting security', '90%');
     var meta = install_doc.couchapp || install_doc.kanso;
     if (meta.config.install_with_no_reader) {
         callback(null, install_doc);
@@ -86,7 +85,7 @@ function install_app_security(install_doc, db_name, update_status_function, call
 
 exports.install_app_vhosts = function (host_options, install_doc, update_status_function, callback) {
     if (host_options.short_urls && host_options.short_app_urls) {
-        update_status_function('Configuring URL', '98%', true);
+        update_status_function('Configuring URL', '98%');
 
         var to_bind_to = [];
         var hostnames = host_options.hostnames.split(',');
