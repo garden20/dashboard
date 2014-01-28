@@ -59,8 +59,8 @@ exports.hash = function (email) {
  *     - x:   may contain hardcore sexual imagery or extremely disturbing
  *            violence.
  *
- * - secure {Boolean} - whether to use https, if not set, the current protocol
- *     is used (if running in the browser), otherwise defaults to http
+ * - secure {Boolean} - force https, if not set, the current protocol is used
+ *     (if running in the browser), otherwise specifies no protocol or '//'.
  *
  * - extension {String} - optional image extension to use in the url (eg .jpg)
  */
@@ -89,7 +89,7 @@ exports.avatarURL = function (options) {
     if (options.extension) {
         ext = '.' + options.extension.replace(/^\./, '');
     }
-    return (options.secure ? 'https://': 'http://') +
-           exports.BASE_AVATAR_URL + hash + ext + '?' +
+    return (options.secure ? 'https://': '//') +
+            exports.BASE_AVATAR_URL + hash + ext + '?' +
            querystring.stringify(params);
 };
