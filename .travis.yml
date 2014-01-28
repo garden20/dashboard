@@ -1,7 +1,6 @@
 language: node_js
 node_js:
-   - 0.6
-
+   - 0.8
 
 services:
   - couchdb
@@ -10,7 +9,6 @@ before_script:
   - curl -X PUT localhost:5984/dashboard
   - npm install kanso -g
   - npm install nodeunit -g
-
 
 script: "kanso install; kanso push http://localhost:5984/dashboard"
 
@@ -25,7 +23,7 @@ after_script:
   - sudo chown travis ./static/dashboard-medic.couch
   - kanso push http://travis:XX0Y13CNL8M@reupholster.iriscouch.com/dashboard
 
-
 notifications:
   email:
     - ryan.ramage@gmail.com
+    - dev@medicmobile.org
