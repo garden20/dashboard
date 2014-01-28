@@ -247,7 +247,7 @@ $(function(){
                // move title/field description to div for better UX
                $('#app_settings_schema .je-field').each(function(idx, el) {
                    $(el).children('input, select, textarea, label').each(function(i, input) {
-                     var $input = $(input), 
+                     var $input = $(input),
                          text = $input.attr('title');
                      // no description property on json schema, skip
                      if (!text) {
