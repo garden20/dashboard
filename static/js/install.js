@@ -105,7 +105,8 @@ $(function() {
 
 
     function errorInstalling(err){
-        alert(err);
+        console.log(err);
+        updateStatus('Install failed: ' + err, '100%', true, false);
     }
 
 
@@ -121,13 +122,12 @@ $(function() {
             if (err) return errorInstalling(err);
             dashboard_core.install_app(remote_app_details, db_name, updateStatus, host_options, function(err, app_install_doc) {
                 if (err) return errorInstalling(err);
-                updateStatus('Install Complete', '100%', true);
+                updateStatus('Install Complete', '100%', true, true);
 
+                // check if a seed_db step has been requested
+                if (remote_app_details.kanso && remote_app_details.kanso.config && remote_app_details.kanso.config.seed_db) {
 
-
-
-                function afterInstall() {
-
+                } else {
                     var settings = {
                         host_options : host_options
                     };
@@ -144,25 +144,10 @@ $(function() {
                     GardenerStatus('/dashboard', ddoc, 'gardener');
                 }
 
-                // check if a seed_db step has been requested
-                if (remote_app_details.kanso && remote_app_details.kanso.config && remote_app_details.kanso.config.seed_db) {
-
-                }
-                else afterInstall();
-
 
             });
         })
 
-
-       //
     })
-
-
-
-
-
-
-
 
 });

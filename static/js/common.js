@@ -83,12 +83,14 @@ function addDBReaderRole(dbName, role, callback) {
   });
 }
 
-function updateStatus(msg, percent, complete) {
+function updateStatus(msg, percent, complete, success) {
     console.log(msg, percent, complete);
     $('.install-info h4').text(msg);
     $('.install-info .bar').css('width', percent);
     if (complete) {
-        $('.install-info .progress').removeClass('active');
+        $('.install-info .progress')
+            .addClass(success ? 'success' : 'danger')
+            .removeClass('active info');
     }
 }
 
