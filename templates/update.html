@@ -1,0 +1,45 @@
+{{#if is_auth}}
+    {{#if app_url}}
+<div class="row">
+  <div class="span4">
+    <div class="market-icon">
+        <a href="{{baseURL}}"><img src="{{baseURL}}static/img/market-logo.png"/></a>
+    </div>
+  </div>
+  <div class="span10">
+
+
+  </div>
+</div>
+<div class="row app_top">
+  <div id="details_sidebar" class="span4" data-hosted="{{hosted}}">
+
+
+  </div>
+
+  <div class="span8 install_where" data-host_options="{{host_options}}">
+
+      <h1>Update Application</h1>
+
+      <div class="loading" data-appurl="{{app_url}}">
+          Loading installation information...Please wait
+      </div>
+  </div>
+</div>
+    {{/if}}
+{{else}}
+<div class="row title">
+  <div class="main span8">
+
+      <div id="content" class="main">
+          <div class="row install-row">
+                 <h1>Update Application</h1>
+                  <div class="alert alert-info">
+                      <p>You need to login as an admin to update an application</p>
+                      <a href="{{login_link}}" class="btn">Login</a>
+                  </div>
+            </div>
+      </div>
+  </div>
+</div>
+{{/if}}

@@ -84,7 +84,7 @@ function addDBReaderRole(dbName, role, callback) {
 }
 
 function updateStatus(msg, percent, complete, success) {
-    console.log(msg, percent, complete);
+    console.log(msg, percent, complete, success);
     $('.install-info h4').text(msg);
     $('.install-info .bar').css('width', percent);
     if (complete) {

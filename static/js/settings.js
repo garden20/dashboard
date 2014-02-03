@@ -552,7 +552,7 @@ $(function(){
                     var currentVersion = remote_data.config.version;
                     $('.update-board tr.dashboard td.available-version').html(currentVersion);
                     if (semver.lt(ourVersion, currentVersion )) {
-                        $('.update-board tr.dashboard div.update-action').show();
+                        $('.update-board tr.dashboard .update-action').show();
                     }
                 },
                 error : function() {
@@ -574,7 +574,7 @@ $(function(){
                         if (app.value.availableVersion) {
                             $('.update-board tr.'+ app.id +' td.available-version').html(app.value.availableVersion);
                            if (app.value.needsUpdate) {
-                               $('.update-board tr.'+ app.id +' div.update-action').show();
+                               $('.update-board tr.'+ app.id +' .update-action').show();
                            }
                         } else {
                             $('.update-board tr.'+ app.id +' td.available-version').html("Can't determine");
@@ -628,27 +628,6 @@ $(function(){
 
     }
 
-
-    $('.update-board  button.update-run-app').live('click',function(){
-        var btn = $(this);
-        btn.button('loading');
-        var id = btn.data('id');
-        dashboard_core.updateApp(id, function(err, app_data) {
-            if (err) {
-                return alert(err);
-            } else {
-                btn
-                 .button('complete')
-                 .addClass('disabled')
-                 .attr('disabled', 'disabled');
-                var meta = app_data.couchapp || app_data.kanso;
-
-                $('.' + id + ' .installed-version').html(meta.config.version);
-            }
-        });
-
-
-    });
 
     $('.update-board tr.dashboard .update-run').live('click',function(){
        var btn = $(this);
