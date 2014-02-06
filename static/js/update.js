@@ -8,11 +8,34 @@ var dashboard_links = require('lib/dashboard_links');
 var dashboard_settings = require('lib/settings');
 var db = require('db').use('_db');
 var datelib = require('datelib');
+var showdown = require('showdown');
 
 $(function() {
 
     function errorLoadingInfo() {
         $('.loading').html(handlebars.templates['install_app_error.html']({}, {}));
+    }
+
+    function getGithubChangelog(repoUrl, callback) {
+        if (repoUrl.indexOf('github.com') != -1) {
+            var parts = repoUrl.substring(repoUrl.indexOf('github.com')).split('/');
+            var user = parts[1];
+            var repo = parts[2];
+            $.ajax({
+                url: 'https://api.github.com/repos/' + user + '/' + repo + '/contents/Changes.md',
+                dataType: 'jsonp',
+                success: function(changelog) {
+                    if (changelog.data.content) {
+                        callback(atob(changelog.data.content.replace(/\s/g, '')));
+                    }
+                }
+            });
+        }
+    }
+
+    function updateChangelog(markdown) {
+        var sd = new showdown.converter();
+        $('#changelog').html(sd.makeHtml(markdown));
     }
 
     var appurl  = $('.loading').data('appurl');
@@ -35,15 +58,22 @@ $(function() {
                     }
 
                     var hosted = $('#details_sidebar').data('hosted');
-
                     var display_name = dashboard_core.display_name(results);
-                    
+                    var app = installed_app_data.couchapp || installed_app_data.kanso;
+
                     results.display_name = display_name;
-                    results.installed_version = installed_app_data.kanso.config.version;
+                    results.installed_version = app.config.version;
                     results.id = installed_app_data._id;
+
+                    if (results.kanso.changelog) {
+                        updateChangelog(atob(results.kanso.changelog));
+                    } else {
+                        getGithubChangelog(appData.kanso.config.url, updateChangelog);
+                    }
 
                     $('#details_sidebar').html(handlebars.templates['update_sidebar.html']({meta: results, hosted: hosted, display_name: display_name}));
                     $('.loading').html(handlebars.templates['update_app_info.html'](results, {}));
+
                 });
 
             }
