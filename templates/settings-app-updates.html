@@ -11,9 +11,7 @@
     <td class="available-version"><img src="static/img/ajax-loader.gif" alt="loading..." /></td>
     <td>
         <a href="#/apps/{{id}}" class="btn small">Settings</a>
-        <div class="update-action" style="display: none;">
-            <button class="btn primary small update-run-app" data-loading-text="Updating..." data-complete-text="Finished!" data-id="{{id}}">Update</button>
-        </div>
+        <a href="update/{{id}}" class="btn primary small update-action" style="display: none;">Update</a>
         {{#if flattrLink}}{{{flattrLink}}}{{/if}}
     </td>
 </tr>

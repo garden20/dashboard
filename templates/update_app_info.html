@@ -1,0 +1,39 @@
+
+<div class="app-details">
+    <h3>App Details</h3>
+
+    Name: {{display_name}}<br/>
+    Current Version: {{installed_version}}<br/>
+    New Version: {{kanso.config.version}}<br/>
+    From: <a href="{{src}}">{{src}}</a>
+</div>
+
+<fieldset class="form-actions">
+    <button class="btn primary large" data-id="{{id}}">Update</button>
+</fieldset>
+
+
+<div class="well install-info" style="display: none;">
+
+    <h4></h4>
+
+    <div class="progress info striped active install-info"  style="display: none;">
+      <div class="bar" style="width: 10%;"></div>
+    </div>
+
+    <div id="replications">
+    </div>
+
+    <div id="gardener">
+    </div>
+
+
+    <a href="#" class="btn success large after-open" style="display: none;">Open App</a>
+    <a href="#" class="btn after-settings" style="display: none;">Configure App</a>
+
+</div>
+
+
+
+
+

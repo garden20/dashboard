@@ -337,7 +337,7 @@ function showSettings() {
                     var currentVersion = remote_data.config.version;
                     $('.update-board tr.dashboard td.available-version').html(currentVersion);
                     if (semver.lt(ourVersion, currentVersion )) {
-                        $('.update-board tr.dashboard div.update-action').show();
+                        $('.update-board tr.dashboard .update-action').show();
                     }
                 },
                 error : function() {
@@ -357,7 +357,7 @@ function showSettings() {
                         if (app.value.availableVersion) {
                             $('.update-board tr.'+ app.id +' td.available-version').html(app.value.availableVersion);
                            if (app.value.needsUpdate) {
-                               $('.update-board tr.'+ app.id +' div.update-action').show();
+                               $('.update-board tr.'+ app.id +' .update-action').show();
                            }
                         } else {
                             $('.update-board tr.'+ app.id +' td.available-version').html("Can't determine");
@@ -579,36 +579,6 @@ $(function() {
           }
        }, {doc_ids : [ '_design/dashboard'  ] });
     });
-
-    $('.update-board  button.update-run-app').live('click',function(){
-        var btn = $(this);
-        btn.button('loading');
-        var id = btn.data('id');
-        $.couch.db(dashboard_db_name).openDoc(id, {
-            success : function(app_data) {
-                $.couch.replicate(app_data.db_src, app_data.installed.db, {
-                   success : function(rep_result) {
-                        var db = $.couch.db(app_data.installed.db);
-                        copyDoc(db, app_data, function(err){
-                            if (err) {
-                                return alert(err);
-                            } else {
-                                btn
-                                 .button('complete')
-                                 .addClass('disabled')
-                                 .attr('disabled', 'disabled');
-                            }
-
-                        });
-
-                   }
-               }, {
-                  doc_ids : [app_data.doc_id]
-               });
-            }
-        })
-    });
-
 
 
 
