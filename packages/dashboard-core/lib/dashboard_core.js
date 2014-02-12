@@ -106,9 +106,12 @@ exports.install_app_vhosts = function (host_options, install_doc, update_status_
 }
 
 function app_gather_current_settings(db, ddoc_id, cb) {
-    $.couch.db(db).openDoc(ddoc_id, {
+     $.couch.db(db).openDoc(ddoc_id, {
         success: function(doc) {
             cb(null, doc.app_settings);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            cb(textStatus + ': ' + errorThrown);
         }
     });
 }
@@ -117,7 +120,7 @@ function apply_app_settings(db, ddoc_id, app_settings, cb) {
     if (!app_settings) return cb(null);
     $.couch.db(db).openDoc(ddoc_id, {
         success: function(doc) {
-            doc.app_settings = app_settings; // TODO - maybe use  _.defaults for new settings not yet seen?
+            doc.app_settings = app_settings; // TODO - maybe use _.defaults for new settings not yet seen?
             $.couch.db(db).saveDoc(doc, {
                 success : function(){
                     cb(null);
@@ -173,7 +176,7 @@ exports.getInstalledApps = function (db_name, callback) {
     }
     callback = args.pop();
     db_name = exports.dashboard_db_name;
-    if (args.length > 0)  db_name = args.shift();
+    if (args.length > 0) db_name = args.shift();
 
 
     $.couch.db(db_name).view(exports.dashboard_ddoc_name + '/by_active_install', {
@@ -185,11 +188,11 @@ exports.getInstalledApps = function (db_name, callback) {
 
                 var app_data = row.doc;
                 return {
-                    id   : app_data._id,
-                    img  : exports.bestIcon128(app_data),
+                    id : app_data._id,
+                    img : exports.bestIcon128(app_data),
                     name : app_data.dashboard_title,
                     doc_id : app_data.doc_id,
-                    db   : app_data.installed.db,
+                    db : app_data.installed.db,
                     start_url : exports.get_launch_url(app_data, window.location.pathname)
                 }
             });
@@ -242,7 +245,7 @@ exports.checkUpdates = function(apps, callback){
     }, 7000);
 
     $.ajax({
-        url :  checkLocation,
+        url : checkLocation,
         dataType : 'json',
         jsonp : true,
         success : function(remote_data) {
@@ -263,33 +266,36 @@ exports.checkUpdates = function(apps, callback){
     });
 }
 
-exports.updateApp = function(app_id, callback) {
-
+exports.updateApp = function(app_id, update_status_function, cb) {
+    $.couch.urlPrefix = '../_couch';
+    var callback = function(err, data) {
+        $.couch.urlPrefix = '_couch';
+        cb(err, data);
+    };
     $.couch.db(exports.dashboard_db_name).openDoc(app_id, {
-        success : function(app_data) {
+        success: function(app_data) {
             var db = $.couch.db(app_data.installed.db),
                 current_app_settings = null;
+            console.log($.couch.urlPrefix);
             async.waterfall([
                 function(callback) {
+                    update_status_function('Checking Current Settings', '10%');
                     app_gather_current_settings(app_data.installed.db, '_design/' + app_data.doc_id, function(err, settings) {
-                        if (err) return callback(err);
+                        if (err) return callback('Cannot load document: ' + err);
                         current_app_settings = settings;
                         return callback(null);
                     });
                 },
                 function(callback) {
+                    update_status_function('Updating App', '30%');
                     app_replicate(app_data.db_src, app_data.installed.db, app_data.doc_id, callback);
                 },
                 function(callback) {
-                    copyDoc(db, app_data.doc_id, '_design/' + app_data.doc_id, true, callback);
-                },
-                function(callback) {
+                    update_status_function('Merging Settings', '80%');
                     apply_app_settings(app_data.installed.db, '_design/' + app_data.doc_id, current_app_settings, callback);
                 },
                 function(callback) {
-                    deleteDoc(db, app_data.installed.db, app_data.doc_id, callback);
-                },
-                function(callback) {
+                    update_status_function('Configuring Type', '98%');
                     exports.getGardenAppDetails(app_data.src, function(err, new_app_data) {
                         var type = 'couchapp';
                         if (new_app_data.kanso) type = 'kanso';
@@ -303,17 +309,17 @@ exports.updateApp = function(app_id, callback) {
                 }
             ], callback);
         },
-        error : function(err) {
-            callback(err);
+        error : function(jqXHR, textStatus, errorThrown) {
+            callback(textStatus + ': ' + errorThrown);
         }
-    })
+    });
 }
 
 exports.getMarkets = function(callback) {
     $.couch.db(exports.dashboard_db_name).view(exports.dashboard_ddoc_name + '/get_markets', {
         include_docs: true,
         success : function(response) {
-            var markets =  _.map(response.rows, function(row) {
+            var markets = _.map(response.rows, function(row) {
                 return {
                     name : row.key,
                     url : row.value
@@ -336,7 +342,7 @@ exports.updateDashboard = function(callback) {
               success : function() {
                   callback();
               }
-   }, {doc_ids : [ '_design/dashboard'  ] });
+   }, {doc_ids : [ '_design/dashboard' ] });
 }
 
 
@@ -443,12 +449,12 @@ exports.get_launch_url = function(install_doc, window_path) {
     if (install_doc.open_path && install_doc.open_path.indexOf('_rewrite') === -1) {
         return './' + install_doc.installed.db + '/_design/' + install_doc.doc_id + install_doc.open_path;
     }
-    if (meta.config.legacy_mode  ) {
+    if (meta.config.legacy_mode ) {
         return './' + install_doc.installed.db + '/_design/' + install_doc.doc_id + '/_rewrite/';
     }
     //return './' + install_doc.installed.db + '/_design/' + install_doc.doc_id + install_doc.open_path;
-    return  user_app_name_to_safe_url(install_doc.dashboard_title) + '/'
-    //return '../../../../' + install_doc.installed.db + '/_design/' + install_doc.doc_id +  install_doc.open_path;
+    return user_app_name_to_safe_url(install_doc.dashboard_title) + '/'
+    //return '../../../../' + install_doc.installed.db + '/_design/' + install_doc.doc_id + install_doc.open_path;
 }
 
 
@@ -477,7 +483,7 @@ exports.bestDashboardImage = function (install_doc) {
         if (meta.config.promo_images.small) {
             //http://ryan.garden20.com:5984/apps/wiki/wiki_2/_db/_design/wiki/icons/wiki_icon_128.png
 
-            return  designDoc(install_doc) +   '/' + meta.config.promo_images.small;
+            return designDoc(install_doc) + '/' + meta.config.promo_images.small;
         }
     } catch(e){}
 
@@ -486,8 +492,8 @@ exports.bestDashboardImage = function (install_doc) {
 
 
 function designDoc(install_doc) {
-    return './_couch/' + install_doc.installed.db +  '/_design/' +  install_doc.doc_id
-    //return  './apps/' + safe(install_doc.dashboard_title) +  '/_db/_design/' +  install_doc.doc_id
+    return './_couch/' + install_doc.installed.db + '/_design/' + install_doc.doc_id
+    //return './apps/' + safe(install_doc.dashboard_title) + '/_db/_design/' + install_doc.doc_id
 }
 
 
@@ -495,7 +501,7 @@ exports.bestIcon96 = function(install_doc) {
     var meta = install_doc.couchapp || install_doc.kanso;
     try {
         if (meta.config.icons['96']) {
-            return designDoc(install_doc) +    '/' + meta.config.icons['96'];
+            return designDoc(install_doc) + '/' + meta.config.icons['96'];
         }
     } catch(e){}
 
@@ -506,7 +512,7 @@ exports.bestIcon128 = function(install_doc) {
     var meta = install_doc.couchapp || install_doc.kanso;
     try {
         if (meta.config.icons['128']) {
-            return designDoc(install_doc) +   '/' + meta.config.icons['128'];
+            return designDoc(install_doc) + '/' + meta.config.icons['128'];
         }
     } catch(e){}
 
@@ -786,7 +792,7 @@ exports.setRootDashboardVhosts = function(host_options, callback) {
 
 
 
- exports.addVhostRule = function  (install_doc, /* optional */ hosts, callback) {
+ exports.addVhostRule = function (install_doc, /* optional */ hosts, callback) {
 
     if (_.isFunction(hosts)) {
         callback = hosts;
@@ -888,7 +894,7 @@ function deleteDoc(couch_db, db_name, doc_id, callback) {
     });
 }
 function saveAppDetails(dashboad_couch_db, app_db_name, app_data, callback) {
-    app_data.installed  = {
+    app_data.installed = {
         date : new Date().getTime(),
         db : app_db_name
     }
@@ -906,10 +912,10 @@ function saveAppDetails(dashboad_couch_db, app_db_name, app_data, callback) {
 }
 
 /**
- * this actively removes sync docs that have no replications
- * @param sync_overview
- * @param callback
- */
+* this actively removes sync docs that have no replications
+* @param sync_overview
+* @param callback
+*/
 
 exports.cleanSyncRecords = function(sync_overview, callback) {
     var clean = [];
@@ -954,7 +960,7 @@ exports.getSyncDocs = function(callback){
             $.couch.db('_replicator').allDocs({
                 include_docs : true,
                 success: function(response) {
-                    cb(null, _.filter(response.rows, function(row){ if (row.doc.sync_doc) return true;  }));
+                    cb(null, _.filter(response.rows, function(row){ if (row.doc.sync_doc) return true; }));
                 }
             })
         }
@@ -967,13 +973,13 @@ exports.getSyncDocs = function(callback){
             var doc = row.doc;
             doc.replications = replications_grouped_by_sync[doc._id];
             // get rid of the dashboard replication from the group list
-            var temp = _.filter(doc.replications, function(row){  if(row.doc.sync_group) return true;   });
+            var temp = _.filter(doc.replications, function(row){ if(row.doc.sync_group) return true; });
             doc.replications_group = _.map(
                 _.groupBy(temp, function(row){
                     return row.doc.sync_group;
                 }),
                 function(value, key) {
-                    var rep = { name: key, replications: value  }
+                    var rep = { name: key, replications: value }
                     rep.status_ok = true;
                     if (rep.replications[0].doc._replication_state == 'error') rep.status_ok = false;
                     if (rep.replications.length == 2) {
@@ -1040,7 +1046,7 @@ exports.initial_remote_dashboard_sync = function(remote_dashboard_db, callback) 
 
 exports.generate_remote_dashboard_url = function(dashboard_root_url, db_name) {
 
-    if (dashboard_root_url.indexOf('http://') !== 0  && dashboard_root_url.indexOf('https://') !== 0 ) {
+    if (dashboard_root_url.indexOf('http://') !== 0 && dashboard_root_url.indexOf('https://') !== 0 ) {
         dashboard_root_url = 'http://' + dashboard_root_url;
     }
 
@@ -1100,7 +1106,7 @@ function app_mapping(local_apps, remote_apps) {
             } else {
                 details.needs_review = true;
                 details.sync_app_count++;
-                var local_app =  _.first(local_app_options, function(test_app){ if (!test_app.claimed) return true; });
+                var local_app = _.first(local_app_options, function(test_app){ if (!test_app.claimed) return true; });
                 if (local_app) {
                     mapping.push({
                         from: remote_app,
@@ -1309,7 +1315,7 @@ exports.create_sync_mapping = function(mapping, host_options, user_details, call
         ensure_sync_doc_dbs(mapping.mapping, function(err){
             _.each(mapping.mapping, function(sync_doc, index){
                 if(!sync_doc.enable) return;
-                var remote_db_url = url.resolve(root_url,  sync_doc.from.db);
+                var remote_db_url = url.resolve(root_url, sync_doc.from.db);
                 var local_db = sync_doc.to.db;
 
                 if (sync_doc.install) to_record_install.push(sync_doc)
