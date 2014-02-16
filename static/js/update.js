@@ -65,15 +65,14 @@ $(function() {
                     results.installed_version = app.config.version;
                     results.id = installed_app_data._id;
 
-                    if (results.kanso.changelog) {
-                        updateChangelog(atob(results.kanso.changelog));
-                    } else {
-                        getGithubChangelog(appData.kanso.config.url, updateChangelog);
-                    }
-
                     $('#details_sidebar').html(handlebars.templates['update_sidebar.html']({meta: results, hosted: hosted, display_name: display_name}));
                     $('.loading').html(handlebars.templates['update_app_info.html'](results, {}));
 
+                    if (results.kanso.changelog) {
+                        updateChangelog(atob(results.kanso.changelog));
+                    } else {
+                        getGithubChangelog(installed_app_data.kanso.config.url, updateChangelog);
+                    }
                 });
 
             }
