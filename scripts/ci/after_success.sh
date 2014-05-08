@@ -8,7 +8,7 @@ if [ "$TRAVIS_BRANCH" == "master" ]; then
     kanso push "$SEED_DB" &&
     # Create .couch file for distribution purposes that includes medic markets
     # and push to medic staging site.
-    sudo ls /var/lib/couchdb &&
+    find sudo ls /var/lib/couchdb &&
     sudo cp /var/lib/couchdb/1.3.0/dashboard.couch ./static/dashboard.couch &&
     sudo chown travis ./static/dashboard.couch &&
     curl -X PUT http://localhost:5984/_config/couchdb/delayed_commits -d '"false"' &&
@@ -19,4 +19,8 @@ if [ "$TRAVIS_BRANCH" == "master" ]; then
     kanso push "$STAGING_DB"
 fi
 
-exit 0;
+if [ "$?" == 0 ]; then
+    exit 0;
+fi
+
+exit 1;
