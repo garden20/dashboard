@@ -159,185 +159,225 @@ $(function(){
         });
     }
 
+    function getAppSettings(doc, callback) {
+        var appSettingsUrl = '/' + doc.doc_id + '/_design/' + doc.doc_id + '/_rewrite/app_settings/' + doc.doc_id;
+        $.ajax({
+            dataType: 'json',
+            url: appSettingsUrl,
+            success: function(data) {
+                callback({
+                    ddoc: false,
+                    settings: data.settings,
+                    schema: data.schema
+                });
+            },
+            error: function () {
+                // app-settings package not installed - attempt slower fallback method
+                var doc_path = '_couch/' + doc.installed.db + '/_design/' + doc.doc_id;
+                $.getJSON(doc_path, function(data) {
+                    var schema;
+                    var ddoc_meta = data.kanso || data.couchapp;
+                    if (ddoc_meta && ddoc_meta.config && ddoc_meta.config.settings_schema) {
+                        schema = ddoc_meta.config.settings_schema;
+                    }
+                    callback({ 
+                        ddoc: data,
+                        settings: data.app_settings,
+                        schema: schema
+                    });
+                });
+            }
+        });
+    }
+
 
     function viewAppSettings(id) {
-        var editor, ddoc;
+        var editor, settings;
 
         viewAppBase(id, function(err, doc) {
-           $('.app_settings').addClass('active');
-           $('.tab_details').html(handlebars.templates['app_details_settings.html'](doc, {}));
+            $('.app_settings').addClass('active');
+            $('.tab_details').html(handlebars.templates['app_details_settings.html'](doc, {}));
 
-           var meta = doc.couchapp || doc.kanso;
-           if (meta.config.settings_schema) {
+            var meta = doc.couchapp || doc.kanso;
+            if (meta.config.settings_schema) {
 
-               var doc_path = '_couch/' + doc.installed.db + '/_design/' + doc.doc_id;
-               $.getJSON(doc_path, function(ddoc_data) {
-                   ddoc = ddoc_data;
-                   // allow editing the ddoc schema directly to help devs!
-                   var schema_to_use = meta.config.settings_schema;
-                   var ddoc_meta = ddoc.kanso || ddoc.couchapp;
-                   if (ddoc_meta && ddoc_meta.config && ddoc_meta.config.settings_schema) {
-                      schema_to_use = ddoc_meta.config.settings_schema;
-                   }
+                getAppSettings(doc, function(data) {
+                    settings = data;
+                    if (!settings.schema) {
+                        // default the schema
+                        settings.schema = meta.config.settings_schema;
+                    }
+                    if (settings.settings) {
+                        settings.schema.default = settings.settings;
+                    }
+                    editor = JsonEdit('app_settings_schema', settings.schema);
+                    cleanUpJsonEdit();
 
-                   if (ddoc.app_settings) {
-                       schema_to_use.default = ddoc.app_settings;
-                   }
-                   editor = JsonEdit('app_settings_schema', schema_to_use);
-                   cleanUpJsonEdit();
+                    $('a.backup').on('click', function(){
 
-                   $('a.backup').on('click', function(){
+                        if (!settings.settings) {
+                            return alert('Please save app settings first');
+                        }
 
-                   if (!ddoc.app_settings) return alert('Please save app settings first');
+                        var a = $(this)[0];
+                        var URL = window.webkitURL || window.URL;
+                        var BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
+                        var file = new Blob([JSON.stringify(settings.settings, null, 4)], {"type": "application\/json"});
 
-                      var a = $(this)[0];
-                      var URL = window.webkitURL || window.URL;
-                      var BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
-                      var file = new Blob([JSON.stringify(ddoc.app_settings, null, 4)], {"type": "application\/json"});
-
-                      var timestamp = moment().format('YYYY-MM-DD-HHmmss');
-                      a.download = doc.doc_id + '_' +  doc.installed.db + '_' + timestamp + '_settings.json';
-                      a.href = URL.createObjectURL(file);
-
-                   });
-
-                   $('button.restore').on('click', function(){
-                        $('#fileUploader').click();
-                   });
-                   $('#fileUploader').on('change', function() {
-
-                      if (this.files.length === 0) return;
-
-                      var reader = new FileReader();
-                      reader.onloadend = function(ev) {
-                         try {
-                           var json = JSON.parse(ev.target.result);
-                           schema_to_use.default = json;
-                           $('.je-field').remove();
-                           editor = JsonEdit('app_settings_schema', schema_to_use);
-                           cleanUpJsonEdit();
-                           alert('Restored values loaded. Click "Save" to complete restore.');
-                         } catch(e) {
-                            alert('Could not restore from file provided.');
-                         }
-                      }
-                      reader.readAsText(this.files[0]);
-
-
+                        var timestamp = moment().format('YYYY-MM-DD-HHmmss');
+                        a.download = doc.doc_id + '_' +  doc.installed.db + '_' + timestamp + '_settings.json';
+                        a.href = URL.createObjectURL(file);
 
                     });
 
+                    $('button.restore').on('click', function(ev){
+                        ev.preventDefault();
+                        $('#fileUploader').click();
+                    });
+                    $('#fileUploader').on('change', function(ev) {
 
-               });
+                        if (this.files.length === 0) return;
 
-           } else {
-                $('#app_settings_schema').html('<h2>No settings to configure</h2>')
-                $('.form-actions').hide();
-           }
+                        var reader = new FileReader();
+                        reader.onloadend = function(ev) {
+                            try {
+                                var json = JSON.parse(ev.target.result);
+                                schema_to_use.default = json;
+                                $('.je-field').remove();
+                                editor = JsonEdit('app_settings_schema', schema_to_use);
+                                cleanUpJsonEdit();
+                                alert('Restored values loaded. Click "Save" to complete restore.');
+                            } catch(e) {
+                                alert('Could not restore from file provided.');
+                            }
+                        }
+                        reader.readAsText(this.files[0]);
+                    });
 
-
-           function cleanUpJsonEdit() {
-                   // hide spinner
-                   $('#app_settings_schema .spinner').hide();
-
-                   // make html more boostrap compatible
-                   $('#app_settings_schema .je-field').addClass('control-group');
-
-                   // move title/field description to div for better UX
-                   $('#app_settings_schema .je-field').each(function(idx, el) {
-                       var $input = $(el).children('input'),
-                           text;
-                       // top level .je-field element has no input child
-                       if ($input.length === 0) {
-                           return;
-                       }
-                       text = $input.attr('title');
-                       // no description property on json schema, skip
-                       if (!text) {
-                           return;
-                       }
-                       $input.parent().append(
-                           '<div class="help-block">' +  text + '</div>'
-                       );
-                       $input.removeAttr('title');
-                   });
-           }
-
-
-           function onFormSubmit(ev) {
-               ev.preventDefault();
-
-               var btn = $('button.save');
-               btn.button('saving');
-               var err_alert = $('.alert');
-               err_alert.hide(10);
-
-               var form = editor.collect();
-
-               // clear errors on each form submission
-               err_alert.find('.msg').html('');
-               $('.je-field').removeClass('error');
-
-               if (!form.result.ok) {
-
-                   err_alert.show(200)
-                       .find('button.close')
-                       .on('click', function () { err_alert.hide(); })
-
-                   err_alert.find('h4')
-                        .text(form.result.msg);
-
-                   // append detailed errors msgs to div
-                   var $err_list = err_alert.find('.msg').append('<ul/>');
-
-                   console.error('failed validation', form.result);
-
-                   // highlight fields with errors
-                   var selector = '';
-                   function highlightErrors(obj, key) {
-                       if (!obj) return;
-                       if (!selector) {
-                           selector = '.je-' + key;
-                       }
-                       if (obj.ok === false && obj.isRoot === true) {
-                           if (_.isArray(obj.data)) {
-                               selector +=  ' .je-' + key;
-                           } else {
-                               $(selector + ' .je-' + key).addClass('error');
-                           }
-                           if (obj.msg) {
-                               $err_list.append(
-                                   '<li>' + key + ': ' + obj.msg +'</li>'
-                               );
-                           }
-                       }
-                       if (_.isArray(obj)) {
-                           _.each(obj[1], highlightErrors);
-                       } else if (_.isObject(obj) && !obj.isRoot) {
-                           _.each(obj, highlightErrors);
-                       } else if (_.isArray(obj.data)) {
-                           _.each(obj.data[0], highlightErrors);
-                       }
-                   };
-                   _.each(form.result.data, highlightErrors);
-
-                   return;
-               }
-
-               ddoc.app_settings = form.data;
-               $.couch.db(doc.installed.db).saveDoc(ddoc, {
-                  success : function() {
-                      btn.button('reset');
-                      humane.info('Save Complete');
-                  },
-                  error: function(status, error, reason) {
-                      console.error('couchdb error', status, error, reason);
-                      alert('Error ' + status + ' ' + reason);
-                  }
                 });
 
+            } else {
+                $('#app_settings_schema').html('<h2>No settings to configure</h2>')
+                $('.form-actions').hide();
+            }
+
+
+            function cleanUpJsonEdit() {
+                // hide spinner
+                $('#app_settings_schema .spinner').hide();
+
+                // make html more boostrap compatible
+                $('#app_settings_schema .je-field').addClass('control-group');
+
+                // move title/field description to div for better UX
+                $('#app_settings_schema .je-field').each(function(idx, el) {
+                    $(el).children('input, select, textarea, label').each(function(i, input) {
+                        var $input = $(input),
+                            text = $input.attr('title');
+                        // no description property on json schema, skip
+                        if (!text) {
+                            return;
+                        }
+                        $input.after(
+                            '<div class="help-block">' +  text + '</div>'
+                        );
+                        $input.removeAttr('title');
+                    });
+                });
+            }
+
+
+            function onFormSubmit(ev) {
+                ev.preventDefault();
+
+                var btn = $('button.save');
+                btn.button('saving');
+                var err_alert = $('.alert');
+                err_alert.hide(10);
+
+                var form = editor.collect();
+
+                // clear errors on each form submission
+                err_alert.find('.msg').html('');
+                $('.je-field').removeClass('error');
+
+                if (!form.result.ok) {
+
+                    err_alert.show(200)
+                        .find('button.close')
+                        .on('click', function () { err_alert.hide(); })
+
+                    err_alert.find('h4')
+                        .text(form.result.msg);
+
+                    // append detailed errors msgs to div
+                    var $err_list = err_alert.find('.msg').append('<ul/>');
+
+                    console.error('failed validation', form.result);
+
+                    // highlight fields with errors
+                    var selector = '';
+                    function highlightErrors(obj, key) {
+                        if (!obj) return;
+                        if (!selector) {
+                            selector = '.je-' + key;
+                        }
+                        if (obj.ok === false && obj.isRoot === true) {
+                            if (_.isArray(obj.data)) {
+                                selector +=  ' .je-' + key;
+                            } else {
+                                $(selector + ' .je-' + key).addClass('error');
+                            }
+                            if (obj.msg) {
+                                $err_list.append(
+                                    '<li>' + key + ': ' + obj.msg +'</li>'
+                                );
+                            }
+                        }
+                        if (_.isArray(obj)) {
+                            _.each(obj[1], highlightErrors);
+                        } else if (_.isObject(obj) && !obj.isRoot) {
+                            _.each(obj, highlightErrors);
+                        } else if (_.isArray(obj.data)) {
+                            _.each(obj.data[0], highlightErrors);
+                        }
+                    };
+                    _.each(form.result.data, highlightErrors);
+
+                    return;
+                }
+
+                function updateSuccess() {
+                    btn.button('reset');
+                    humane.info('Save Complete');
+                }
+
+                function updateError(status, error, reason) {
+                    console.error('couchdb error', status, error, reason);
+                    alert('Error ' + status + ' ' + reason);
+                }
+
+                if (settings.ddoc) {
+                    // app-settings package not installed - attempt slower fallback method
+                    settings.ddoc.app_settings = form.data;
+                    $.couch.db(doc.installed.db).saveDoc(settings.ddoc, {
+                        success: updateSuccess,
+                        error: updateError
+                    });
+                } else {
+                    $.ajax({
+                        type: 'PUT',
+                        data: JSON.stringify(form.data),
+                        contentType: 'application/json',
+                        dataType: 'json',
+                        url: '/' + doc.doc_id + '/_design/' + doc.doc_id + '/_rewrite/update_settings/' + doc.doc_id,
+                        success: updateSuccess,
+                        error: updateError
+                    });
+                }
+
             };
-            $('form').on('submit', onFormSubmit);
+            $('form.app-settings').on('submit', onFormSubmit);
         });
     }
 
@@ -554,7 +594,7 @@ $(function(){
                     var currentVersion = remote_data.config.version;
                     $('.update-board tr.dashboard td.available-version').html(currentVersion);
                     if (semver.lt(ourVersion, currentVersion )) {
-                        $('.update-board tr.dashboard div.update-action').show();
+                        $('.update-board tr.dashboard .update-action').show();
                     }
                 },
                 error : function() {
@@ -576,7 +616,7 @@ $(function(){
                         if (app.value.availableVersion) {
                             $('.update-board tr.'+ app.id +' td.available-version').html(app.value.availableVersion);
                            if (app.value.needsUpdate) {
-                               $('.update-board tr.'+ app.id +' div.update-action').show();
+                               $('.update-board tr.'+ app.id +' .update-action').show();
                            }
                         } else {
                             $('.update-board tr.'+ app.id +' td.available-version').html("Can't determine");
@@ -630,27 +670,6 @@ $(function(){
 
     }
 
-
-    $('.update-board  button.update-run-app').live('click',function(){
-        var btn = $(this);
-        btn.button('loading');
-        var id = btn.data('id');
-        dashboard_core.updateApp(id, function(err, app_data) {
-            if (err) {
-                return alert(err);
-            } else {
-                btn
-                 .button('complete')
-                 .addClass('disabled')
-                 .attr('disabled', 'disabled');
-                var meta = app_data.couchapp || app_data.kanso;
-
-                $('.' + id + ' .installed-version').html(meta.config.version);
-            }
-        });
-
-
-    });
 
     $('.update-board tr.dashboard .update-run').live('click',function(){
        var btn = $(this);
