@@ -234,6 +234,7 @@ $(function(){
                         ev.preventDefault();
                         $('#fileUploader').click();
                     });
+
                     $('#fileUploader').on('change', function(ev) {
 
                         if (this.files.length === 0) return;
@@ -242,12 +243,13 @@ $(function(){
                         reader.onloadend = function(ev) {
                             try {
                                 var json = JSON.parse(ev.target.result);
-                                schema_to_use.default = json;
+                                settings.schema.default = json;
                                 $('.je-field').remove();
-                                editor = JsonEdit('app_settings_schema', schema_to_use);
+                                editor = JsonEdit('app_settings_schema', settings.schema);
                                 cleanUpJsonEdit();
                                 alert('Restored values loaded. Click "Save" to complete restore.');
                             } catch(e) {
+                                console.log('Error restoring settings', e);
                                 alert('Could not restore from file provided.');
                             }
                         }
