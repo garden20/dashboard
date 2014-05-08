@@ -1,15 +1,15 @@
-var dashboard_core = require('lib/dashboard_core');
-var dashboard_links = require('lib/dashboard_links');
-var _ = require('underscore')._;
-var handlebars = require('handlebars');
-var utils = require('lib/utils');
-var session = require('session');
-var users = require("users");
-var semver = require("semver");
-var revalidator = require("revalidator");
-var password = require('lib/password');
-var flattr = require('flattr');
-var async = require('async');
+var dashboard_core = require('lib/dashboard_core'),
+    dashboard_links = require('lib/dashboard_links'),
+    _ = require('underscore')._,
+    handlebars = require('handlebars'),
+    utils = require('lib/utils'),
+    session = require('session'),
+    users = require('users'),
+    semver = require('semver'),
+    revalidator = require('revalidator'),
+    password = require('lib/password'),
+    flattr = require('flattr'),
+    async = require('async');
 
 
 $(function(){
@@ -602,7 +602,6 @@ $(function(){
             });
         });
 
-
         dashboard_core.getInstalledAppsByMarket(function(err, apps) {
             _.each(apps, function(apps, location ) {
                 var data = {
@@ -611,18 +610,24 @@ $(function(){
                 };
                 $('.update-board').append(handlebars.templates['settings-app-updates.html'](data, {}));
                 dashboard_core.checkUpdates(data, function(err, appVersions) {
-                    if (!appVersions) return;
-                    _.each(appVersions.apps, function(app) {
-                        if (app.value.availableVersion) {
-                            $('.update-board tr.'+ app.id +' td.available-version').html(app.value.availableVersion);
-                           if (app.value.needsUpdate) {
-                               $('.update-board tr.'+ app.id +' .update-action').show();
-                           }
-                        } else {
-                            $('.update-board tr.'+ app.id +' td.available-version').html("Can't determine");
-                        }
-
-                    })
+                    if (appVersions) {
+                        _.each(appVersions.apps, function(app) {
+                            var row = $('.update-board tr.' + app.id);
+                            if (app.value.availableVersion) {
+                                row.find('td.available-version').html(app.value.availableVersion);
+                                if (app.value.needsUpdate) {
+                                    row.find('.update-action').show();
+                                }
+                            } else {
+                                row.find('td.available-version').html("Can't determine");
+                            }
+                        });
+                    } else {
+                        console.log(err);
+                        _.each(apps, function(app) {
+                            $('.update-board tr.' + app.id + ' td.available-version').html("Can't determine");
+                        });
+                    }
                 });
             })
         });
