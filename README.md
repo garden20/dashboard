@@ -20,12 +20,14 @@ npm install -g kanso
 ### Development
 
 ```
+kanso install &&
 kanso push http://localhost:5984/dashboard
 ```
 
 ### Production
 
 ```
+kanso install &&
 kanso push https://example.com/dashboard
 ```
 
