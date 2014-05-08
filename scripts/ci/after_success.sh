@@ -6,7 +6,7 @@ STAGING_DB='http://travis-ci:a5nghmongP!@staging.dev.medicmobile.org/dashboard'
 if [ "$TRAVIS_BRANCH" == "master" ]; then
 
     # Update seed URL for all dashboards in the world.
-    kanso push "$SEED_DB" || exit "$?";
+    kanso push --minify "$SEED_DB" || exit "$?";
 
     # Create .couch file for distribution purposes that includes medic markets
     # and push to medic staging site.
