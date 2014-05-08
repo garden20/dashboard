@@ -28,7 +28,7 @@ kanso push http://localhost:5984/dashboard
 
 ```
 kanso install &&
-kanso push https://example.com/dashboard
+kanso push --minify https://example.com/dashboard
 ```
 
 #### Vhosts
