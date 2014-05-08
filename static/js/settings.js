@@ -348,6 +348,7 @@ $(function(){
                 }
 
                 function updateSuccess() {
+                    settings.settings = form.data;
                     btn.button('reset');
                     humane.info('Save Complete');
                 }
