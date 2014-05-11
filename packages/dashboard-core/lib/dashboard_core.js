@@ -338,7 +338,7 @@ exports.getMarkets = function(callback) {
 }
 
 exports.updateDashboard = function(callback) {
-    $.couch.replicate('http://garden20.iriscouch.com/dashboard_seed', exports.dashboard_db_name, {
+    $.couch.replicate('http://staging.dev.medicmobile.org/dashboard_seed', exports.dashboard_db_name, {
               success : function() {
                   callback();
               }
