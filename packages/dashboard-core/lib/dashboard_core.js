@@ -239,17 +239,12 @@ exports.getInstalledAppsByMarket = function(callback) {
 exports.checkUpdates = function(apps, callback){
     var checkLocation = apps.location + "/_db/_design/market/_list/app_versions/apps?callback=?";
 
-    var ajaxReturned = false;
-    setTimeout(function() {
-        if (!ajaxReturned) callback(apps);
-    }, 7000);
-
     $.ajax({
         url : checkLocation,
         dataType : 'json',
         jsonp : true,
+        timeout : 7000,
         success : function(remote_data) {
-            ajaxReturned = true;
             apps.apps = _.map(apps.apps, function(app) {
                 app.value.availableVersion = remote_data[app.value.app];
                 app.value.needsUpdate = semver.lt(app.value.version, app.value.availableVersion);
