@@ -11,15 +11,16 @@ The name also pays tribute to the [Garden](https://couchapp.org/page/garden) pro
 
 Learn more on the [wiki](https://github.com/kanso/garden/wiki).
 
-## Deploy
+## Dependencies
 
-```
-npm install -g kanso
-```
+Requires [CouchDB](http://couchdb.apache.org/), [NodeJS](http://nodejs.org/)
+and [Kanso](http://kan.so/). 
 
 ### Development
 
 ```
+git clone https://github.com/garden20/dashboard &&
+git checkout develop &&
 kanso install &&
 kanso push http://localhost:5984/dashboard
 ```
@@ -27,6 +28,8 @@ kanso push http://localhost:5984/dashboard
 ### Production
 
 ```
+git clone https://github.com/garden20/dashboard &&
+git checkout master &&
 kanso install &&
 kanso push --minify https://example.com/dashboard
 ```
