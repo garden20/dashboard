@@ -161,32 +161,39 @@ $(function(){
 
     function getAppSettings(doc, callback) {
         var appSettingsUrl = '/' + doc.doc_id + '/_design/' + doc.doc_id + '/_rewrite/app_settings/' + doc.doc_id;
+        function handleError() {
+            // app-settings package not installed - attempt slower fallback method
+            var doc_path = '_couch/' + doc.installed.db + '/_design/' + doc.doc_id;
+            $.getJSON(doc_path, function(data) {
+                var schema;
+                var ddoc_meta = data.kanso || data.couchapp;
+                if (ddoc_meta && ddoc_meta.config && ddoc_meta.config.settings_schema) {
+                    schema = ddoc_meta.config.settings_schema;
+                }
+                callback({
+                    ddoc: data,
+                    settings: data.app_settings,
+                    schema: schema
+                });
+            });
+        }
         $.ajax({
             dataType: 'json',
             url: appSettingsUrl,
             success: function(data) {
-                callback({
-                    ddoc: false,
-                    settings: data.settings,
-                    schema: data.schema
-                });
-            },
-            error: function () {
-                // app-settings package not installed - attempt slower fallback method
-                var doc_path = '_couch/' + doc.installed.db + '/_design/' + doc.doc_id;
-                $.getJSON(doc_path, function(data) {
-                    var schema;
-                    var ddoc_meta = data.kanso || data.couchapp;
-                    if (ddoc_meta && ddoc_meta.config && ddoc_meta.config.settings_schema) {
-                        schema = ddoc_meta.config.settings_schema;
-                    }
-                    callback({ 
-                        ddoc: data,
-                        settings: data.app_settings,
-                        schema: schema
+                // few basic checks we have the app_settings API
+                if (typeof data.settings === 'object'
+                    && typeof data.schema === 'object') {
+                    callback({
+                        ddoc: false,
+                        settings: data.settings,
+                        schema: data.schema
                     });
-                });
-            }
+                } else {
+                    handleError();
+                }
+            },
+            error: handleError
         });
     }
 
@@ -361,7 +368,11 @@ $(function(){
                 }
 
                 if (settings.ddoc) {
-                    // app-settings package not installed - attempt slower fallback method
+                    console.warn(
+                        'app-settings package not installed,'
+                        + ' attempting to use slower fallback method to update settings.'
+                        + ' See: https://github.com/garden20/app_settings'
+                    );
                     settings.ddoc.app_settings = form.data;
                     $.couch.db(doc.installed.db).saveDoc(settings.ddoc, {
                         success: updateSuccess,
