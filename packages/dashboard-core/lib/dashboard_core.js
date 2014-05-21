@@ -69,15 +69,13 @@ function install_app_security(install_doc, db_name, update_status_function, call
         callback(null, install_doc);
     } else {
         exports.addDBReaderRole(db_name, '_admin', function(err) {
-
             if (install_doc.remote_user) {
                 exports.addDBReaderUser(db_name, install_doc.remote_user, function(err) {
                     callback(err, install_doc);
                 })
-            } else callback(err, install_doc);
-
-
-
+            } else {
+                callback(err, install_doc);
+            }
         });
     }
 }
@@ -116,21 +114,48 @@ function app_gather_current_settings(db, ddoc_id, cb) {
     });
 }
 
-function apply_app_settings(db, ddoc_id, app_settings, cb) {
+exports.migrate_app_settings = function (db, ddoc_id, doc, current_version, settings, cb) {
+    var meta = doc.couchapp || doc.kanso;
+    var path = meta && meta.config && meta.config.migration_path;
+    if (path) {
+        $.ajax({
+            url: '/' + db + '/' + ddoc_id + '/_rewrite/' + path,
+            type: 'POST',
+            data: JSON.stringify({ 
+                settings: settings,
+                from: current_version
+            }),
+            dataType: 'json',
+            success: function(data) {
+                cb(null, data);
+            },
+            error: function(jqXHR, textStatus, error) {
+                cb('Error invoking settings migration: ' + error);
+            }
+        });
+    } else {
+        cb(null, settings);
+    }
+}
+
+function apply_app_settings(db, ddoc_id, current_version, app_settings, cb) {
     if (!app_settings) return cb(null);
     $.couch.db(db).openDoc(ddoc_id, {
         success: function(doc) {
-            doc.app_settings = app_settings; // TODO - maybe use _.defaults for new settings not yet seen?
-            $.couch.db(db).saveDoc(doc, {
-                success : function(){
-                    cb(null);
+            exports.migrate_app_settings(db, ddoc_id, doc, current_version, app_settings, function(err, updated) {
+                if (err) {
+                    return cb(err)
                 }
+                _.extend(doc.app_settings, updated);
+                $.couch.db(db).saveDoc(doc, {
+                    success: function() {
+                        cb(null);
+                    }
+                });
             });
         }
     });
 }
-
-
 
 function app_replicate(src, target, doc_id, callback) {
     $.couch.replicate(src, target, {
@@ -142,8 +167,8 @@ function app_replicate(src, target, doc_id, callback) {
                 return callback('error replicating ' + txtStatus);
             }
         }, {
-       create_target:true,
-       doc_ids : [doc_id]
+        create_target:true,
+        doc_ids : [doc_id]
     });
 }
 
@@ -261,7 +286,14 @@ exports.checkUpdates = function(apps, callback){
     });
 }
 
-exports.updateApp = function(app_id, update_status_function, cb) {
+exports.updateApp = function(app_id, current_version, update_status_function, cb) {
+
+    if (!cb) {
+        cb = update_status_function;
+        update_status_function = current_version;
+        current_version = undefined;
+    }
+
     $.couch.urlPrefix = '../_couch';
     var callback = function(err, data) {
         $.couch.urlPrefix = '_couch';
@@ -287,7 +319,7 @@ exports.updateApp = function(app_id, update_status_function, cb) {
                 },
                 function(callback) {
                     update_status_function('Merging Settings', '80%');
-                    apply_app_settings(app_data.installed.db, '_design/' + app_data.doc_id, current_app_settings, callback);
+                    apply_app_settings(app_data.installed.db, '_design/' + app_data.doc_id, current_version, current_app_settings, callback);
                 },
                 function(callback) {
                     update_status_function('Configuring Type', '98%');

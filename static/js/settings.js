@@ -226,6 +226,7 @@ $(function(){
                             return alert('Please save app settings first');
                         }
 
+                        settings.settings._version = meta.config.version;
                         var a = $(this)[0];
                         var URL = window.webkitURL || window.URL;
                         var BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
@@ -248,17 +249,38 @@ $(function(){
 
                         var reader = new FileReader();
                         reader.onloadend = function(ev) {
+                            var json;
                             try {
-                                var json = JSON.parse(ev.target.result);
-                                settings.schema.default = json;
-                                $('.je-field').remove();
-                                editor = JsonEdit('app_settings_schema', settings.schema);
-                                cleanUpJsonEdit();
-                                alert('Restored values loaded. Click "Save" to complete restore.');
+                                json = JSON.parse(ev.target.result);
                             } catch(e) {
                                 console.log('Error restoring settings', e);
                                 alert('Could not restore from file provided.');
+                                return;
                             }
+
+                            var version = json._version;
+                            delete json._version;
+
+                            dashboard_core.migrate_app_settings(
+                                doc.installed.db, 
+                                '_design/' + doc.doc_id, 
+                                doc, 
+                                version, 
+                                json, 
+                                function(err, updated) {
+                                    if (err) {
+                                        console.log('Error restoring settings', err);
+                                        alert('Could not restore from file provided.');
+                                    } else {
+                                        settings.schema.default = updated;
+                                        $('.je-field').remove();
+                                        editor = JsonEdit('app_settings_schema', settings.schema);
+                                        cleanUpJsonEdit();
+                                        alert('Restored values loaded. Click "Save" to complete restore.');
+                                    }
+                                }
+                            );
+
                         }
                         reader.readAsText(this.files[0]);
                     });
