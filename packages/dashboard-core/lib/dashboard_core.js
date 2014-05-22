@@ -114,12 +114,12 @@ function app_gather_current_settings(db, ddoc_id, cb) {
     });
 }
 
-exports.migrate_app_settings = function (db, ddoc_id, doc, current_version, settings, cb) {
+exports.migrate_app_settings = function (doc, current_version, settings, cb) {
     var meta = doc.couchapp || doc.kanso;
     var path = meta && meta.config && meta.config.migration_path;
     if (path) {
         $.ajax({
-            url: '/' + db + '/' + ddoc_id + '/_rewrite/' + path,
+            url: path,
             type: 'POST',
             data: JSON.stringify({ 
                 settings: settings,

@@ -262,11 +262,9 @@ $(function(){
                             delete json._version;
 
                             dashboard_core.migrate_app_settings(
-                                doc.installed.db, 
-                                '_design/' + doc.doc_id, 
-                                doc, 
-                                version, 
-                                json, 
+                                doc,
+                                version,
+                                json,
                                 function(err, updated) {
                                     if (err) {
                                         console.log('Error restoring settings', err);
