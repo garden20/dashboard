@@ -86,7 +86,8 @@ $(function() {
         updateStatus('Updating App', '0%');
 
         var id = $(this).data('id');
-        dashboard_core.updateApp(id, updateStatus, function(err, app_data) {
+        var version = $(this).data('version');
+        dashboard_core.updateApp(id, version, updateStatus, function(err, app_data) {
 
             if (err) {
                 console.log(err);
