@@ -293,28 +293,33 @@ $(function(){
 
             function cleanUpJsonEdit() {
                 // hide spinner
-                $('#app_settings_schema .spinner').hide();
+                $('#app_settings_schema .spinner').css('display','none');
 
                 // make html more boostrap compatible
                 $('#app_settings_schema .je-field').addClass('control-group');
 
                 // move title/field description to div for better UX
-                $('#app_settings_schema .je-field').each(function(idx, el) {
-                    $(el).children('input, select, textarea, label').each(function(i, input) {
-                        var $input = $(input),
-                            text = $input.attr('title');
-                        // no description property on json schema, skip
-                        if (!text) {
-                            return;
-                        }
-                        $input.after(
-                            '<div class="help-block">' +  text + '</div>'
-                        );
-                        $input.removeAttr('title');
-                    });
-                });
+                var tagnames = ['input','select','textarea','label'];
+                for (var i = 0; i < tagnames.length; i++) {
+                    cleanUpJsonEditTitle(tagnames[i]);
+                }
             }
 
+            /**
+             * Create a help block for the title. Defers execution to improve
+             * UI rendering performance.
+             */
+            function cleanUpJsonEditTitle(tagname) {
+                setTimeout(function() {
+                    $('#app_settings_schema .je-field > ' + tagname + '[title]')
+                        .each(function() {
+                            $(this).after(
+                                '<div class="help-block">' +  this.title + '</div>'
+                            );
+                            this.title = '';
+                        });
+                }, 0);
+            }
 
             function onFormSubmit(ev) {
                 ev.preventDefault();
