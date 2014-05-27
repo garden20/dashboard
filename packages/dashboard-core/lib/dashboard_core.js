@@ -142,7 +142,7 @@ function apply_app_settings(db, ddoc_id, current_version, app_settings, cb) {
     if (!app_settings) return cb(null);
     $.couch.db(db).openDoc(ddoc_id, {
         success: function(doc) {
-            exports.migrate_app_settings(db, ddoc_id, doc, current_version, app_settings, function(err, updated) {
+            exports.migrate_app_settings(doc, current_version, app_settings, function(err, updated) {
                 if (err) {
                     return cb(err)
                 }
