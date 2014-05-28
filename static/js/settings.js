@@ -716,17 +716,22 @@ $(function(){
 
 
     $('.update-board tr.dashboard .update-run').live('click',function(){
-       var btn = $(this);
-       btn.button('loading');
-       $.couch.replicate('http://staging.dev.medicmobile.org/dashboard_seed', dashboard_core.dashboard_db_name, {
-          success : function() {
-              btn
-                  .button('complete')
-                  .addClass('disabled')
-                  .attr('disabled', 'disabled');
-
-          }
-       }, {doc_ids : [ '_design/dashboard'  ] });
+        var btn = $(this);
+        var wrapper = btn.closest('td');
+        btn.hide();
+        wrapper.find('.loading').show();
+        $.couch.replicate('http://staging.dev.medicmobile.org/dashboard_seed', dashboard_core.dashboard_db_name, {
+            success : function() {
+                console.log('successfully replicated dashboard');
+                wrapper.find('.loading').hide();
+                wrapper.find('.status').text('Finished').show();
+            },
+            error : function(jqXHR, textStatus, errorThrown) {
+                console.log('error replicating dashboard', textStatus, errorThrown);
+                wrapper.find('.loading').hide();
+                wrapper.find('.status').text('Error').show();
+            }
+        }, {doc_ids : [ '_design/dashboard' ] });
     });
 
 
