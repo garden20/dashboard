@@ -144,12 +144,14 @@ function apply_app_settings(db, ddoc_id, current_version, app_settings, cb) {
         success: function(doc) {
             exports.migrate_app_settings(doc, current_version, app_settings, function(err, updated) {
                 if (err) {
-                    return cb(err)
+                    // migration failed, but app is updated. do the best we can.
+                    doc.app_settings = app_settings;
+                } else {
+                    _.extend(doc.app_settings, updated);
                 }
-                _.extend(doc.app_settings, updated);
                 $.couch.db(db).saveDoc(doc, {
                     success: function() {
-                        cb(null);
+                        cb(err);
                     }
                 });
             });
