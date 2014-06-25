@@ -295,7 +295,7 @@ exports.updateApp = function(app_id, current_version, update_status_function, cb
         update_status_function = current_version;
         current_version = undefined;
     }
-
+    
     $.couch.urlPrefix = '../_couch';
     var callback = function(err, data) {
         $.couch.urlPrefix = '_couch';
@@ -320,8 +320,14 @@ exports.updateApp = function(app_id, current_version, update_status_function, cb
                     app_replicate(app_data.db_src, app_data.installed.db, app_data.doc_id, callback);
                 },
                 function(callback) {
+                     copyDoc(db, app_data.doc_id, '_design/' + app_data.doc_id, true, callback);
+                },
+                function(callback) {
                     update_status_function('Merging Settings', '80%');
                     apply_app_settings(app_data.installed.db, '_design/' + app_data.doc_id, current_version, current_app_settings, callback);
+                },
+                function(callback) {
+                    deleteDoc(db, app_data.installed.db, app_data.doc_id, callback);
                 },
                 function(callback) {
                     update_status_function('Configuring Type', '98%');

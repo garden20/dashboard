@@ -66,7 +66,7 @@ exports.appUrl = function(settingsDoc, app_install_doc, req) {
 }
 
 exports.appSettingsUrl = function(settingsDoc, app_install_doc) {
-    if (settingsDoc.host_options.rootDashboard) {
+    if (settingsDoc.host_options.short_urls && settingsDoc.host_options.rootDashboard) {
         return '/settings#/apps/' + app_install_doc._id;
     }
 

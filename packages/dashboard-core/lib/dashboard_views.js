@@ -94,6 +94,12 @@ exports.get_markets =  {
         if (doc.type && doc.type === 'market' ) {
             emit(doc.name, doc.url);
         }
+        if (doc.type && doc.type === 'install' && doc.src) {
+            var parts = doc.src.split('/');
+            parts.splice(parts.length - 2);
+            var market = parts.join('/') + '/';
+            emit(market, market);
+        }
      }
 }
 

@@ -1,6 +1,6 @@
 {
     "name": "dashboard-core",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "core functions for managing a dashboard",
     "modules": "lib",
     "dependencies": {
