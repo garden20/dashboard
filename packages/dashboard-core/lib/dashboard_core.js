@@ -103,13 +103,40 @@ exports.install_app_vhosts = function (host_options, install_doc, update_status_
     }
 }
 
+/*
+ * Fetch `app_settings` property on the ddoc using the app-settings module
+ * because it's more efficient than fetching the entire ddoc.  If not found
+ * then do failover routine looking at entire ddoc. We should encourage authors
+ * who want the features of dashboad to manage the app_settings property to use
+ * the app-settings module.
+ */
 function app_gather_current_settings(db, ddoc_id, cb) {
-     $.couch.db(db).openDoc(ddoc_id, {
-        success: function(doc) {
-            cb(null, doc.app_settings);
+
+    function failover() {
+        $.couch.db(db).openDoc(ddoc_id, {
+            success: function(doc) {
+                cb(null, doc.app_settings);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                cb(textStatus + ': ' + errorThrown);
+            }
+        });
+    }
+
+    var $db = $.couch.db(db),
+        ddoc_parts = ddoc_id.split('/'),
+        url = [$db.uri + ddoc_id, '_rewrite/app_settings', ddoc_parts[1]].join('/');
+
+    $.ajax({
+        url: url,
+        success: function(data) {
+            cb(null, data.settings);
         },
-        error: function(jqXHR, textStatus, errorThrown) {
-            cb(textStatus + ': ' + errorThrown);
+        error: function(jqXHR, textStatus, error) {
+            if (jqXHR.status == '404') {
+                return failover();
+            }
+            cb('Error gatthering settings: ' + textStatus + ' ' + error);
         }
     });
 }
@@ -139,7 +166,9 @@ exports.migrate_app_settings = function (doc, current_version, settings, cb) {
 }
 
 function apply_app_settings(db, ddoc_id, current_version, app_settings, cb) {
+
     if (!app_settings) return cb(null);
+
     $.couch.db(db).openDoc(ddoc_id, {
         success: function(doc) {
             exports.migrate_app_settings(doc, current_version, app_settings, function(err, updated) {
@@ -149,14 +178,40 @@ function apply_app_settings(db, ddoc_id, current_version, app_settings, cb) {
                 } else {
                     _.extend(doc.app_settings, updated);
                 }
-                $.couch.db(db).saveDoc(doc, {
+
+                function failover() {
+                    $.couch.db(db).saveDoc(doc, {
+                        success: function() {
+                            cb(err);
+                        }
+                    });
+                }
+
+                var $db = $.couch.db(db),
+                    ddoc_parts = ddoc_id.split('/'),
+                    url = [$db.uri + ddoc_id, '_rewrite/update_settings', ddoc_parts[1]].join('/');
+
+                $.ajax({
+                    url: url,
+                    type: 'PUT',
+                    data : JSON.stringify(doc.app_settings),
+                    dataType : 'json',
+                    contentType: 'application/json',
                     success: function() {
                         cb(err);
+                    },
+                    error: function(jqXHR, textStatus, error) {
+                        if (jqXHR.status == '404') {
+                            return failover();
+                        }
+                        cb('Error saving settings: ' + textStatus + ' ' + error);
                     }
                 });
             });
         }
     });
+
+
 }
 
 function app_replicate(src, target, doc_id, callback) {
