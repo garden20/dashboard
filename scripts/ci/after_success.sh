@@ -3,6 +3,11 @@
 SEED_DB='http://travis-ci:a5nghmongP!@staging.dev.medicmobile.org/dashboard_seed'
 STAGING_DB='http://travis-ci:a5nghmongP!@staging.dev.medicmobile.org/dashboard'
 
+# Never push to market on pull requests
+if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+    exit 0;
+fi
+
 if [ "$TRAVIS_BRANCH" == "master" ]; then
 
     # Update seed URL for all dashboards in the world.
