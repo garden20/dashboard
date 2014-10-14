@@ -103,25 +103,7 @@ exports.install_app_vhosts = function (host_options, install_doc, update_status_
     }
 }
 
-/*
- * Fetch `app_settings` property on the ddoc using the app-settings module
- * because it's more efficient than fetching the entire ddoc.  If not found
- * then do failover routine looking at entire ddoc. We should encourage authors
- * who want the features of dashboad to manage the app_settings property to use
- * the app-settings module.
- */
-function app_gather_current_settings(db, ddoc_id, cb) {
-
-    function failover() {
-        $.couch.db(db).openDoc(ddoc_id, {
-            success: function(doc) {
-                cb(null, doc.app_settings);
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                cb(textStatus + ': ' + errorThrown);
-            }
-        });
-    }
+function has_app_settings_support(db, ddoc_id, cb) {
 
     var $db = $.couch.db(db),
         ddoc_parts = ddoc_id.split('/'),
@@ -129,27 +111,86 @@ function app_gather_current_settings(db, ddoc_id, cb) {
 
     $.ajax({
         url: url,
-        success: function(data) {
-            cb(null, data.settings);
+        type: 'HEAD',
+        success: function() {
+            cb(null, true);
         },
         error: function(jqXHR, textStatus, error) {
             if (jqXHR.status == '404') {
-                return failover();
+                console.warn('app-settings support not found: ' + url);
+                cb(null, false);
+            } else {
+                console.error('Failed to query app-settings: ' + textStatus + ' ' + error);
+                cb(null, false);
             }
-            cb('Error gatthering settings: ' + textStatus + ' ' + error);
         }
     });
+
 }
 
-exports.migrate_app_settings = function (doc, current_version, settings, cb) {
-    var meta = doc.couchapp || doc.kanso;
-    var path = meta && meta.config && meta.config.migration_path;
+/*
+ * Fetch `app_settings` property on the ddoc using the app-settings module
+ * because it's more efficient than fetching the entire ddoc.  If not found
+ * then do failover routine looking at entire ddoc. We encourage authors to use
+ * the app-settings package  when using dashboard to manage settings.
+ *
+ * Call callback with data object structure:
+ *   {
+ *    meta: ddoc.kanso || ddoc.couchapp,
+ *    settings: ddoc.app_settings
+ *   }
+ */
+function app_gather_current_settings(db, ddoc_id, cb) {
+
+    function _error(jqXHR, textStatus, error) {
+        cb('Failed gathering settings: ' + textStatus + ' ' + error);
+    }
+
+    function _fetch_app_settings() {
+        var $db = $.couch.db(db),
+            ddoc_parts = ddoc_id.split('/'),
+            url = [$db.uri + ddoc_id, '_rewrite/app_settings', ddoc_parts[1]].join('/');
+        $.ajax({
+            url: url,
+            success: function(data) {
+                cb(null, {
+                    settings: data.settings,
+                    meta: data.meta
+                })
+            },
+            error: _error
+        });
+    }
+
+    function _fetch_ddoc() {
+        $.couch.db(db).openDoc(ddoc_id, {
+            success: function(data) {
+                cb(null, {
+                    settings: data.app_settings,
+                    meta: data.kanso || data.couchapp
+                });
+            },
+            error: _error
+        });
+    }
+
+    has_app_settings_support(db, ddoc_id, function(err, bool) {
+        err ? cb(err) : (
+            bool ? _fetch_app_settings() : _fetch_ddoc()
+        );
+    });
+
+}
+
+exports.migrate_app_settings = function (data, current_version, cb) {
+    //var meta = doc.couchapp || doc.kanso;
+    var path = data.meta && data.meta.config && data.meta.config.migration_path;
     if (path) {
         $.ajax({
             url: path,
             type: 'POST',
-            data: JSON.stringify({ 
-                settings: settings,
+            data: JSON.stringify({
+                settings: data.settings,
                 from: current_version
             }),
             dataType: 'json',
@@ -161,57 +202,78 @@ exports.migrate_app_settings = function (doc, current_version, settings, cb) {
             }
         });
     } else {
-        cb(null, settings);
+        cb(null, data.settings);
     }
 }
 
-function apply_app_settings(db, ddoc_id, current_version, app_settings, cb) {
+/*
+ * Save the migrated settings if migration succeeds, otherwise save the
+ * non-migrated ones on the new ddoc.
+ */
+function apply_app_settings(db, ddoc_id, current_version, data, cb) {
 
-    if (!app_settings) return cb(null);
+    if (!data) return cb(null);
 
-    $.couch.db(db).openDoc(ddoc_id, {
-        success: function(doc) {
-            exports.migrate_app_settings(doc, current_version, app_settings, function(err, updated) {
-                if (err) {
-                    // migration failed, but app is updated. do the best we can.
-                    doc.app_settings = app_settings;
-                } else {
-                    _.extend(doc.app_settings, updated);
-                }
+    function _error(jqXHR, textStatus, error) {
+        cb('Error saving settings: ' + textStatus + ' ' + error);
+    }
 
-                function failover() {
+    function _migration_error(err) {
+        if (err) {
+            console.error(
+                'Setting migration failed, keeping non-migrated ' +
+                'settings as best effort. ' + err
+            );
+        }
+    }
+
+    function _update_ddoc() {
+        $.couch.db(db).openDoc(ddoc_id, {
+            success: function(doc) {
+                exports.migrate_app_settings(data, current_version, function(err, updated) {
+                    if (err) {
+                        _migration_error(err);
+                        doc.app_settings = data.settings;
+                    } else {
+                        _.extend(doc.app_settings, updated);
+                    }
                     $.couch.db(db).saveDoc(doc, {
                         success: function() {
                             cb(err);
-                        }
+                        },
+                        error: _error
                     });
-                }
-
-                var $db = $.couch.db(db),
-                    ddoc_parts = ddoc_id.split('/'),
-                    url = [$db.uri + ddoc_id, '_rewrite/update_settings', ddoc_parts[1]].join('/');
-
-                $.ajax({
-                    url: url,
-                    type: 'PUT',
-                    data : JSON.stringify(doc.app_settings),
-                    dataType : 'json',
-                    contentType: 'application/json',
-                    success: function() {
-                        cb(err);
-                    },
-                    error: function(jqXHR, textStatus, error) {
-                        if (jqXHR.status == '404') {
-                            return failover();
-                        }
-                        cb('Error saving settings: ' + textStatus + ' ' + error);
-                    }
                 });
+            },
+            error: _error
+        });
+    }
+
+    function _update_app_settings() {
+        var $db = $.couch.db(db),
+            ddoc_parts = ddoc_id.split('/'),
+            url = [$db.uri + ddoc_id, '_rewrite/update_settings', ddoc_parts[1]].join('/');
+        exports.migrate_app_settings(data, current_version, function(err, updated) {
+            _migration_error(err);
+            $.ajax({
+                url: url,
+                type: 'PUT',
+                data : JSON.stringify(updated || data.settings),
+                dataType : 'json',
+                contentType: 'application/json',
+                success: function() {
+                    cb(err);
+                },
+                error: _error,
             });
-        }
+        });
+    }
+
+    has_app_settings_support(db, ddoc_id, function(err, bool) {
+        err ? cb(err) : (
+            bool ? _update_app_settings() : _update_ddoc()
+        );
     });
-
-
 }
 
 function app_replicate(src, target, doc_id, callback) {
@@ -350,7 +412,7 @@ exports.updateApp = function(app_id, current_version, update_status_function, cb
         update_status_function = current_version;
         current_version = undefined;
     }
-    
+
     $.couch.urlPrefix = '../_couch';
     var callback = function(err, data) {
         $.couch.urlPrefix = '_couch';
