@@ -18,7 +18,11 @@ if [ "$TRAVIS_BRANCH" == "master" ]; then
     curl -X PUT http://localhost:5984/_config/couchdb/delayed_commits -d '"false"' && \
     wget https://gist.githubusercontent.com/mandric/4beda54677555c8c46f9/raw/markets.json && \
     kanso upload markets.json http://localhost:5984/dashboard && \
-    sudo cp `sudo find /var/lib/couchdb/ -name dashboard.couch` ./static/dashboard-medic.couch && \
+    \
+    # This uploads the raw on-disk file in /var/lib/couchdb/dashboard.couch
+    # to the remote CouchDB server specified in $STAGING_DB, as a attachment.
+    # From there, it's accessible to web clients/builds, including medic-os.
+    sudo cp "`sudo find /var/lib/couchdb/ -name dashboard.couch`" ./static/dashboard-medic.couch && \
     sudo chown travis ./static/dashboard-medic.couch && \
     kanso push "$STAGING_DB"
 fi
