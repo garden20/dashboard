@@ -23,7 +23,7 @@
 
             new RactiveCouch.View(dashboard_url, 'gardener/gardener', {
                 el : elem_id,
-                template: '{{#rows.length}}<h4>Modules</h4>{{/rows.length}}{{#rows}}<div><h6>{{key[1]}}</h6><div>{{value.msg}}</div><div class="progress" ><div class="bar" style="width: {{value.percent}}%; "></div></div></div>{{/rows}}',
+                template: '{{#rows.length}}<h4>Modules</h4>{{/rows.length}}{{#rows}}<div><h6>{{key[1]}}</h6><div class="{{value.complete}}">{{value.msg}}</div><div class="progress" ><div class="bar" style="width: {{value.percent}}%; "></div></div></div>{{/rows}}',
                 include_docs: true,
                 view_options: {
                     startkey: [ddoc_path],
@@ -47,6 +47,7 @@
             key: [change.doc.path, change.doc.module],
             value: {
                 percent: change.doc.percent,
+                complete: change.doc.percent === 100 ? 'complete' : 'working',
                 msg: change.doc.msg
             }
         };

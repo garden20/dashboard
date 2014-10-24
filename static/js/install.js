@@ -132,11 +132,13 @@ $(function() {
                         host_options : host_options
                     };
 
-                    var link = dashboard_links.appUrl(settings, app_install_doc);
-                    $('.after-open').attr('href', link).show();
+                    moduleInstallationComplete('gardener', remote_app_details, function() {
+                        var link = dashboard_links.appUrl(settings, app_install_doc);
+                        $('.after-open').attr('href', link).show();
 
-                    var settings_link = dashboard_links.appSettingsUrl(settings, app_install_doc);
-                    $('.after-settings').attr('href', settings_link).show();
+                        var settings_link = dashboard_links.appSettingsUrl(settings, app_install_doc);
+                        $('.after-settings').attr('href', settings_link).show();
+                    });
 
 
                     // add gardener status

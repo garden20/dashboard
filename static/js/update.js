@@ -99,11 +99,14 @@ $(function() {
                     host_options: host_options
                 };
 
-                var link = dashboard_links.appUrl(settings, app_data);
-                $('.after-open').attr('href', link).show();
+                moduleInstallationComplete('gardener', app_data, function() {
+                    var link = dashboard_links.appUrl(settings, app_data);
+                    $('.after-open').attr('href', link).show();
 
-                var settings_link = dashboard_links.appSettingsUrl(settings, app_data);
-                $('.after-settings').attr('href', settings_link).show();
+                    var settings_link = dashboard_links.appSettingsUrl(settings, app_data);
+                    $('.after-settings').attr('href', settings_link).show();
+                });
+
 
                 // add gardener status
                 var ddoc = '/' + app_data.installed.db + '/_design/' + app_data.doc_id;
