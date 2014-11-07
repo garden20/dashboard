@@ -1,7 +1,5 @@
 #!/bin/bash -x
 
-set -x
-
 LABEL=''
 SHOULD_RUN=''
 MARKETS_URL='https://gist.githubusercontent.com/mandric/4beda54677555c8c46f9/raw/markets.json'
@@ -36,9 +34,6 @@ fi
 # Upload targets
 STAGING_DB="$UPLOAD_URL/dashboard"
 SEED_DB="$UPLOAD_URL/dashboard_seed$LABEL"
-
-echo "$UPLOAD_URL"
-echo "$SEED_DB"
 
 # Update seed URL for all dashboards in the world.
 kanso push --minify "$SEED_DB" || exit "$?";
