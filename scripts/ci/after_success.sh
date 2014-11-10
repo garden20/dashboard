@@ -3,6 +3,7 @@
 LABEL=''
 SHOULD_RUN=''
 MARKETS_URL='https://gist.githubusercontent.com/mandric/4beda54677555c8c46f9/raw/markets.json'
+HOME="`dirname $0`"
 
 if [ -z "$UPLOAD_URL" ]; then
   echo 'Environment must contain UPLOAD_URL' >&2
@@ -56,4 +57,4 @@ kanso upload markets.json 'http://localhost:5984/dashboard' && \
 sudo cp "`sudo find /var/lib/couchdb/ -name dashboard.couch`" \
   "./static/dashboard-medic$LABEL.couch" && \
 sudo chown travis "./static/dashboard-medic$LABEL.couch" && \
-./upload.sh "$UPLOAD_URL/downloads" "./static/dashboard-medic$LABEL.couch"
+${HOME}/upload.sh "$UPLOAD_URL/downloads" "./static/dashboard-medic$LABEL.couch"
