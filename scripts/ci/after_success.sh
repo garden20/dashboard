@@ -9,9 +9,11 @@ if [ -z "$UPLOAD_URL" ]; then
   exit 1
 fi
 
-# Never push to market on pull requests
-if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
-  exit 0;
+if [ -n "$TRAVIS" ]; then
+  if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+      echo 'Not uploading on pull requests.'
+      exit 0
+  fi
 fi
 
 # Always run for whitelisted branches
@@ -23,6 +25,7 @@ done
 
 # Exit now if we're not needed
 if [ -z "$SHOULD_RUN" ]; then
+  echo 'Not deploying this branch.'
   exit 0
 fi
 
@@ -32,7 +35,6 @@ if [ "$TRAVIS_BRANCH" != "master" ]; then
 fi
 
 # Upload targets
-STAGING_DB="$UPLOAD_URL/dashboard"
 SEED_DB="$UPLOAD_URL/dashboard_seed$LABEL"
 
 # Update seed URL for all dashboards in the world.
@@ -48,14 +50,10 @@ wget "$MARKETS_URL" && \
 kanso upload markets.json 'http://localhost:5984/dashboard' && \
 \
 # This uploads the raw on-disk file in /var/lib/couchdb/dashboard.couch
-# to the remote CouchDB server specified in $STAGING_DB, as a attachment.
+# to the remote CouchDB server as a attachment.
 # From there, it's accessible to web clients/builds, including medic-os.
 \
 sudo cp "`sudo find /var/lib/couchdb/ -name dashboard.couch`" \
   "./static/dashboard-medic$LABEL.couch" && \
-\
 sudo chown travis "./static/dashboard-medic$LABEL.couch" && \
-kanso push "$STAGING_DB"
-
-exit "$?";
-
+./upload.sh "$UPLOAD_URL/downloads" "./static/dashboard-medic$LABEL.couch"
