@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 SELF="`basename $0`"
 HOME="`dirname $0`"
