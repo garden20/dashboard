@@ -124,6 +124,28 @@ function renameVhostRule(app_data, old_name, callback) {
     }, 'vhosts', appRewrite(safe_name), null );
 }
 
+function moduleInstallationComplete(elem_id, app_data, callback) {
+    var folders = (app_data.kanso &&
+                   app_data.kanso.config &&
+                   app_data.kanso.config.node_module_folders) || '';
+    var expected = folders.split(',').length;
+
+    var el = $('#' + elem_id);
+
+    if (expected === 0 || el.length === 0) {
+        return callback();
+    }
+
+    function poll() {
+        if (el.find('.complete').length === expected) {
+            return callback();
+        }
+        setTimeout(poll, 1000);
+    };
+
+    poll();
+};
+
 $(function() {
     $('.help').tooltip({placement: 'bottom'});
 
