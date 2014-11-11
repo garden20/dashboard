@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SELF="`basename $0`"
-HOME="`dirname $0`"
+SELF_HOME="`dirname $0`"
 DATE=`date +%Y%d%m%H%M` 
 COUCHDB_URL=${COUCHDB_URL:-http://localhost:5984}
 UPLOAD_DB_URL=${1:-${COUCHDB_URL}/downloads}
@@ -12,7 +12,7 @@ DOC_URL="$UPLOAD_DB_URL/$ID"
 #DIST_ARCHIVE=${DIST_ARCHIVE:-medic-demos-${DATE}.tgz}
 #FILE="${DIST_DIR}/${DIST_ARCHIVE}"
 
-source "${HOME}/functions.sh" 
+source "${SELF_HOME}/functions.sh" 
 
 usage () {
     echo "Uploads CouchDB attachment based on filename."
