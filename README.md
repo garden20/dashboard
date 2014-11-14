@@ -1,6 +1,7 @@
 [![Build Status](https://secure.travis-ci.org/garden20/dashboard.png)](http://travis-ci.org/garden20/dashboard)
 
 # Dashboard
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/garden20/dashboard?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 The dashboard couchapp gives you a way to make a site out of a bunch of couchapps.
 
