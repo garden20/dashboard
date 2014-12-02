@@ -261,10 +261,14 @@ $(function(){
                             var version = json._version;
                             delete json._version;
 
+                            var data = {
+                                meta: doc.couchapp || doc.kanso,
+                                settings: json
+                            }
+
                             dashboard_core.migrate_app_settings(
-                                doc,
+                                data,
                                 version,
-                                json,
                                 function(err, updated) {
                                     if (err) {
                                         console.log('Error restoring settings', err);
