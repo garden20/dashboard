@@ -2,7 +2,7 @@
 
 LABEL=''
 SHOULD_RUN=''
-MARKETS_URL='https://gist.githubusercontent.com/mandric/4beda54677555c8c46f9/raw/markets.json'
+MARKETS_URL='https://raw.githubusercontent.com/medic/medic-data/master/data/dashboard/markets.json'
 SELF_HOME="`dirname $0`"
 
 if [ -z "$UPLOAD_URL" ]; then
@@ -47,7 +47,7 @@ kanso push --minify "$SEED_DB" || exit "$?";
 curl -X PUT -d '"false"' \
   'http://localhost:5984/_config/couchdb/delayed_commits' && \
 \
-wget "$MARKETS_URL" && \
+curl -f -s "$MARKETS_URL" > markets.json && \
 kanso upload markets.json 'http://localhost:5984/dashboard' && \
 \
 # This uploads the raw on-disk file in /var/lib/couchdb/dashboard.couch
