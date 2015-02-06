@@ -630,7 +630,7 @@ $(function(){
             $('.update-board tr.dashboard td.installed-version').html(ourVersion);
 
             $.ajax({
-                url :  "http://staging.dev.medicmobile.org/dashboard_seed/_design/dashboard/_show/configInfo/_design/dashboard?callback=?",
+                url :  "https://staging.dev.medicmobile.org/dashboard_seed/_design/dashboard/_show/configInfo/_design/dashboard?callback=?",
                 dataType : 'json',
                 jsonp : true,
                 success : function(remote_data) {
@@ -724,7 +724,7 @@ $(function(){
         var wrapper = btn.closest('td');
         btn.hide();
         wrapper.find('.loading').show();
-        $.couch.replicate('http://staging.dev.medicmobile.org/dashboard_seed', dashboard_core.dashboard_db_name, {
+        $.couch.replicate('https://staging.dev.medicmobile.org/dashboard_seed', dashboard_core.dashboard_db_name, {
             success : function() {
                 console.log('successfully replicated dashboard');
                 wrapper.find('.loading').hide();
