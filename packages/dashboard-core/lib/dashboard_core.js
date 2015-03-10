@@ -182,9 +182,30 @@ function app_gather_current_settings(db, ddoc_id, cb) {
 
 }
 
+var migrate_app_settings_retries = 0,
+    migrate_app_settings_max_retries = 5;
+
+/*
+ * Call the migration path if the app specified one in the settings.
+ */
 exports.migrate_app_settings = function (data, current_version, cb) {
-    //var meta = doc.couchapp || doc.kanso;
+
     var path = data.meta && data.meta.config && data.meta.config.migration_path;
+
+    /* if we see a 500 server error try again */
+    var _error = function(jqXHR, textStatus, error) {
+        if ((500 <= jqXHR.status <= 599) &&
+            (migrate_app_settings_retries < migrate_app_settings_max_retries)) {
+            setTimeout(function() {
+                console.log('retrying settings migration..');
+                migrate_app_settings_retries++;
+                migrate_app_settings(data, current_version, cb);
+            }, 5);
+        } else {
+            cb('settings migration failed ' + path + ' ' + error);
+        }
+    }
+
     if (path) {
         $.ajax({
             url: path,
@@ -197,9 +218,7 @@ exports.migrate_app_settings = function (data, current_version, cb) {
             success: function(data) {
                 cb(null, data);
             },
-            error: function(jqXHR, textStatus, error) {
-                cb('Error invoking settings migration: ' + error);
-            }
+            error: _error
         });
     } else {
         cb(null, data.settings);
@@ -209,6 +228,9 @@ exports.migrate_app_settings = function (data, current_version, cb) {
 /*
  * Save the migrated settings if migration succeeds, otherwise save the
  * non-migrated ones on the new ddoc.
+ *
+ * Try to use the app_settings module because it's more efficient, save the
+ * entire ddoc again as a fallback.
  */
 function apply_app_settings(db, ddoc_id, current_version, data, cb) {
 
@@ -276,15 +298,31 @@ function apply_app_settings(db, ddoc_id, current_version, data, cb) {
     });
 }
 
+var app_replicate_retries = 0,
+    app_replicate_max_retries = 5;
+
 function app_replicate(src, target, doc_id, callback) {
+
+    /* if we see a 500 server error try again */
+    var _error = function(jqXHR, textStatus, error) {
+        if ((500 <= jqXHR.status <= 599) &&
+            (app_replicate_retries < app_replicate_max_retries)) {
+            setTimeout(function() {
+                console.log('retrying replication...');
+                app_replicate_retries++;
+                app_replicate(src, target, doc_id, callback);
+            }, 5);
+        } else {
+            console.error('error replicating', arguments);
+            return callback('error replicating ' + textStatus);
+        }
+    }
+
     $.couch.replicate(src, target, {
             success : function() {
                 return callback(null);
             },
-            error : function(xhr, txtStatus, err) {
-                console.error('error replicating', arguments);
-                return callback('error replicating ' + txtStatus);
-            }
+            error: _error
         }, {
         create_target:true,
         doc_ids : [doc_id]
@@ -1595,7 +1633,7 @@ function record_sync_install(sync_doc, main_mapping, host_options, replication_c
         },
         function(callback) {
             var couch_db = $.couch.db(new_db_name);
-            copyDoc(couch_db, install_doc.doc_id, '_design/' + install_doc.doc_id, false, function(err){
+            copyDoc(couch_db, install_doc.doc_id, '_design/' + install_doc.doc_id, false, function(err) {
                 // we are leanent with this error, as replication might have got to it first.
                 console.log(err);
                 callback();
