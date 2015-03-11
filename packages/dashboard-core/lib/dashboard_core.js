@@ -183,7 +183,7 @@ function app_gather_current_settings(db, ddoc_id, cb) {
 }
 
 var migrate_app_settings_retries = 0,
-    migrate_app_settings_max_retries = 5;
+    migrate_app_settings_max_retries = 10;
 
 /*
  * Call the migration path if the app specified one in the settings.
@@ -193,14 +193,14 @@ exports.migrate_app_settings = function (data, current_version, cb) {
     var path = data.meta && data.meta.config && data.meta.config.migration_path;
 
     /* if we see a 500 server error try again */
-    var _error = function(jqXHR, textStatus, error) {
-        if ((500 <= jqXHR.status <= 599) &&
+    var _retry = function(jqXHR, textStatus, error) {
+        if ((500 <= jqXHR.status && jqXHR.status <= 599) &&
             (migrate_app_settings_retries < migrate_app_settings_max_retries)) {
             setTimeout(function() {
                 console.log('retrying settings migration..');
                 migrate_app_settings_retries++;
-                migrate_app_settings(data, current_version, cb);
-            }, 5);
+                exports.migrate_app_settings(data, current_version, cb);
+            }, 5 * 1000);
         } else {
             cb('settings migration failed ' + path + ' ' + error);
         }
@@ -218,7 +218,7 @@ exports.migrate_app_settings = function (data, current_version, cb) {
             success: function(data) {
                 cb(null, data);
             },
-            error: _error
+            error: _retry
         });
     } else {
         cb(null, data.settings);
@@ -299,19 +299,19 @@ function apply_app_settings(db, ddoc_id, current_version, data, cb) {
 }
 
 var app_replicate_retries = 0,
-    app_replicate_max_retries = 5;
+    app_replicate_max_retries = 10;
 
 function app_replicate(src, target, doc_id, callback) {
 
     /* if we see a 500 server error try again */
-    var _error = function(jqXHR, textStatus, error) {
-        if ((500 <= jqXHR.status <= 599) &&
+    var _retry = function(jqXHR, textStatus, error) {
+        if ((500 <= jqXHR.status && jqXHR.status <= 599) &&
             (app_replicate_retries < app_replicate_max_retries)) {
             setTimeout(function() {
                 console.log('retrying replication...');
                 app_replicate_retries++;
                 app_replicate(src, target, doc_id, callback);
-            }, 5);
+            }, 5 * 1000);
         } else {
             console.error('error replicating', arguments);
             return callback('error replicating ' + textStatus);
@@ -322,7 +322,7 @@ function app_replicate(src, target, doc_id, callback) {
             success : function() {
                 return callback(null);
             },
-            error: _error
+            error: _retry
         }, {
         create_target:true,
         doc_ids : [doc_id]
