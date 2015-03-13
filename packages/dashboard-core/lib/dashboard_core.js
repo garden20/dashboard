@@ -12,6 +12,41 @@ exports.dashboard_ddoc_name = 'dashboard';
 
 $.couch.urlPrefix = '_couch';
 
+var retries = {},
+    max_retries = 10;
+
+/*
+ * Run `_retry` function on ajax requests that define it in options.  Maintain
+ * counters on each url and hijack error function if we see a `_retry` option.
+ * Only hijack if we are below max retries, otherwise allow the defined error
+ * function to run.
+ */
+$.ajaxPrefilter(function(options, originalOptions) {
+    if (!options._retry && !options.error) {
+        return;
+    }
+    var url = options.url;
+    var retry = function() {
+        console.log('retrying request %s...', url);
+        setTimeout(function() {
+            options._retry();
+        }, 5 * 1000);
+    }
+    if (typeof retries[url] === 'undefined') {
+        retries[url] = 0;
+    }
+    if (retries[url] < max_retries) {
+        // try straight couch url for last few retries
+        if (retries[url] >= (max_retries - 2)) {
+            options.url = $.couch.urlPrefix + '/' + url;
+        }
+        retries[url]++;
+        options.error = retry;
+    }
+    //console.log('ajaxPrefilter retries', retries);
+    //console.log('ajaxPrefilter options.url', options.url);
+});
+
 exports.getGardenAppDetails = function(app_url, callback) {
     var app_json_url = app_details_json(app_url);
     $.ajax({
@@ -182,29 +217,12 @@ function app_gather_current_settings(db, ddoc_id, cb) {
 
 }
 
-var migrate_app_settings_retries = 0,
-    migrate_app_settings_max_retries = 10;
-
 /*
  * Call the migration path if the app specified one in the settings.
  */
 exports.migrate_app_settings = function (data, current_version, cb) {
 
     var path = data.meta && data.meta.config && data.meta.config.migration_path;
-
-    /* if we see a 500 server error try again */
-    var _retry = function(jqXHR, textStatus, error) {
-        if ((500 <= jqXHR.status && jqXHR.status <= 599) &&
-            (migrate_app_settings_retries < migrate_app_settings_max_retries)) {
-            setTimeout(function() {
-                console.log('retrying settings migration..');
-                migrate_app_settings_retries++;
-                exports.migrate_app_settings(data, current_version, cb);
-            }, 5 * 1000);
-        } else {
-            cb('settings migration failed ' + path + ' ' + error);
-        }
-    }
 
     if (path) {
         $.ajax({
@@ -218,7 +236,12 @@ exports.migrate_app_settings = function (data, current_version, cb) {
             success: function(data) {
                 cb(null, data);
             },
-            error: _retry
+            error: function(jqXHR, textStatus, error) {
+                cb('settings migration failed ' + path + ' ' + error);
+            },
+            _retry: function() {
+                exports.migrate_app_settings(data, current_version, cb);
+            }
         });
     } else {
         cb(null, data.settings);
@@ -235,10 +258,6 @@ exports.migrate_app_settings = function (data, current_version, cb) {
 function apply_app_settings(db, ddoc_id, current_version, data, cb) {
 
     if (!data) return cb(null);
-
-    function _error(jqXHR, textStatus, error) {
-        cb('Error saving settings: ' + textStatus + ' ' + error);
-    }
 
     function _migration_error(err) {
         if (err) {
@@ -267,7 +286,12 @@ function apply_app_settings(db, ddoc_id, current_version, data, cb) {
                     });
                 });
             },
-            error: _error
+            error: function(jqXHR, textStatus, error) {
+                cb('Error saving settings: ' + textStatus + ' ' + error);
+            },
+            _retry: function() {
+                apply_app_settings(db, ddoc_id, current_version, data, cb);
+            }
         });
     }
 
@@ -286,7 +310,12 @@ function apply_app_settings(db, ddoc_id, current_version, data, cb) {
                 success: function() {
                     cb(err);
                 },
-                error: _error,
+                error: function(jqXHR, textStatus, error) {
+                    cb('Error saving settings: ' + textStatus + ' ' + error);
+                },
+                _retry: function() {
+                    apply_app_settings(db, ddoc_id, current_version, data, cb);
+                }
             });
         });
     }
@@ -298,31 +327,18 @@ function apply_app_settings(db, ddoc_id, current_version, data, cb) {
     });
 }
 
-var app_replicate_retries = 0,
-    app_replicate_max_retries = 10;
-
 function app_replicate(src, target, doc_id, callback) {
-
-    /* if we see a 500 server error try again */
-    var _retry = function(jqXHR, textStatus, error) {
-        if ((500 <= jqXHR.status && jqXHR.status <= 599) &&
-            (app_replicate_retries < app_replicate_max_retries)) {
-            setTimeout(function() {
-                console.log('retrying replication...');
-                app_replicate_retries++;
-                app_replicate(src, target, doc_id, callback);
-            }, 5 * 1000);
-        } else {
-            console.error('error replicating', arguments);
-            return callback('error replicating ' + textStatus);
-        }
-    }
 
     $.couch.replicate(src, target, {
             success : function() {
                 return callback(null);
             },
-            error: _retry
+            error: function(jqXHR, textStatus, error) {
+                callback('error replicating ' + textStatus);
+            },
+            _retry: function() {
+                app_replicate(src, target, doc_id, callback);
+            }
         }, {
         create_target:true,
         doc_ids : [doc_id]
@@ -1073,11 +1089,14 @@ function deleteDoc(couch_db, db_name, doc_id, callback) {
               dataType : 'json',
               contentType: 'application/json',
               type: 'POST',
-              success : function(data) {
+              success: function(data) {
                   callback(null);
               },
-              error : function() {
-                  callback('a problem deleting the non prefixed doc');
+              error: function() {
+                callback('a problem deleting the non prefixed doc');
+              },
+              _retry: function() {
+                deleteDoc(couch_db, db_name, doc_id, callback);
               }
              });
         }
