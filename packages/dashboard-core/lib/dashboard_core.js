@@ -36,8 +36,8 @@ $.ajaxPrefilter(function(options, originalOptions) {
         retries[url] = 0;
     }
     if (retries[url] < max_retries) {
-        // try straight couch url for last few retries
-        if (retries[url] >= (max_retries - 2)) {
+        // try straight couch url on even counts
+        if (retries[url] >= (max_retries % 2 === 0)) {
             options.url = $.couch.urlPrefix + '/' + url;
         }
         retries[url]++;
