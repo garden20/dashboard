@@ -12,35 +12,41 @@ exports.dashboard_ddoc_name = 'dashboard';
 
 $.couch.urlPrefix = '_couch';
 
-var retries = {},
-    max_retries = 10;
-
 /*
  * Run `_retry` function on ajax requests that define it in options.  Maintain
  * counters on each url and hijack error function if we see a `_retry` option.
  * Only hijack if we are below max retries, otherwise allow the defined error
  * function to run.
  */
+
+var retries = {},
+    max_retries = 10,
+    max_retries_fallback = 5;
+
 $.ajaxPrefilter(function(options, originalOptions) {
-    if (!options._retry && !options.error) {
+    if (!options._retry || !options.error) {
         return;
     }
-    var url = options.url;
+    var url = options.url,
+        // set fallback to straight couch url
+        url_fallback = $.couch.urlPrefix + '/' + options.url;
     var retry = function() {
-        console.log('retrying request %s...', url);
+        console.log('retrying request...');
         setTimeout(function() {
             options._retry();
         }, 5 * 1000);
     }
+    // initialize counters
     if (typeof retries[url] === 'undefined') {
         retries[url] = 0;
+        retries[url_fallback] = 0;
     }
     if (retries[url] < max_retries) {
-        // try straight couch url on even counts
-        if (retries[url] >= (max_retries % 2 === 0)) {
-            options.url = $.couch.urlPrefix + '/' + url;
-        }
         retries[url]++;
+        options.error = retry;
+    } else if (retries[url_fallback] < max_retries_fallback) {
+        retries[url_fallback]++;
+        options.url = url_fallback;
         options.error = retry;
     }
     //console.log('ajaxPrefilter retries', retries);
@@ -259,6 +265,10 @@ function apply_app_settings(db, ddoc_id, current_version, data, cb) {
 
     if (!data) return cb(null);
 
+    function _error(jqXHR, textStatus, error) {
+        cb('Error saving settings: ' + textStatus + ' ' + error);
+    }
+
     function _migration_error(err) {
         if (err) {
             console.error(
@@ -310,9 +320,7 @@ function apply_app_settings(db, ddoc_id, current_version, data, cb) {
                 success: function() {
                     cb(err);
                 },
-                error: function(jqXHR, textStatus, error) {
-                    cb('Error saving settings: ' + textStatus + ' ' + error);
-                },
+                error: _error,
                 _retry: function() {
                     apply_app_settings(db, ddoc_id, current_version, data, cb);
                 }
@@ -476,7 +484,6 @@ exports.updateApp = function(app_id, current_version, update_status_function, cb
         success: function(app_data) {
             var db = $.couch.db(app_data.installed.db),
                 current_app_settings = null;
-            console.log($.couch.urlPrefix);
             async.waterfall([
                 function(callback) {
                     update_status_function('Checking Current Settings', '10%');
