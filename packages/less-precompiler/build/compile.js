@@ -9,10 +9,10 @@ var less = require('less'),
 function compileLess(project_path, filename, settings, callback) {
     // we get a rather cryptic error when trying to compile a file that doesn't
     // exist, so check early for that and report something sensible
-    path.exists(filename, function (exists) {
-        if (!exists) {
-            return callback(new Error('File does not exist: ' + filename));
-        }
+    // path.exists(filename, function (exists) {
+    //     if (!exists) {
+    //         return callback(new Error('File does not exist: ' + filename));
+    //     }
         console.log('Compiling ' + utils.relpath(filename, project_path));
         var args = [filename];
         if (settings.less.compress) {
@@ -36,7 +36,7 @@ function compileLess(project_path, filename, settings, callback) {
                 callback(new Error(err_out));
             }
         });
-    });
+    // });
 };
 
 module.exports = function (root, path, settings, doc, callback) {
