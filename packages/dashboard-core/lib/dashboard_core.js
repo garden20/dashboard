@@ -1087,7 +1087,8 @@ function copyDoc(couch_db, from_doc_id, to_doc_id, update, callback) {
 function deleteDoc(couch_db, db_name, doc_id, callback) {
     couch_db.headDoc(doc_id, {}, {
         success : function(data, status, jqXHR) {
-            var rev = jqXHR.getResponseHeader('ETag').replace(/"/gi, '');
+            var rev = jqXHR.getResponseHeader('ETag');
+            rev = (rev || '').replace(/^W\//, '').replace(/"/gi, '');
             var purge_url = jQuery.couch.urlPrefix + '/' + db_name + '/_purge';
             var data = {};
             data[doc_id] = [rev];
