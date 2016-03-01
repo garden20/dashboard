@@ -1073,7 +1073,8 @@ function copyDoc(couch_db, from_doc_id, to_doc_id, update, callback) {
         couch_db.headDoc(to_doc_id,{}, {
            success : function(data, status, jqXHR) {
                if (!jqXHR) callback('Update failed.');
-               var rev = jqXHR.getResponseHeader('ETag').replace(/"/gi, '');
+               var rev = jqXHR.getResponseHeader('ETag');
+               rev = (rev || '').replace(/^W\//, '').replace(/"/gi, '');
                to_doc_id += "?rev=" + rev;
                return actualCopy(to_doc_id);
            }
