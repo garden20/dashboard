@@ -307,6 +307,13 @@ $(function(){
                 for (var i = 0; i < tagnames.length; i++) {
                     cleanUpJsonEditTitle(tagnames[i]);
                 }
+                // Same for objects.
+                setTimeout(function() {
+                    $('#app_settings_schema .je-object-fields > legend')
+                        .each(function() {
+                            $(this).replaceWith($('<div class="help-block">' + this.innerHTML + '</div>'));
+                        });
+                }, 0);
             }
 
             /**
